@@ -1,0 +1,163 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Batch {
+  batch_id: ID!
+  name: String!
+  category: String!
+  maxAbsents: Int!
+  defaultMessage: String!
+  createdOn: String!
+  createdBy: String!
+  orientationDate: String
+  batchStarted: String
+  classTimings: String
+  classUpdatedBy: String
+  classUpdatedOn: String
+  users: [User!]!
+}
+
+type Candidate {
+  candidate_id: ID!
+  name: String!
+  email: String!
+  phoneNo: String!
+  gender: String!
+  laptopAvailability: String!
+  status: String!
+  age: Int!
+  qualification: String!
+  institutionName: String!
+  allocatedHours: Int
+  purpose: String!
+  user: User!
+}
+
+type User {
+  user_id: String!
+  name: String!
+  email: String!
+  role: String!
+  phoneNumber: String
+  address: String
+  status: String
+  watchlisted: Boolean
+  batch: Batch
+  candidate: Candidate
+}
+
+type LoginResponse {
+  accessToken: String!
+  user: User!
+}
+
+type Query {
+  users: [User!]!
+  userByEmail(email: String!): User!
+  user(id: String!): User!
+  batchs: [Batch!]!
+  batch(id: String!): Batch!
+  candidates: [Candidate!]!
+  candidate(id: String!): Candidate!
+}
+
+type Mutation {
+  login(loginInput: LoginInput!): LoginResponse!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: String!): String!
+  createBatch(createBatchInput: CreateBatchInput!): Batch!
+  updateBatch(updateBatchInput: UpdateBatchInput!): Batch!
+  removeBatch(id: String!): Batch!
+  createCandidate(createCandidateInput: CreateCandidateInput!): Candidate!
+  updateCandidate(updateCandidateInput: UpdateCandidateInput!): Candidate!
+  removeCandidate(id: String!): Candidate!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  role: String!
+  phoneNumber: String
+  address: String
+  status: String
+  watchlisted: Boolean
+  batchId: String
+  candidateId: String
+}
+
+input UpdateUserInput {
+  user_id: String!
+  name: String!
+  email: String!
+  password: String!
+  phoneNumber: String
+  address: String
+  watchlisted: Boolean
+  status: String
+}
+
+input CreateBatchInput {
+  name: String!
+  category: String!
+  maxAbsents: Int!
+  defaultMessage: String!
+  createdOn: String!
+  createdBy: String!
+  orientationDate: String
+  batchStarted: String
+  classTimings: String
+  classUpdatedBy: String
+  classUpdatedOn: String
+}
+
+input UpdateBatchInput {
+  name: String!
+  category: String
+  maxAbsents: Int!
+  defaultMessage: String!
+  createdOn: String!
+  createdBy: String!
+  orientationDate: String!
+  batchStarted: String!
+  classTimings: String!
+  classUpdatedBy: String!
+  classUpdatedOn: String!
+  id: String!
+}
+
+input CreateCandidateInput {
+  name: String!
+  email: String!
+  phoneNo: String!
+  gender: String!
+  laptopAvailability: String!
+  status: String!
+  age: Int!
+  qualification: String!
+  institutionName: String!
+  allocatedHours: Int
+  purpose: String!
+}
+
+input UpdateCandidateInput {
+  candidate_id: ID!
+  name: String!
+  email: String!
+  phoneNo: String!
+  gender: String!
+  laptopAvailability: String!
+  status: String!
+  age: Int!
+  qualification: String!
+  institutionName: String!
+  allocatedHours: Int!
+  purpose: String!
+}
