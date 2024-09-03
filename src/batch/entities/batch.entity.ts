@@ -1,13 +1,12 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { User } from 'src/users/entities/user.entity';
-import { Column, PrimaryGeneratedColumn, Entity, OneToMany } from 'typeorm';
+import { Column, PrimaryGeneratedColumn, Entity, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 
 @ObjectType()
-@Entity()
+@Entity('batch')
 export class Batch {
-
   @Field(() => ID)
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   batch_id: string;
 
   @Field()
@@ -15,46 +14,55 @@ export class Batch {
   name: string;
 
   @Field()
-  @Column()
+  @Column({ default: 'open', nullable: true })
   category: string;
 
-  @Field(()=>Int)
-  @Column({ type: 'int' })
+  @Field(() => Int)
+  @Column({ type: 'int', default: 3, nullable: true })
   maxAbsents: number;
 
   @Field()
-  @Column()
+  @Column({ default: 'Please Be Regular!', nullable: true })
   defaultMessage: string;
 
   @Field()
-  @Column()
-  createdOn: string;
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  createdOn: Date;
 
   @Field()
   @Column()
   createdBy: string;
 
-  @Field({nullable:true})
-  @Column({  nullable:true})
-  orientationDate: string;
+  @Field({ nullable: true })
+  @Column({ type: 'date', nullable: true })
+  orientationDate?: string;
 
-  @Field({nullable:true})
-  @Column({ nullable:true})
-  batchStarted: string;
+  @Field({ nullable: true })
+  @Column({type:"time", nullable: true })
+  orientationTime?: string;
 
-  @Field({nullable:true})
-  @Column({ nullable:true })
-  classTimings: string; 
+  @Field({ nullable: true })
+  @Column({type:'date', nullable: true })
+  batchStarted?: string;
 
-  @Field({nullable:true})
-  @Column({nullable:true})
-  classUpdatedBy: string;
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  classTimings?: string;
 
-  @Field({nullable:true})
-  @Column({ nullable:true})
-  classUpdatedOn: string;
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  classUpdatedBy?: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  classUpdatedOn?: string;
 
   @OneToMany(() => User, user => user.batch)
-  @Field(() => [User]) 
+  @Field(() => [User], { nullable: true })
   users: User[];
-}
+
+  @ManyToMany(() => User, user => user.teachingBatches)
+  @JoinTable()
+  @Field(() => [User], { nullable: true })
+  teachers?: User[];
+  }

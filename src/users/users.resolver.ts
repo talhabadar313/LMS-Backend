@@ -14,13 +14,13 @@ export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
   @Mutation(() => User)
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles('admin', 'teacher')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Mutation(() => User)
   async createUser(@Args('createUserInput') createUserInput: CreateUserInput): Promise<User> {
     const { batchId, role, ...userData } = createUserInput;
   
-    if ((role === 'student' || role === 'teacher') && !batchId) {
+    if ((role === 'student') && !batchId) {
       throw new Error('Batch ID is required for students and teachers');
     }
   
@@ -54,6 +54,12 @@ export class UsersResolver {
     return this.usersService.findOne(user_id);
   }
 
+  @Query(() => [User], { name: 'teachers' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  findTeachers() {
+   return this.usersService.findTeachers()
+  }
   @Mutation(() => User)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')

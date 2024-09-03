@@ -1,37 +1,62 @@
-import { InputType, Field , Int} from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsOptional, IsString, IsArray, IsInt } from 'class-validator';
 
 @InputType()
 export class CreateBatchInput {
   @Field()
-  name:string
+  @IsString()
+  name: string;
 
-  @Field()
-  category: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  category?: string;
 
-  @Field(()=>Int)
+  @Field(() => Int, { defaultValue: 3 })
+  @IsInt()
+  @IsOptional()
   maxAbsents: number;
 
-  @Field()
+  @Field({ defaultValue: 'Please Be Regular!' })
+  @IsString()
+  @IsOptional()
   defaultMessage: string;
-
-  @Field()
-  createdOn: string;
 
   @Field()
   createdBy: string;
 
-  @Field({nullable:true})
-  orientationDate: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  orientationDate?: string;
 
-  @Field({nullable:true})
-  batchStarted: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  orientationTime?: string;
 
-  @Field({nullable:true})
-  classTimings: string; 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  batchStarted?: string;
 
-  @Field({nullable:true})
-  classUpdatedBy: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  classTimings?: string;
 
-  @Field({nullable:true})
-  classUpdatedOn: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  classUpdatedBy?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  classUpdatedOn?: string;
+
+  @Field(() => [String])
+  @IsOptional()
+  @IsArray()
+  teacherIds: string[];
 }

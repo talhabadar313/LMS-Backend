@@ -1,38 +1,61 @@
-import { CreateBatchInput } from './create-batch.input';
-import { InputType, Field, PartialType, Int } from '@nestjs/graphql';
+import { InputType, Field, ID, Int } from '@nestjs/graphql';
+import { IsOptional, IsString, IsArray, IsInt } from 'class-validator';
 
 @InputType()
-export class UpdateBatchInput extends PartialType(CreateBatchInput) {
-  @Field()
+export class UpdateBatchInput {
+
+  @Field(() => ID)
   id: string;
 
   @Field()
-  name:string
+  @IsString()
+  name: string;
 
-  @Field(()=>Int)
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @Field(() => Int, { defaultValue: 3 })
+  @IsInt()
   maxAbsents: number;
 
-  @Field()
+  @Field({ defaultValue: 'Please Be Regular!' })
+  @IsString()
   defaultMessage: string;
 
-  @Field()
-  createdOn: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  orientationDate?: string;
 
-  @Field()
-  createdBy: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  orientationTime?: string;
 
-  @Field()
-  orientationDate: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  batchStarted?: string;
 
-  @Field()
-  batchStarted: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  classTimings?: string;
 
-  @Field()
-  classTimings: string; 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  classUpdatedBy?: string;
 
-  @Field()
-  classUpdatedBy: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  classUpdatedOn?: string;
 
-  @Field()
-  classUpdatedOn: string;
+  @Field(() => [ID], { nullable: 'items' })
+  @IsOptional()
+  @IsArray()
+  teacherIds?: string[];
 }

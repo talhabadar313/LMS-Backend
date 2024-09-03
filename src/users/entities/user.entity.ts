@@ -1,14 +1,14 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn , OneToOne} from "typeorm";
-import { ObjectType, Field } from "@nestjs/graphql";
-import { Batch } from "src/batch/entities/batch.entity";
-import { Candidate } from "src/candidates/entities/candidate.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn , OneToOne, JoinColumn, ManyToMany} from 'typeorm';
+import { ObjectType, Field } from '@nestjs/graphql';
+import { Batch } from 'src/batch/entities/batch.entity';
+import { Candidate } from 'src/candidates/entities/candidate.entity';
+import { ID } from '@nestjs/graphql';
 
 @ObjectType()
-@Entity()
+@Entity('user')
 export class User {
-
-  @Field(() => String)
-  @PrimaryGeneratedColumn("uuid")
+  @Field(() => ID)
+  @PrimaryGeneratedColumn('uuid')
   user_id: string;
 
   @Field()
@@ -24,7 +24,7 @@ export class User {
 
   @Field()
   @Column()
-  role: string;
+  role: string;  
 
   @Field({ nullable: true })
   @Column({ unique: true, nullable: true })
@@ -38,17 +38,22 @@ export class User {
   @Column({ nullable: true })
   status?: string;
 
-   @Field(() => Boolean , { nullable: true })
-   @Column({ type: 'boolean', default: false, nullable:true })
-   watchlisted: boolean;
+  @Field(() => Boolean, { nullable: true })
+  @Column({ type: 'boolean', default: false, nullable: true })
+  watchlisted?: boolean;
 
-  @ManyToOne(() => Batch, batch => batch.users, { nullable: true })
-  @JoinColumn({ name: 'batchId' }) 
-  @Field(() => Batch, { nullable: true }) 
-  batch?: Batch;
-
-  @OneToOne(() => Candidate, candidate => candidate.user , { nullable: true })
-  @JoinColumn({ name: 'candidateId' })  
+  @OneToOne(() => Candidate, candidate => candidate.user, { nullable: true })
+  @JoinColumn({ name: 'candidateId' })
   @Field(() => Candidate, { nullable: true })
   candidate?: Candidate;
+  
+  @ManyToOne(() => Batch, batch => batch.users)
+  @JoinColumn({ name: 'batchId' })
+  @Field(() => Batch, { nullable: true })
+  batch?: Batch;
+
+  @ManyToMany(() => Batch, batch => batch.teachers)
+  @Field(() => [Batch], { nullable: true })
+  teachingBatches?: Batch[];
+
 }

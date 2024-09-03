@@ -8,15 +8,22 @@ type Batch {
   category: String!
   maxAbsents: Int!
   defaultMessage: String!
-  createdOn: String!
+  createdOn: DateTime!
   createdBy: String!
   orientationDate: String
+  orientationTime: String
   batchStarted: String
   classTimings: String
   classUpdatedBy: String
   classUpdatedOn: String
-  users: [User!]!
+  users: [User!]
+  teachers: [User!]
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Candidate {
   candidate_id: ID!
@@ -35,7 +42,7 @@ type Candidate {
 }
 
 type User {
-  user_id: String!
+  user_id: ID!
   name: String!
   email: String!
   role: String!
@@ -43,8 +50,9 @@ type User {
   address: String
   status: String
   watchlisted: Boolean
-  batch: Batch
   candidate: Candidate
+  batch: Batch
+  teachingBatches: [Batch!]
 }
 
 type LoginResponse {
@@ -56,7 +64,8 @@ type Query {
   users: [User!]!
   userByEmail(email: String!): User!
   user(id: String!): User!
-  batchs: [Batch!]!
+  teachers: [User!]!
+  batches: [Batch!]!
   batch(id: String!): Batch!
   candidates: [Candidate!]!
   candidate(id: String!): Candidate!
@@ -68,6 +77,8 @@ type Mutation {
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: String!): String!
   createBatch(createBatchInput: CreateBatchInput!): Batch!
+  addTeachersToBatch(batchId: String!, teacherIds: [String!]!): Batch!
+  removeTeacherFromBatch(batchId: String!, teacherId: String!): Batch!
   updateBatch(updateBatchInput: UpdateBatchInput!): Batch!
   removeBatch(id: String!): Batch!
   createCandidate(createCandidateInput: CreateCandidateInput!): Candidate!
@@ -89,48 +100,50 @@ input CreateUserInput {
   address: String
   status: String
   watchlisted: Boolean
-  batchId: String
-  candidateId: String
+  batchId: ID
+  candidateId: ID
 }
 
 input UpdateUserInput {
-  user_id: String!
+  user_id: ID!
   name: String!
   email: String!
   password: String!
+  role: String!
   phoneNumber: String
   address: String
-  watchlisted: Boolean
   status: String
+  watchlisted: Boolean
 }
 
 input CreateBatchInput {
   name: String!
-  category: String!
-  maxAbsents: Int!
-  defaultMessage: String!
-  createdOn: String!
+  category: String
+  maxAbsents: Int! = 3
+  defaultMessage: String! = "Please Be Regular!"
   createdBy: String!
   orientationDate: String
+  orientationTime: String
   batchStarted: String
   classTimings: String
   classUpdatedBy: String
   classUpdatedOn: String
+  teacherIds: [String!]!
 }
 
 input UpdateBatchInput {
+  id: ID!
   name: String!
   category: String
-  maxAbsents: Int!
-  defaultMessage: String!
-  createdOn: String!
-  createdBy: String!
-  orientationDate: String!
-  batchStarted: String!
-  classTimings: String!
-  classUpdatedBy: String!
-  classUpdatedOn: String!
-  id: String!
+  maxAbsents: Int! = 3
+  defaultMessage: String! = "Please Be Regular!"
+  orientationDate: String
+  orientationTime: String
+  batchStarted: String
+  classTimings: String
+  classUpdatedBy: String
+  classUpdatedOn: String
+  teacherIds: [ID]!
 }
 
 input CreateCandidateInput {

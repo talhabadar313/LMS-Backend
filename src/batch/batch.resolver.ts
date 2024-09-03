@@ -8,6 +8,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/auth/role.quard';
 import { Roles } from 'src/auth/role.decorator';
 
+
 @Resolver(() => Batch)
 export class BatchResolver {
   constructor(private readonly batchService: BatchService) {}
@@ -19,8 +20,27 @@ export class BatchResolver {
     return this.batchService.create(createBatchInput);
   }
 
-  @Query(() => [Batch], { name: 'batchs' })
- 
+  @Mutation(() => Batch)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles("admin")
+  async addTeachersToBatch(
+    @Args('batchId') batchId: string,
+    @Args('teacherIds', { type: () => [String] }) teacherIds: string[],
+  ): Promise<Batch> {
+    return this.batchService.addTeachersToBatch(batchId, teacherIds);
+  }
+
+  @Mutation(() => Batch)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles("admin")
+  async removeTeacherFromBatch(
+    @Args('batchId') batchId: string,
+    @Args('teacherId') teacherId: string,
+  ): Promise<Batch> {
+    return this.batchService.removeTeacherFromBatch(batchId, teacherId);
+  }
+
+  @Query(() => [Batch], { name: 'batches' })
   findAll() {
     return this.batchService.findAll();
   }
@@ -44,3 +64,4 @@ export class BatchResolver {
     return this.batchService.remove(id);
   }
 }
+

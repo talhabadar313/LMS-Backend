@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { Candidate } from 'src/candidates/entities/candidate.entity';
 
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -20,6 +21,7 @@ export class UsersService {
     @InjectRepository(Candidate)
     private readonly candidateRepository: Repository<Candidate>
   ) {}
+
 
   async create(createUserInput: CreateUserInput): Promise<User> {
     const saltRounds = 10;
@@ -72,6 +74,10 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email }, relations: ['batch', 'candidate'] });
   }
 
+  findTeachers(): Promise<User[]> {
+    return this.userRepository.find({ where: { role: 'teacher' }});
+  }
+
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.findOneByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -79,6 +85,7 @@ export class UsersService {
     }
     return null;
   }
+
 
   async update(user_id: string, updateUserInput: UpdateUserInput): Promise<User> {
     const saltRounds = 10;
@@ -90,6 +97,7 @@ export class UsersService {
     await this.userRepository.update(user_id, updateUserInput);
     return this.userRepository.findOne({ where: { user_id }, relations: ['batch', 'candidate'] });
   }
+
 
   async remove(user_id: string): Promise<void> {
     await this.userRepository.delete(user_id);
