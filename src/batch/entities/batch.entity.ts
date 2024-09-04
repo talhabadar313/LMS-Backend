@@ -1,6 +1,9 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { User } from 'src/users/entities/user.entity';
-import { Column, PrimaryGeneratedColumn, Entity, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Column, PrimaryGeneratedColumn, Entity, OneToMany, ManyToMany, JoinTable, AfterLoad } from 'typeorm';
+
+
+import { Candidate } from 'src/candidates/entities/candidate.entity';
 
 @ObjectType()
 @Entity('batch')
@@ -38,11 +41,11 @@ export class Batch {
   orientationDate?: string;
 
   @Field({ nullable: true })
-  @Column({type:"time", nullable: true })
+  @Column({ type: 'time', nullable: true })
   orientationTime?: string;
 
   @Field({ nullable: true })
-  @Column({type:'date', nullable: true })
+  @Column({ type: 'date', nullable: true })
   batchStarted?: string;
 
   @Field({ nullable: true })
@@ -65,4 +68,46 @@ export class Batch {
   @JoinTable()
   @Field(() => [User], { nullable: true })
   teachers?: User[];
+
+  @Field(() => Int)
+  totalCandidates?: number;
+  
+  @Field(() => Int)
+  newCandidates?: number;
+
+  @Field(() => Int)
+  interviewedCandidates?: number;
+
+  @Field(() => Int)
+  invitedCandidates?: number;
+
+  @Field(() => Int)
+  registeredCandidates?: number;
+
+  @Field(() => Int)
+  rejectedCandidates?: number;
+
+  @OneToMany(() => Candidate, candidate => candidate.batch)
+  @Field(() => [Candidate], { nullable: true })
+  candidates?: Candidate[];
+
+  @AfterLoad()
+  async calculateFields() {
+    if (this.category === 'open') {
+      if (this.candidates) {
+        this.totalCandidates = this.candidates.length;
+        this.newCandidates = this.candidates.filter(candidate => candidate.status==='new').length;
+        this.interviewedCandidates = this.candidates.filter(candidate => candidate.status === 'interviewed').length;
+        this.invitedCandidates = this.candidates.filter(candidate => candidate.status === 'invited').length;
+        this.rejectedCandidates = this.candidates.filter(candidate => candidate.status === 'rejected').length;
+        this.registeredCandidates = this.candidates.filter(candidate => candidate.status === 'registered').length;
+      }
+    } else {
+      if (this.users) {
+        this.totalCandidates = this.users.length;
+        this.interviewedCandidates = this.users.filter(user => user.status === 'interviewed').length;
+        this.registeredCandidates = this.users.filter(user => user.status === 'registered').length;
+      }
+    }
   }
+}

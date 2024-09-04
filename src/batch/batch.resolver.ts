@@ -20,6 +20,7 @@ export class BatchResolver {
     return this.batchService.create(createBatchInput);
   }
 
+
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")

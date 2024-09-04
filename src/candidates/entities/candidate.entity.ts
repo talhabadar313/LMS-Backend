@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { Batch } from 'src/batch/entities/batch.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, PrimaryGeneratedColumn, Entity , OneToOne} from 'typeorm';
+import { Column, PrimaryGeneratedColumn, Entity , OneToOne, ManyToOne, JoinColumn} from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -15,11 +16,11 @@ export class Candidate {
   name: string;
 
   @Field()
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Field()
-  @Column()
+  @Column({ unique: true })
   phoneNo: string;
 
   @Field()
@@ -57,4 +58,9 @@ export class Candidate {
   @OneToOne(() => User, user => user.candidate)
   @Field(() => User)
   user: User;
+
+  @ManyToOne(() => Batch, batch => batch.candidates)
+  @JoinColumn({ name: 'batchId' })
+  @Field(() => Batch)
+  batch?: Batch;
 }

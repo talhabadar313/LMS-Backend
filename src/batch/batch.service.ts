@@ -44,8 +44,7 @@ export class BatchService {
       throw new InternalServerErrorException('Error creating batch');
     }
   }
-
-
+  
   async addTeachersToBatch(batchId: string, teacherIds: string[]): Promise<Batch> {
     const batch = await this.batchRepository.findOne({
       where: { batch_id: batchId },
@@ -81,14 +80,14 @@ export class BatchService {
 
   
   async findAll(): Promise<Batch[]> {
-    return this.batchRepository.find({ relations: ['teachers', 'users'] });
+    return this.batchRepository.find({ relations: ['teachers', 'users' , 'candidates'] });
   }
 
  
   async findOne(batch_id: string): Promise<Batch> {
     const batch = await this.batchRepository.findOne({
       where: { batch_id },
-      relations: ['teachers' , 'users'],
+      relations: ['teachers' , 'users' , 'candidates'],
     });
 
     if (!batch) {
@@ -106,7 +105,7 @@ export class BatchService {
 
     return this.batchRepository.findOne({
       where: { batch_id },
-      relations: ['teachers', 'users'],
+      relations: ['teachers', 'users' , 'candidates'],
     });
   }
 

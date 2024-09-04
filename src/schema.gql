@@ -2,6 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Candidate {
+  candidate_id: ID!
+  name: String!
+  email: String!
+  phoneNo: String!
+  gender: String!
+  laptopAvailability: String!
+  status: String!
+  age: Int!
+  qualification: String!
+  institutionName: String!
+  allocatedHours: Int
+  purpose: String!
+  user: User!
+  batch: Batch!
+}
+
 type Batch {
   batch_id: ID!
   name: String!
@@ -18,28 +35,19 @@ type Batch {
   classUpdatedOn: String
   users: [User!]
   teachers: [User!]
+  totalCandidates: Int!
+  newCandidates: Int!
+  interviewedCandidates: Int!
+  invitedCandidates: Int!
+  registeredCandidates: Int!
+  rejectedCandidates: Int!
+  candidates: [Candidate!]
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
-
-type Candidate {
-  candidate_id: ID!
-  name: String!
-  email: String!
-  phoneNo: String!
-  gender: String!
-  laptopAvailability: String!
-  status: String!
-  age: Int!
-  qualification: String!
-  institutionName: String!
-  allocatedHours: Int
-  purpose: String!
-  user: User!
-}
 
 type User {
   user_id: ID!
@@ -158,6 +166,7 @@ input CreateCandidateInput {
   institutionName: String!
   allocatedHours: Int
   purpose: String!
+  batchId: ID!
 }
 
 input UpdateCandidateInput {
@@ -173,4 +182,5 @@ input UpdateCandidateInput {
   institutionName: String!
   allocatedHours: Int!
   purpose: String!
+  batchId: ID!
 }
