@@ -5,7 +5,7 @@ import { IsOptional, IsString, IsArray, IsInt } from 'class-validator';
 export class UpdateBatchInput {
 
   @Field(() => ID)
-  id: string;
+  batch_id: string;
 
   @Field()
   @IsString()
@@ -15,6 +15,14 @@ export class UpdateBatchInput {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @Field()
+  @IsOptional()
+  createdOn: Date;
+
+  @Field()
+  @IsOptional()
+  createdBy: string;
 
   @Field(() => Int, { defaultValue: 3 })
   @IsInt()

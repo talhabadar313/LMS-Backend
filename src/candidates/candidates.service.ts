@@ -33,6 +33,23 @@ export class CandidatesService {
   findAll(): Promise<Candidate[]> {
     return this.candidateRepository.find({ relations: ['user', 'batch'] });
   }
+  async findByBatchId(batchId: string): Promise<Candidate[]> {
+    const candidates = await this.candidateRepository.find({
+      where: { batch: { batch_id: batchId } },
+      relations: ['user', 'batch'],
+    });
+    
+    console.log('Fetched candidates:', candidates);
+ 
+    candidates.forEach(candidate => {
+      if (!candidate.candidate_id) {
+        console.error('Candidate with null ID:', candidate); 
+      }
+    });
+  
+    return candidates;
+  }
+  
 
   findOne(id: string): Promise<Candidate> {
     return this.candidateRepository.findOne({ where: { candidate_id: id }, relations: ['user', 'batch'] });

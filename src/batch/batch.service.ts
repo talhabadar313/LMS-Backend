@@ -5,6 +5,7 @@ import { Batch } from './entities/batch.entity';
 import { User } from 'src/users/entities/user.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
+import { ApplicationsResponse } from 'src/candidates/dto/applications-response';
 
 @Injectable()
 export class BatchService {
@@ -98,16 +99,35 @@ export class BatchService {
   }
 
   async update(batch_id: string, updateBatchInput: UpdateBatchInput): Promise<Batch> {
-    const result = await this.batchRepository.update(batch_id, updateBatchInput);
-    if (result.affected === 0) {
+    const batch = await this.batchRepository.findOne({
+      where: { batch_id },
+      relations: ['teachers'],
+    });
+  
+    if (!batch) {
       throw new NotFoundException(`Batch with ID ${batch_id} not found`);
     }
-
+  
+    // Update other properties
+    Object.assign(batch, updateBatchInput);
+  
+    // Handle teacher updates
+    if (updateBatchInput.teacherIds) {
+      const teachers = await this.userRepository.find({
+        where: { user_id: In(updateBatchInput.teacherIds) },
+      });
+  
+      batch.teachers = teachers;
+    }
+  
+    await this.batchRepository.save(batch);
+  
     return this.batchRepository.findOne({
       where: { batch_id },
-      relations: ['teachers', 'users' , 'candidates'],
+      relations: ['teachers'],
     });
   }
+  
 
   async remove(batch_id: string): Promise<void> {
     const batch = await this.batchRepository.findOne({ where: { batch_id }, relations: ['teachers', 'users'] });
@@ -121,4 +141,59 @@ export class BatchService {
 
     await this.batchRepository.remove(batch);
   }
-}
+
+  async getApplicationsPerDay(batchId: string): Promise<ApplicationsResponse> {
+    const batch = await this.batchRepository.findOne({
+      where: { batch_id: batchId },
+      relations: ['candidates'],
+    });
+
+    if (!batch) {
+      throw new NotFoundException(`Batch with ID ${batchId} not found`);
+    }
+
+    const candidates = batch.candidates;
+
+    const daysOfWeek: ApplicationsResponse = {
+      mondayApplications: 0,
+      tuesdayApplications: 0,
+      wednesdayApplications: 0,
+      thursdayApplications: 0,
+      fridayApplications: 0,
+      saturdayApplications: 0,
+      sundayApplications: 0,
+    };
+
+    candidates.forEach((candidate) => {
+      const registrationDate = new Date(candidate.createdOn);
+      const dayOfWeek = registrationDate.getDay();
+
+      switch (dayOfWeek) {
+        case 1:
+          daysOfWeek.mondayApplications++;
+          break;
+        case 2:
+          daysOfWeek.tuesdayApplications++;
+          break;
+        case 3:
+          daysOfWeek.wednesdayApplications++;
+          break;
+        case 4:
+          daysOfWeek.thursdayApplications++;
+          break;
+        case 5:
+          daysOfWeek.fridayApplications++;
+          break;
+        case 6:
+          daysOfWeek.saturdayApplications++;
+          break;
+        case 0:
+          daysOfWeek.sundayApplications++;
+          break;
+      }
+    });
+
+    return daysOfWeek;
+  }
+  }
+  

@@ -15,9 +15,15 @@ type Candidate {
   institutionName: String!
   allocatedHours: Int
   purpose: String!
+  createdOn: DateTime!
   user: User!
   batch: Batch!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Batch {
   batch_id: ID!
@@ -41,13 +47,10 @@ type Batch {
   invitedCandidates: Int!
   registeredCandidates: Int!
   rejectedCandidates: Int!
+  maleCandidates: Int!
+  femaleCandidates: Int!
   candidates: [Candidate!]
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type User {
   user_id: ID!
@@ -68,6 +71,16 @@ type LoginResponse {
   user: User!
 }
 
+type ApplicationsResponse {
+  mondayApplications: Int!
+  tuesdayApplications: Int!
+  wednesdayApplications: Int!
+  thursdayApplications: Int!
+  fridayApplications: Int!
+  saturdayApplications: Int!
+  sundayApplications: Int!
+}
+
 type Query {
   users: [User!]!
   userByEmail(email: String!): User!
@@ -75,7 +88,9 @@ type Query {
   teachers: [User!]!
   batches: [Batch!]!
   batch(id: String!): Batch!
+  getApplicationsPerDay(id: String!): ApplicationsResponse!
   candidates: [Candidate!]!
+  batchcandidates(id: String!): [Candidate!]!
   candidate(id: String!): Candidate!
 }
 
@@ -140,9 +155,11 @@ input CreateBatchInput {
 }
 
 input UpdateBatchInput {
-  id: ID!
+  batch_id: ID!
   name: String!
   category: String
+  createdOn: DateTime!
+  createdBy: String!
   maxAbsents: Int! = 3
   defaultMessage: String! = "Please Be Regular!"
   orientationDate: String

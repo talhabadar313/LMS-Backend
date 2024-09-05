@@ -87,6 +87,12 @@ export class Batch {
   @Field(() => Int)
   rejectedCandidates?: number;
 
+  @Field(()=> Int)
+  maleCandidates?: number;
+
+  @Field(()=> Int)
+  femaleCandidates?: number;
+
   @OneToMany(() => Candidate, candidate => candidate.batch)
   @Field(() => [Candidate], { nullable: true })
   candidates?: Candidate[];
@@ -96,6 +102,8 @@ export class Batch {
     if (this.category === 'open') {
       if (this.candidates) {
         this.totalCandidates = this.candidates.length;
+        this.maleCandidates = this.candidates.filter(candidate => candidate.gender==="male").length;
+        this.femaleCandidates = this.candidates.filter(candidate => candidate.gender==="female").length;
         this.newCandidates = this.candidates.filter(candidate => candidate.status==='new').length;
         this.interviewedCandidates = this.candidates.filter(candidate => candidate.status === 'interviewed').length;
         this.invitedCandidates = this.candidates.filter(candidate => candidate.status === 'invited').length;
@@ -105,6 +113,8 @@ export class Batch {
     } else {
       if (this.users) {
         this.totalCandidates = this.users.length;
+        this.maleCandidates = this.candidates.filter(candidate => candidate.gender==="male").length;
+        this.femaleCandidates = this.candidates.filter(candidate => candidate.gender==="female").length;
         this.interviewedCandidates = this.users.filter(user => user.status === 'interviewed').length;
         this.registeredCandidates = this.users.filter(user => user.status === 'registered').length;
       }

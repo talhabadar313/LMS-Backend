@@ -7,7 +7,7 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/auth/role.quard';
 import { Roles } from 'src/auth/role.decorator';
-
+import { ApplicationsResponse } from 'src/candidates/dto/applications-response';
 
 @Resolver(() => Batch)
 export class BatchResolver {
@@ -19,7 +19,6 @@ export class BatchResolver {
   createBatch(@Args('createBatchInput') createBatchInput: CreateBatchInput) {
     return this.batchService.create(createBatchInput);
   }
-
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
@@ -55,7 +54,7 @@ export class BatchResolver {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")
   updateBatch(@Args('updateBatchInput') updateBatchInput: UpdateBatchInput) {
-    return this.batchService.update(updateBatchInput.id, updateBatchInput);
+    return this.batchService.update(updateBatchInput.batch_id, updateBatchInput);
   }
 
   @Mutation(() => Batch)
@@ -64,5 +63,11 @@ export class BatchResolver {
   removeBatch(@Args('id', { type: () => String }) id: string) {
     return this.batchService.remove(id);
   }
-}
 
+    @Query(() => ApplicationsResponse)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles("admin")
+  getApplicationsPerDay(@Args('id', { type: () => String }) batchId: string) {
+    return this.batchService.getApplicationsPerDay(batchId);
+  }
+}

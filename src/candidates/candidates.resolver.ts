@@ -23,7 +23,20 @@ export class CandidatesResolver {
     return this.candidatesService.findAll();
   }
 
+  @Query(() => [Candidate], { name: 'batchcandidates' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  async findByBatch(@Args('id', { type: () => String }) id: string): Promise<Candidate[]> {
+  const candidates = await this.candidatesService.findByBatchId(id);
+  
+  console.log('Candidates returned from service:', candidates); 
+  return candidates;
+}
+
+
   @Query(() => Candidate, { name: 'candidate' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles("admin","teacher")
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.candidatesService.findOne(id);
   }

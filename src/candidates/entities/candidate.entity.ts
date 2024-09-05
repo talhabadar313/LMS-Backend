@@ -55,6 +55,10 @@ export class Candidate {
   @Column()
   purpose: string;
 
+  @Field()
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  createdOn: Date;
+
   @OneToOne(() => User, user => user.candidate)
   @Field(() => User)
   user: User;
@@ -64,3 +68,7 @@ export class Candidate {
   @Field(() => Batch)
   batch?: Batch;
 }
+function CreateDateColumn(): (target: Candidate, propertyKey: "createdOn") => void {
+  throw new Error('Function not implemented.');
+}
+
