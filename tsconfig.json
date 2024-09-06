@@ -22,9 +22,12 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
+  "include": [
+    "src/**/*"  // Include all files within the rootDir
+  ],
   "exclude": [
-    "node_modules",
-    "dist",
-    "test"
+    "node_modules",  // Exclude node_modules
+    "dist",  // Exclude output directory
+    "test"  // Exclude test files or folders
   ]
 }
