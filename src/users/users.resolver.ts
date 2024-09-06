@@ -5,7 +5,7 @@ import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/auth/role.quard';
+import { RolesGuard } from 'src/auth/role.guard';
 import { Roles } from 'src/auth/role.decorator';
 
 
