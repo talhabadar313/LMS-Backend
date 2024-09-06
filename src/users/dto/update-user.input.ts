@@ -31,11 +31,6 @@ export class UpdateUserInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  address?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
   status?: string;
 
   @Field(() => Boolean, { nullable: true })

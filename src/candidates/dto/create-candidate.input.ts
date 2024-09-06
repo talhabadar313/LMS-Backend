@@ -18,7 +18,7 @@ export class CreateCandidateInput {
   @Field()
   laptopAvailability: string;
 
-  @Field()
+  @Field({defaultValue:"new"})
   status: string;
 
   @Field(() => Int)

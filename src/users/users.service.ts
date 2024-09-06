@@ -33,7 +33,6 @@ export class UsersService {
       password: hashedPassword,
       role: createUserInput.role,
       phoneNumber: createUserInput.phoneNumber,
-      address: createUserInput.address,
       status: createUserInput.status,
       watchlisted: createUserInput.role === 'student' ? false : null,
     };

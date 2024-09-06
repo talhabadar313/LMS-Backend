@@ -1,4 +1,5 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn , OneToOne, JoinColumn, ManyToMany} from 'typeorm';
+
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToMany } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { Candidate } from 'src/candidates/entities/candidate.entity';
@@ -24,15 +25,11 @@ export class User {
 
   @Field()
   @Column()
-  role: string;  
+  role: string;
 
   @Field({ nullable: true })
   @Column({ unique: true, nullable: true })
   phoneNumber?: string;
-
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  address?: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
@@ -46,8 +43,8 @@ export class User {
   @JoinColumn({ name: 'candidateId' })
   @Field(() => Candidate, { nullable: true })
   candidate?: Candidate;
-  
-  @ManyToOne(() => Batch, batch => batch.users)
+
+  @ManyToOne(() => Batch, batch => batch.users, { nullable: true })
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch, { nullable: true })
   batch?: Batch;
@@ -55,5 +52,4 @@ export class User {
   @ManyToMany(() => Batch, batch => batch.teachers)
   @Field(() => [Batch], { nullable: true })
   teachingBatches?: Batch[];
-
 }

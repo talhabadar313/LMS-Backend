@@ -58,7 +58,6 @@ type User {
   email: String!
   role: String!
   phoneNumber: String
-  address: String
   status: String
   watchlisted: Boolean
   candidate: Candidate
@@ -120,7 +119,6 @@ input CreateUserInput {
   password: String!
   role: String!
   phoneNumber: String
-  address: String
   status: String
   watchlisted: Boolean
   batchId: ID
@@ -134,7 +132,6 @@ input UpdateUserInput {
   password: String!
   role: String!
   phoneNumber: String
-  address: String
   status: String
   watchlisted: Boolean
 }
@@ -177,7 +174,7 @@ input CreateCandidateInput {
   phoneNo: String!
   gender: String!
   laptopAvailability: String!
-  status: String!
+  status: String! = "new"
   age: Int!
   qualification: String!
   institutionName: String!
@@ -191,13 +188,6 @@ input UpdateCandidateInput {
   name: String!
   email: String!
   phoneNo: String!
-  gender: String!
-  laptopAvailability: String!
   status: String!
-  age: Int!
-  qualification: String!
-  institutionName: String!
-  allocatedHours: Int!
-  purpose: String!
-  batchId: ID!
+  batchName: String!
 }

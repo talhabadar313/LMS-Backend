@@ -1,5 +1,5 @@
-import { InputType, Field, ID, Int } from '@nestjs/graphql';
-import { IsUUID } from 'class-validator';
+import { InputType, Field, ID } from '@nestjs/graphql';
+import { IsUUID, IsOptional } from 'class-validator';
 @InputType()
 export class UpdateCandidateInput {
 
@@ -16,31 +16,12 @@ export class UpdateCandidateInput {
   phoneNo: string;
 
   @Field()
-  gender: string;
-
-  @Field()
-  laptopAvailability: string;
-
-  @Field()
+  @IsOptional()
   status: string;
 
-  @Field(() => Int)
-  age: number;
-
   @Field()
-  qualification: string;
-
-  @Field()
-  institutionName: string;
-
-  @Field(() => Int)
-  allocatedHours: number;
-
-  @Field()
-  purpose: string;
-
-  @Field(() => ID)
   @IsUUID()
-  batchId?: string;
+  @IsOptional()
+  batchName?: string;
 
 }

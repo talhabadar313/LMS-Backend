@@ -108,10 +108,8 @@ export class BatchService {
       throw new NotFoundException(`Batch with ID ${batch_id} not found`);
     }
   
-    // Update other properties
     Object.assign(batch, updateBatchInput);
   
-    // Handle teacher updates
     if (updateBatchInput.teacherIds) {
       const teachers = await this.userRepository.find({
         where: { user_id: In(updateBatchInput.teacherIds) },
