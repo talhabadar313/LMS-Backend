@@ -10,6 +10,7 @@ import { BatchModule } from './batch/batch.module';
 import { CandidatesModule } from './candidates/candidates.module';
 import { MailModule } from './mail/mail.module';
 
+
 dotenv.config({path:'.env'});
 
 @Module({
