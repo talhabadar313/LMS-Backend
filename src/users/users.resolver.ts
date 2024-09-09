@@ -14,8 +14,8 @@ export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
   @Mutation(() => User)
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles('admin', 'teacher')
   @Mutation(() => User)
   async createUser(@Args('createUserInput') createUserInput: CreateUserInput): Promise<User> {
     const { batchId, role, ...userData } = createUserInput;
