@@ -5,8 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Batch } from 'src/batch/entities/batch.entity';
-import { Candidate } from 'src/candidates/entities/candidate.entity';
+import { Batch } from '../batch/entities/batch.entity';
+import { Candidate } from '../candidates/entities/candidate.entity';
 
 
 @Injectable()

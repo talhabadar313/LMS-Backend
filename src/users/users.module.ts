@@ -4,8 +4,8 @@ import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { UsersResolver } from './users.resolver';
 import { AuthModule } from '../auth/auth.module'; 
-import { BatchModule } from 'src/batch/batch.module';
-import { CandidatesModule } from 'src/candidates/candidates.module';
+import { BatchModule } from '../batch/batch.module';
+import { CandidatesModule } from '../candidates/candidates.module';
 @Module({
   imports: [
     forwardRef(() => AuthModule), 

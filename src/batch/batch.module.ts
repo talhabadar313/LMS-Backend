@@ -3,10 +3,9 @@ import { BatchService } from './batch.service';
 import { BatchResolver } from './batch.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Batch } from './entities/batch.entity';
-import { AuthModule } from 'src/auth/auth.module';
-import { User } from 'src/users/entities/user.entity';
-import { CandidatesModule } from 'src/candidates/candidates.module';
-import { Candidate } from 'src/candidates/entities/candidate.entity';
+import { AuthModule } from '../auth/auth.module';
+import { User } from '../users/entities/user.entity';
+import { Candidate } from '../candidates/entities/candidate.entity';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Batch, User, Candidate]), AuthModule],

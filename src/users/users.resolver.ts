@@ -4,9 +4,9 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
 import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/auth/role.guard';
-import { Roles } from 'src/auth/role.decorator';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
 
 
 @Resolver(() => User)

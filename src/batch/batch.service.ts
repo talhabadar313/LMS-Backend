@@ -2,10 +2,10 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Batch } from './entities/batch.entity';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
-import { ApplicationsResponse } from 'src/candidates/dto/applications-response';
+import { ApplicationsResponse } from '../candidates/dto/applications-response';
 
 @Injectable()
 export class BatchService {

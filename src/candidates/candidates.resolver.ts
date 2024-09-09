@@ -4,9 +4,9 @@ import { Candidate } from './entities/candidate.entity';
 import { CreateCandidateInput } from './dto/create-candidate.input';
 import { UpdateCandidateInput } from './dto/update-candidate.input';
 import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/auth/role.guard';
-import { Roles } from 'src/auth/role.decorator';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
 @Resolver(() => Candidate)
 export class CandidatesResolver {
   constructor(private readonly candidatesService: CandidatesService) {}

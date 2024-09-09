@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { CreateCandidateInput } from './dto/create-candidate.input';
 import { UpdateCandidateInput } from './dto/update-candidate.input';
 import { Candidate } from './entities/candidate.entity';
-import { Batch } from 'src/batch/entities/batch.entity'; 
-import { User } from 'src/users/entities/user.entity';
+import { Batch } from '../batch/entities/batch.entity'; 
+import { User } from '../users/entities/user.entity';
 
 
 @Injectable()

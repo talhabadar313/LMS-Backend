@@ -4,10 +4,10 @@ import { Batch } from './entities/batch.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
 import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/auth/role.guard';
-import { Roles } from 'src/auth/role.decorator';
-import { ApplicationsResponse } from 'src/candidates/dto/applications-response';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
+import { ApplicationsResponse } from '../candidates/dto/applications-response';
 
 @Resolver(() => Batch)
 export class BatchResolver {
