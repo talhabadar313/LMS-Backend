@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm'; 
 import { CreateCandidateInput } from './dto/create-candidate.input';
@@ -6,7 +6,7 @@ import { UpdateCandidateInput } from './dto/update-candidate.input';
 import { Candidate } from './entities/candidate.entity';
 import { Batch } from '../batch/entities/batch.entity'; 
 import { User } from '../users/entities/user.entity';
-
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class CandidatesService {
@@ -18,19 +18,30 @@ export class CandidatesService {
     private readonly batchRepository: Repository<Batch>,
 
     @InjectRepository(User) 
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+
+    private readonly mailService: MailService,
   ) {}
 
   async create(createCandidateInput: CreateCandidateInput): Promise<Candidate> {
-    const candidate = this.candidateRepository.create(createCandidateInput);
-
-    if (createCandidateInput.batchId) {
-      const batch = await this.batchRepository.findOne({ where: { batch_id: createCandidateInput.batchId } });
-      if (!batch) {
-        throw new Error('Batch not found');
-      }
-      candidate.batch = batch;
+    if (!createCandidateInput.batchId) {
+      throw new BadRequestException('Batch ID is required.');
     }
+
+    const batch = await this.batchRepository.findOne({ 
+      where: { batch_id: createCandidateInput.batchId }
+    });
+
+    if (!batch) {
+      throw new NotFoundException('Batch not found.');
+    }
+
+    if (batch.category !== 'open') {
+      throw new BadRequestException('Batch is closed. Cannot add candidates.');
+    }
+
+    const candidate = this.candidateRepository.create(createCandidateInput);
+    candidate.batch = batch;
 
     return this.candidateRepository.save(candidate);
   }
@@ -38,6 +49,7 @@ export class CandidatesService {
   findAll(): Promise<Candidate[]> {
     return this.candidateRepository.find({ relations: ['user', 'batch'] });
   }
+
   async findByBatchId(batchId: string): Promise<Candidate[]> {
     const candidates = await this.candidateRepository.find({
       where: { batch: { batch_id: batchId } },
@@ -54,14 +66,15 @@ export class CandidatesService {
   
     return candidates;
   }
-  
 
   findOne(id: string): Promise<Candidate> {
-    return this.candidateRepository.findOne({ where: { candidate_id: id }, relations: ['user', 'batch'] });
+    return this.candidateRepository.findOne({ 
+      where: { candidate_id: id }, 
+      relations: ['user', 'batch'] 
+    });
   }
 
   async update(id: string, updateCandidateInput: UpdateCandidateInput): Promise<Candidate> {
-   
     const candidate = await this.candidateRepository.findOne({
       where: { candidate_id: id },
       relations: ['batch', 'user'],
@@ -70,6 +83,7 @@ export class CandidatesService {
     if (!candidate) {
       throw new NotFoundException(`Candidate with ID ${id} not found`);
     }
+
     if (updateCandidateInput.batchName) {
       const batch = await this.batchRepository.findOne({ where: { name: updateCandidateInput.batchName } });
       if (!batch) {
@@ -78,19 +92,27 @@ export class CandidatesService {
       candidate.batch = batch;
     }
 
+  
     Object.assign(candidate, updateCandidateInput);
 
-    await this.candidateRepository.save(candidate);
 
+   
+    if (updateCandidateInput.status === 'invited') {
+     
+      const tempPassword = this.generateTempPassword();
+      const loginUrl = "https://lms-o0uuo4mc2-talhas-projects-cc754da5.vercel.app/"
+      
+      await this.mailService.sendInvitationEmail(candidate.email, candidate.name, tempPassword, loginUrl);
+
+    }
+
+    if (updateCandidateInput.status === 'rejected') {
+      await this.mailService.sendRejectionEmail(candidate.email, candidate.name);
+    }
+   
     if (updateCandidateInput.status === 'registered') {
-      if (candidate.user) {
-        candidate.user.name = candidate.name;
-        candidate.user.email = candidate.email;
-        candidate.user.phoneNumber = candidate.phoneNo;
-        candidate.user.status = candidate.status;
-        candidate.user.batch = candidate.batch; 
-        await this.userRepository.save(candidate.user);
-      } else {
+    
+      if (!candidate.user) {
         const newUser = new User();
         newUser.name = candidate.name;
         newUser.email = candidate.email;
@@ -101,18 +123,30 @@ export class CandidatesService {
         newUser.batch = candidate.batch; 
         newUser.candidate = candidate;
         await this.userRepository.save(newUser);
+      } else {
+       
+        candidate.user.status = 'registered';
+        candidate.user.name = candidate.name;
+        candidate.user.email = candidate.email;
+        candidate.user.phoneNumber = candidate.phoneNo;
+        candidate.user.batch = candidate.batch;
+        await this.userRepository.save(candidate.user);
       }
     }
+
+    
+    await this.candidateRepository.save(candidate);
 
     return this.candidateRepository.findOne({
       where: { candidate_id: id },
       relations: ['batch', 'user'],
     });
-}
+  }
 
-
-  
-
+ 
+  private generateTempPassword(): string {
+    return Math.random().toString(36).slice(-8); 
+  }
   async remove(id: string): Promise<void> {
     await this.candidateRepository.delete(id);
   }

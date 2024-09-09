@@ -5,9 +5,10 @@ import { Candidate } from './entities/candidate.entity';
 import { AuthModule } from '../auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BatchModule } from '../batch/batch.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Candidate]), AuthModule, BatchModule],
+  imports:[TypeOrmModule.forFeature([Candidate]), AuthModule, BatchModule, MailModule],
   providers: [CandidatesResolver, CandidatesService],
   exports:[TypeOrmModule]
 })

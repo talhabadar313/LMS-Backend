@@ -8,6 +8,7 @@ import * as dotenv from 'dotenv';
 import { AuthModule } from './auth/auth.module';
 import { BatchModule } from './batch/batch.module';
 import { CandidatesModule } from './candidates/candidates.module';
+import { MailModule } from './mail/mail.module';
 
 dotenv.config({path:'.env'});
 
@@ -31,12 +32,12 @@ dotenv.config({path:'.env'});
       synchronize: true,
       logging: true,
     }),
-    
-    
+
     AuthModule,
     UsersModule,
     BatchModule,
     CandidatesModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],
