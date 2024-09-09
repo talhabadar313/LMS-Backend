@@ -10,7 +10,7 @@ async function bootstrap() {
 
   // Enable CORS for specific origins
   app.enableCors({
-    origin: ['https://lms-alpha-five.vercel.app', 'http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://lms-alpha-five.vercel.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
