@@ -9,11 +9,7 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./",
-    "paths": {
-      "src/*": ["src/*"]
-    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -21,13 +17,5 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
-  },
-  "include": [
-    "src/**/*"  // Include all files within the rootDir
-  ],
-  "exclude": [
-    "node_modules",  // Exclude node_modules
-    "dist",  // Exclude output directory
-    "test"  // Exclude test files or folders
-  ]
+  }
 }

@@ -5,7 +5,7 @@ import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { RoleGuard } from 'src/auth/role.guard';
+import { RolesGuard } from 'src/auth/role.guard';
 import { Roles } from 'src/auth/role.decorator';
 import { ApplicationsResponse } from 'src/candidates/dto/applications-response';
 
@@ -14,14 +14,14 @@ export class BatchResolver {
   constructor(private readonly batchService: BatchService) {}
 
   @Mutation(() => Batch)
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")
   createBatch(@Args('createBatchInput') createBatchInput: CreateBatchInput) {
     return this.batchService.create(createBatchInput);
   }
 
   @Mutation(() => Batch)
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")
   async addTeachersToBatch(
     @Args('batchId') batchId: string,
@@ -31,7 +31,7 @@ export class BatchResolver {
   }
 
   @Mutation(() => Batch)
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")
   async removeTeacherFromBatch(
     @Args('batchId') batchId: string,
@@ -51,21 +51,21 @@ export class BatchResolver {
   }
 
   @Mutation(() => Batch)
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")
   updateBatch(@Args('updateBatchInput') updateBatchInput: UpdateBatchInput) {
     return this.batchService.update(updateBatchInput.batch_id, updateBatchInput);
   }
 
   @Mutation(() => Batch)
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")
   removeBatch(@Args('id', { type: () => String }) id: string) {
     return this.batchService.remove(id);
   }
 
     @Query(() => ApplicationsResponse)
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin")
   getApplicationsPerDay(@Args('id', { type: () => String }) batchId: string) {
     return this.batchService.getApplicationsPerDay(batchId);
