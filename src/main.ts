@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-const express = require('express'); // Use require syntax for express
+import * as express from 'express';
 
-const server = express(); // Create an express server
+const server = express(); // Use import syntax for express
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
-  // Enable CORS for specific origins
+  // Apply CORS before other middlewares
   app.enableCors({
     origin: ['http://localhost:3001', 'https://lms-alpha-five.vercel.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -19,8 +19,6 @@ async function bootstrap() {
   await app.init(); // Initialize the app for serverless deployment
 }
 
-// Start the application
+// Initialize server and export for Vercel
 bootstrap();
-
-// Export the server to be used by Vercel
-export default server; // Export default for Vercel serverless functions
+export default server;
