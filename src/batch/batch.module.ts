@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Batch } from './entities/batch.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { User } from 'src/users/entities/user.entity';
+import { CandidatesModule } from 'src/candidates/candidates.module';
 import { Candidate } from 'src/candidates/entities/candidate.entity';
 
 @Module({
