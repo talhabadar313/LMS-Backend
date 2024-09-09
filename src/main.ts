@@ -16,11 +16,13 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.init(); // Initialize the app for serverless deployment
+  await app.init(); // Initialize the app
+
+  // Start the server on port 3000
+  server.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
+  });
 }
 
 // Start the application
 bootstrap();
-
-// Export the server to be used by Vercel
-export default server; // Export default for Vercel serverless functions
