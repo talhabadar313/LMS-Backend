@@ -13,7 +13,6 @@ import { Roles } from '../auth/role.decorator';
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  @Mutation(() => User)
   // @UseGuards(AuthGuard, RolesGuard)
   // @Roles('admin', 'teacher')
   @Mutation(() => User)
@@ -76,3 +75,4 @@ async removeUser(@Args('id', { type: () => String }) id: string): Promise<string
 }
 
 }
+

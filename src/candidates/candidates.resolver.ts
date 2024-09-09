@@ -28,8 +28,6 @@ export class CandidatesResolver {
   @Roles('admin', 'teacher')
   async findByBatch(@Args('id', { type: () => String }) id: string): Promise<Candidate[]> {
   const candidates = await this.candidatesService.findByBatchId(id);
-  
-  console.log('Candidates returned from service:', candidates); 
   return candidates;
 }
 
