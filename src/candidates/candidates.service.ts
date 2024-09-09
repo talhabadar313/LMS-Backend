@@ -100,7 +100,7 @@ export class CandidatesService {
     if (updateCandidateInput.status === 'invited') {
      
       const tempPassword = this.generateTempPassword();
-      const loginUrl = "https://lms-o0uuo4mc2-talhas-projects-cc754da5.vercel.app/"
+      const loginUrl = "https://lms-alpha-five.vercel.app/"
       
       await this.mailService.sendInvitationEmail(candidate.email, candidate.name, tempPassword, loginUrl);
 
