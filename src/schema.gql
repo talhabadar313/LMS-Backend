@@ -6,6 +6,7 @@ type Candidate {
   candidate_id: ID!
   name: String!
   email: String!
+  tempPassword: String
   phoneNo: String!
   gender: String!
   laptopAvailability: String!
@@ -91,6 +92,7 @@ type Query {
   candidates: [Candidate!]!
   batchcandidates(id: String!): [Candidate!]!
   candidate(id: String!): Candidate!
+  candidateByEmail(email: String!): Candidate!
 }
 
 type Mutation {

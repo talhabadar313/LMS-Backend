@@ -50,6 +50,13 @@ export class CandidatesService {
     return this.candidateRepository.find({ relations: ['user', 'batch'] });
   }
 
+  async findCandidateByEmail(email: string): Promise<Candidate | undefined> {
+    return this.candidateRepository.findOne({ 
+      where: { email },
+      relations: ['batch', 'user'],
+    });
+  }
+
   async findByBatchId(batchId: string): Promise<Candidate[]> {
     const candidates = await this.candidateRepository.find({
       where: { batch: { batch_id: batchId } },
@@ -92,26 +99,21 @@ export class CandidatesService {
       candidate.batch = batch;
     }
 
-  
     Object.assign(candidate, updateCandidateInput);
 
-
-   
     if (updateCandidateInput.status === 'invited') {
-     
       const tempPassword = this.generateTempPassword();
+      candidate.tempPassword = tempPassword; 
       const loginUrl = "https://lms-alpha-five.vercel.app/"
       
       await this.mailService.sendInvitationEmail(candidate.email, candidate.name, tempPassword, loginUrl);
-
     }
 
     if (updateCandidateInput.status === 'rejected') {
       await this.mailService.sendRejectionEmail(candidate.email, candidate.name);
     }
-   
+  
     if (updateCandidateInput.status === 'registered') {
-    
       if (!candidate.user) {
         const newUser = new User();
         newUser.name = candidate.name;
@@ -124,7 +126,6 @@ export class CandidatesService {
         newUser.candidate = candidate;
         await this.userRepository.save(newUser);
       } else {
-       
         candidate.user.status = 'registered';
         candidate.user.name = candidate.name;
         candidate.user.email = candidate.email;
@@ -134,7 +135,6 @@ export class CandidatesService {
       }
     }
 
-    
     await this.candidateRepository.save(candidate);
 
     return this.candidateRepository.findOne({

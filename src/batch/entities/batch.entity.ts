@@ -41,7 +41,7 @@ export class Batch {
   orientationDate?: string;
 
   @Field({ nullable: true })
-  @Column({ type: 'time', nullable: true })
+  @Column({nullable: true })
   orientationTime?: string;
 
   @Field({ nullable: true })
