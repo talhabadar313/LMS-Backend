@@ -24,10 +24,12 @@ async function bootstrap() {
       console.log('GraphQL Playground available at http://localhost:3000/graphql');
     });
   }
+
+  return server; // Return the server for serverless platforms
 }
 
 // Bootstrap the application
-bootstrap();
+const server = bootstrap(); // Assign the server variable and initialize
 
 // Export the server handler for platforms like Vercel
 export default server;
