@@ -5,10 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Batch } from './entities/batch.entity';
 import { AuthModule } from '../auth/auth.module';
 import { User } from '../users/entities/user.entity';
-import { Candidate } from '../candidates/entities/candidate.entity';
+
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Batch, User, Candidate]), AuthModule],
+  imports:[TypeOrmModule.forFeature([Batch, User]), AuthModule],
   providers: [BatchResolver, BatchService],
   exports:[TypeOrmModule]
   

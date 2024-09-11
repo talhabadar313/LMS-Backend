@@ -19,6 +19,10 @@ export class Candidate {
   @Column({ unique: true })
   email: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  tempPassword?: string; 
+
   @Field()
   @Column({ unique: true })
   phoneNo: string;

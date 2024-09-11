@@ -39,6 +39,13 @@ export class CandidatesResolver {
     return this.candidatesService.findOne(id);
   }
 
+  @Query(() => Candidate, { name: 'candidateByEmail' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  findOneByEmail(@Args('email', { type: () => String }) email: string) {
+    return this.candidatesService.findCandidateByEmail(email);
+  }
+
   @UseGuards(AuthGuard, RolesGuard)
   @Roles("admin","teacher")
   @Mutation(() => Candidate)

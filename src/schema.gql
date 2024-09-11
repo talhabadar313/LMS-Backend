@@ -6,6 +6,7 @@ type Candidate {
   candidate_id: ID!
   name: String!
   email: String!
+  tempPassword: String
   phoneNo: String!
   gender: String!
   laptopAvailability: String!
@@ -85,12 +86,13 @@ type Query {
   userByEmail(email: String!): User!
   user(id: String!): User!
   teachers: [User!]!
-  batches: [Batch!]!
-  batch(id: String!): Batch!
-  getApplicationsPerDay(id: String!): ApplicationsResponse!
   candidates: [Candidate!]!
   batchcandidates(id: String!): [Candidate!]!
   candidate(id: String!): Candidate!
+  candidateByEmail(email: String!): Candidate!
+  batches: [Batch!]!
+  batch(id: String!): Batch!
+  getApplicationsPerDay(id: String!): ApplicationsResponse!
 }
 
 type Mutation {
@@ -98,14 +100,14 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: String!): String!
+  createCandidate(createCandidateInput: CreateCandidateInput!): Candidate!
+  updateCandidate(updateCandidateInput: UpdateCandidateInput!): Candidate!
+  removeCandidate(id: String!): Candidate!
   createBatch(createBatchInput: CreateBatchInput!): Batch!
   addTeachersToBatch(batchId: String!, teacherIds: [String!]!): Batch!
   removeTeacherFromBatch(batchId: String!, teacherId: String!): Batch!
   updateBatch(updateBatchInput: UpdateBatchInput!): Batch!
   removeBatch(id: String!): Batch!
-  createCandidate(createCandidateInput: CreateCandidateInput!): Candidate!
-  updateCandidate(updateCandidateInput: UpdateCandidateInput!): Candidate!
-  removeCandidate(id: String!): Candidate!
 }
 
 input LoginInput {
@@ -134,6 +136,30 @@ input UpdateUserInput {
   phoneNumber: String
   status: String
   watchlisted: Boolean
+}
+
+input CreateCandidateInput {
+  name: String!
+  email: String!
+  phoneNo: String!
+  gender: String!
+  laptopAvailability: String!
+  status: String! = "new"
+  age: Int!
+  qualification: String!
+  institutionName: String!
+  allocatedHours: Int
+  purpose: String!
+  batchId: ID!
+}
+
+input UpdateCandidateInput {
+  candidate_id: ID!
+  name: String!
+  email: String!
+  phoneNo: String!
+  status: String!
+  batchName: String!
 }
 
 input CreateBatchInput {
@@ -166,28 +192,4 @@ input UpdateBatchInput {
   classUpdatedBy: String
   classUpdatedOn: String
   teacherIds: [ID]!
-}
-
-input CreateCandidateInput {
-  name: String!
-  email: String!
-  phoneNo: String!
-  gender: String!
-  laptopAvailability: String!
-  status: String! = "new"
-  age: Int!
-  qualification: String!
-  institutionName: String!
-  allocatedHours: Int
-  purpose: String!
-  batchId: ID!
-}
-
-input UpdateCandidateInput {
-  candidate_id: ID!
-  name: String!
-  email: String!
-  phoneNo: String!
-  status: String!
-  batchName: String!
 }

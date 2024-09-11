@@ -6,7 +6,7 @@ import { UpdateCandidateInput } from './dto/update-candidate.input';
 import { Candidate } from './entities/candidate.entity';
 import { Batch } from '../batch/entities/batch.entity'; 
 import { User } from '../users/entities/user.entity';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class CandidatesService {
@@ -50,6 +50,13 @@ export class CandidatesService {
     return this.candidateRepository.find({ relations: ['user', 'batch'] });
   }
 
+  async findCandidateByEmail(email: string): Promise<Candidate | undefined> {
+    return this.candidateRepository.findOne({ 
+      where: { email },
+      relations: ['batch', 'user'],
+    });
+  }
+
   async findByBatchId(batchId: string): Promise<Candidate[]> {
     const candidates = await this.candidateRepository.find({
       where: { batch: { batch_id: batchId } },
@@ -74,6 +81,56 @@ export class CandidatesService {
     });
   }
 
+  async resetPassword(candidateId: string, tempPassword: string, newPassword: string): Promise<Candidate> {
+    const candidate = await this.candidateRepository.findOne({
+      where: { candidate_id: candidateId },
+    });
+
+    if (!candidate) {
+      throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
+    }
+
+    if (candidate.tempPassword !== tempPassword) {
+      throw new BadRequestException('Invalid temporary password');
+    }
+
+    // Update candidate status to registered and clear temp password
+    candidate.status = 'registered';
+    candidate.tempPassword = null; // Clear temp password
+
+    // Save candidate data
+    await this.candidateRepository.save(candidate);
+
+    // Create or update user record
+    const existingUser = await this.userRepository.findOne({ where: { candidate: candidate } });
+
+    if (!existingUser) {
+      // Create new user if it doesn't exist
+      const newUser = new User();
+      newUser.name = candidate.name;
+      newUser.email = candidate.email;
+      newUser.password = newPassword; // Hash the password in a real implementation
+      newUser.role = 'student';
+      newUser.phoneNumber = candidate.phoneNo;
+      newUser.status = 'registered';
+      newUser.batch = candidate.batch;
+      newUser.candidate = candidate;
+      await this.userRepository.save(newUser);
+    } else {
+      // Update existing user
+      existingUser.password = newPassword; // Hash the password in a real implementation
+      existingUser.status = 'registered';
+      existingUser.name = candidate.name;
+      existingUser.email = candidate.email;
+      existingUser.phoneNumber = candidate.phoneNo;
+      existingUser.batch = candidate.batch;
+      await this.userRepository.save(existingUser);
+    }
+
+    return candidate;
+  }
+
+
   async update(id: string, updateCandidateInput: UpdateCandidateInput): Promise<Candidate> {
     const candidate = await this.candidateRepository.findOne({
       where: { candidate_id: id },
@@ -92,26 +149,21 @@ export class CandidatesService {
       candidate.batch = batch;
     }
 
-  
     Object.assign(candidate, updateCandidateInput);
 
-
-   
     if (updateCandidateInput.status === 'invited') {
-     
       const tempPassword = this.generateTempPassword();
+      candidate.tempPassword = tempPassword; 
       const loginUrl = "https://lms-alpha-five.vercel.app/"
       
       await this.mailService.sendInvitationEmail(candidate.email, candidate.name, tempPassword, loginUrl);
-
     }
 
     if (updateCandidateInput.status === 'rejected') {
       await this.mailService.sendRejectionEmail(candidate.email, candidate.name);
     }
-   
+  
     if (updateCandidateInput.status === 'registered') {
-    
       if (!candidate.user) {
         const newUser = new User();
         newUser.name = candidate.name;
@@ -124,7 +176,6 @@ export class CandidatesService {
         newUser.candidate = candidate;
         await this.userRepository.save(newUser);
       } else {
-       
         candidate.user.status = 'registered';
         candidate.user.name = candidate.name;
         candidate.user.email = candidate.email;
@@ -134,7 +185,6 @@ export class CandidatesService {
       }
     }
 
-    
     await this.candidateRepository.save(candidate);
 
     return this.candidateRepository.findOne({
