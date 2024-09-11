@@ -25,4 +25,4 @@ async function bootstrap() {
 }
 
 // Start the application
-bootstrap();
+export default bootstrap();
