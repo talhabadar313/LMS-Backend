@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-const express = require('express'); // Use require syntax for express
+import * as express from 'express';
 
 const server = express(); // Create an express server
 
@@ -18,11 +18,17 @@ async function bootstrap() {
 
   await app.init(); // Initialize the app
 
-  // Start the server on port 3000
-  server.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
-  });
+  // Start the server on localhost if not in a Vercel environment
+  if (process.env.NODE_ENV !== 'production') {
+    server.listen(3000, () => {
+      console.log('Server is running on http://localhost:3000');
+      console.log('GraphQL Playground available at http://localhost:3000/graphql');
+    });
+  }
 }
 
-// Start the application
-export default bootstrap();
+// Call bootstrap to initialize the app
+bootstrap();
+
+// Export the server handler for Vercel (Vercel will use this)
+export default server;
