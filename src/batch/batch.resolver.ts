@@ -66,7 +66,7 @@ export class BatchResolver {
 
     @Query(() => ApplicationsResponse)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles("admin" , "teacher")
   getApplicationsPerDay(@Args('id', { type: () => String }) batchId: string) {
     return this.batchService.getApplicationsPerDay(batchId);
   }
