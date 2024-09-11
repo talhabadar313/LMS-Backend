@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
+import express from 'express'; // Correct import for Express
 
 async function bootstrap() {
-  const server = express();
+  const server = express(); // Create the Express server
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
   // Enable CORS
@@ -16,17 +15,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Configure Apollo Server
-  const apolloServer = new ApolloServer({
-    // Your Apollo server options here
-    playground: process.env.NODE_ENV === 'development', // Only enable in development
-    // If needed, specify other Apollo Server options
-  });
+  await app.init(); // Initialize the NestJS app
 
-  apolloServer.applyMiddleware({ app, path: '/graphql' });
-
-  await app.init();
-
+  // Start the server on localhost if not in production (like Vercel)
   if (process.env.NODE_ENV !== 'production') {
     server.listen(3000, () => {
       console.log('Server is running on http://localhost:3000');
@@ -34,7 +25,11 @@ async function bootstrap() {
     });
   }
 
-  return server;
+  return server; // Return the server for serverless platforms
 }
 
-bootstrap();
+// Bootstrap the application
+const server = bootstrap(); // Assign the server variable and initialize
+
+// Export the server handler for platforms like Vercel
+export default server;
