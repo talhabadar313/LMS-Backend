@@ -52,7 +52,7 @@ export class BatchResolver {
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles("admin" , "teacher")
   updateBatch(@Args('updateBatchInput') updateBatchInput: UpdateBatchInput) {
     return this.batchService.update(updateBatchInput.batch_id, updateBatchInput);
   }
