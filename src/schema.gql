@@ -69,6 +69,7 @@ type User {
 type LoginResponse {
   accessToken: String!
   user: User!
+  needsPasswordReset: Boolean!
 }
 
 type ApplicationsResponse {
@@ -103,6 +104,7 @@ type Mutation {
   createCandidate(createCandidateInput: CreateCandidateInput!): Candidate!
   updateCandidate(updateCandidateInput: UpdateCandidateInput!): Candidate!
   removeCandidate(id: String!): Candidate!
+  resetCandidatePassword(email: String!, tempPassword: String!, newPassword: String!): Candidate!
   createBatch(createBatchInput: CreateBatchInput!): Batch!
   addTeachersToBatch(batchId: String!, teacherIds: [String!]!): Batch!
   removeTeacherFromBatch(batchId: String!, teacherId: String!): Batch!

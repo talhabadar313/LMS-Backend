@@ -81,55 +81,51 @@ export class CandidatesService {
     });
   }
 
-  async resetPassword(candidateId: string, tempPassword: string, newPassword: string): Promise<Candidate> {
+  async resetPassword(email: string, tempPassword: string, newPassword: string): Promise<Candidate> {
     const candidate = await this.candidateRepository.findOne({
-      where: { candidate_id: candidateId },
+      where: { email: email },
+      relations: ['batch'],  // Make sure you load the 'batch' relation
     });
-
+  
     if (!candidate) {
-      throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
+      throw new NotFoundException(`Candidate with email ${email} not found`);
     }
-
+  
     if (candidate.tempPassword !== tempPassword) {
       throw new BadRequestException('Invalid temporary password');
     }
-
-    // Update candidate status to registered and clear temp password
+  
     candidate.status = 'registered';
-    candidate.tempPassword = null; // Clear temp password
-
-    // Save candidate data
+    candidate.tempPassword = null; 
+  
     await this.candidateRepository.save(candidate);
-
-    // Create or update user record
-    const existingUser = await this.userRepository.findOne({ where: { candidate: candidate } });
-
-    if (!existingUser) {
-      // Create new user if it doesn't exist
-      const newUser = new User();
-      newUser.name = candidate.name;
-      newUser.email = candidate.email;
-      newUser.password = newPassword; // Hash the password in a real implementation
-      newUser.role = 'student';
-      newUser.phoneNumber = candidate.phoneNo;
-      newUser.status = 'registered';
-      newUser.batch = candidate.batch;
-      newUser.candidate = candidate;
-      await this.userRepository.save(newUser);
+  
+    let user = await this.userRepository.findOne({ where: { candidate: candidate } });
+  
+    if (!user) {
+      user = new User();
+      user.name = candidate.name;
+      user.email = candidate.email;
+      user.password = newPassword; 
+      user.role = 'student';
+      user.phoneNumber = candidate.phoneNo;
+      user.status = 'registered';
+      user.batch = candidate.batch;  
+      user.candidate = candidate;
     } else {
-      // Update existing user
-      existingUser.password = newPassword; // Hash the password in a real implementation
-      existingUser.status = 'registered';
-      existingUser.name = candidate.name;
-      existingUser.email = candidate.email;
-      existingUser.phoneNumber = candidate.phoneNo;
-      existingUser.batch = candidate.batch;
-      await this.userRepository.save(existingUser);
+      user.password = newPassword;
+      user.status = 'registered';
+      user.name = candidate.name;
+      user.email = candidate.email;
+      user.phoneNumber = candidate.phoneNo;
+      user.batch = candidate.batch;  
     }
-
+  
+    await this.userRepository.save(user);
+  
     return candidate;
   }
-
+  
 
   async update(id: string, updateCandidateInput: UpdateCandidateInput): Promise<Candidate> {
     const candidate = await this.candidateRepository.findOne({
@@ -163,27 +159,27 @@ export class CandidatesService {
       await this.mailService.sendRejectionEmail(candidate.email, candidate.name);
     }
   
-    if (updateCandidateInput.status === 'registered') {
-      if (!candidate.user) {
-        const newUser = new User();
-        newUser.name = candidate.name;
-        newUser.email = candidate.email;
-        newUser.password = 'default123'; 
-        newUser.role = 'student';
-        newUser.phoneNumber = candidate.phoneNo;
-        newUser.status = candidate.status;
-        newUser.batch = candidate.batch; 
-        newUser.candidate = candidate;
-        await this.userRepository.save(newUser);
-      } else {
-        candidate.user.status = 'registered';
-        candidate.user.name = candidate.name;
-        candidate.user.email = candidate.email;
-        candidate.user.phoneNumber = candidate.phoneNo;
-        candidate.user.batch = candidate.batch;
-        await this.userRepository.save(candidate.user);
-      }
-    }
+    // if (updateCandidateInput.status === 'registered') {
+    //   if (!candidate.user) {
+    //     const newUser = new User();
+    //     newUser.name = candidate.name;
+    //     newUser.email = candidate.email;
+    //     newUser.password = 'default123'; 
+    //     newUser.role = 'student';
+    //     newUser.phoneNumber = candidate.phoneNo;
+    //     newUser.status = candidate.status;
+    //     newUser.batch = candidate.batch; 
+    //     newUser.candidate = candidate;
+    //     await this.userRepository.save(newUser);
+    //   } else {
+    //     candidate.user.status = 'registered';
+    //     candidate.user.name = candidate.name;
+    //     candidate.user.email = candidate.email;
+    //     candidate.user.phoneNumber = candidate.phoneNo;
+    //     candidate.user.batch = candidate.batch;
+    //     await this.userRepository.save(candidate.user);
+    //   }
+    // }
 
     await this.candidateRepository.save(candidate);
 

@@ -7,4 +7,7 @@ export class LoginResponse {
 
   @Field(() => User)
   user: User;
+
+  @Field()
+  needsPasswordReset:Boolean
 }

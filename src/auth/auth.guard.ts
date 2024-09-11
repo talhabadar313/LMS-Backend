@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
 
     try {
       const decoded = this.authService.verifyToken(token);
-      ctx.req.user = decoded; // Attach the decoded token (including roles) to the request
+      ctx.req.user = decoded;
       return true;
     } catch (err) {
       throw new UnauthorizedException('Invalid token', err.message);

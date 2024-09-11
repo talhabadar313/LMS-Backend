@@ -59,4 +59,13 @@ export class CandidatesResolver {
   removeCandidate(@Args('id', { type: () => String }) id: string) {
     return this.candidatesService.remove(id);
   }
+  @Mutation(() => Candidate)
+
+  resetCandidatePassword(
+    @Args('email', { type: () => String }) email: string,
+    @Args('tempPassword', { type: () => String }) tempPassword: string,
+    @Args('newPassword', { type: () => String }) newPassword: string,
+  ) {
+    return this.candidatesService.resetPassword(email, tempPassword, newPassword);
+  }
 }

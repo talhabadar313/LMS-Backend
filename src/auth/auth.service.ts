@@ -1,17 +1,17 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginInput } from '../users/dto/login-user.input';
 import { JwtPayload } from 'jsonwebtoken';
 import { User } from '../users/entities/user.entity';
-import { CandidatesService } from '../candidates/candidates.service'; // Import CandidatesService
+import { CandidatesService } from '../candidates/candidates.service'; 
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly candidatesService: CandidatesService, // Inject CandidatesService
+    private readonly candidatesService: CandidatesService, 
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -26,7 +26,7 @@ export class AuthService {
     const user = await this.validateUser(loginInput.email, loginInput.password);
 
     if (user) {
-      // If user exists, proceed with JWT token creation
+      
       const payload: JwtPayload = { 
         id: user.user_id, 
         name: user.name, 
@@ -35,21 +35,26 @@ export class AuthService {
       };
       const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
 
-      return { accessToken, user };
+      return { accessToken, user,  needsPasswordReset: false };
     } 
 
-    // Check if the email belongs to a candidate
+   
     const candidate = await this.candidatesService.findCandidateByEmail(loginInput.email);
 
     if (candidate && candidate.tempPassword === loginInput.password) {
       return { 
-        accessToken: '', 
-        user: null, // No user record yet
-        needsPasswordReset: true // Indicate that a password reset is needed
+        user: {
+          user_id: candidate.candidate_id,
+          name: candidate.name,
+          email: candidate.email,
+          role: 'candidate',
+          password:candidate.tempPassword
+        },
+        accessToken:"",
+        needsPasswordReset: true 
       };
     }
 
-    // If no user or candidate matches
     throw new UnauthorizedException('Invalid credentials');
   }
 
