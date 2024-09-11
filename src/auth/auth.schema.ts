@@ -5,7 +5,7 @@ export class LoginResponse {
   @Field()
   accessToken: string;
 
-  @Field(() => User)
+  @Field(() => User, {nullable:true})
   user: User;
 
   @Field()

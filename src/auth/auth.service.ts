@@ -43,13 +43,7 @@ export class AuthService {
 
     if (candidate && candidate.tempPassword === loginInput.password) {
       return { 
-        user: {
-          user_id: candidate.candidate_id,
-          name: candidate.name,
-          email: candidate.email,
-          role: 'candidate',
-          password:candidate.tempPassword
-        },
+        user:null,
         accessToken:"",
         needsPasswordReset: true 
       };

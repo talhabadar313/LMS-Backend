@@ -33,3 +33,4 @@ const server = bootstrap(); // Assign the server variable and initialize
 
 // Export the server handler for platforms like Vercel
 export default server;
+

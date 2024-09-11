@@ -68,7 +68,7 @@ type User {
 
 type LoginResponse {
   accessToken: String!
-  user: User!
+  user: User
   needsPasswordReset: Boolean!
 }
 
