@@ -19,6 +19,8 @@ dotenv.config({path:'.env'});
       driver: ApolloDriver,
       autoSchemaFile: process.env.NODE_ENV === 'production' ? true : join(process.cwd(), 'src/schema.gql'),
       context: ({ req }) => ({ req }),
+      playground: process.env.NODE_ENV === 'production' || process.env.ENABLE_PLAYGROUND === 'true',
+
     }),
     
     TypeOrmModule.forRoot({
