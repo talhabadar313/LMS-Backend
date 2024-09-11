@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
+import * as express from 'express'; // Use the 'import' syntax for Express
 
 const server = express(); // Create an express server
 
