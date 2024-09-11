@@ -5,6 +5,7 @@ import { jwtConstants } from './auth.constants';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { AuthGuard } from './auth.guard';
+import { CandidatesModule } from '../candidates/candidates.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AuthGuard } from './auth.guard';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' },
     }),
+    forwardRef(() => CandidatesModule), 
   ],
   providers: [AuthService, AuthResolver, AuthGuard],
   exports: [AuthService, AuthGuard],

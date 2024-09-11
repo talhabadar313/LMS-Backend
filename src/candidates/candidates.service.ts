@@ -6,7 +6,7 @@ import { UpdateCandidateInput } from './dto/update-candidate.input';
 import { Candidate } from './entities/candidate.entity';
 import { Batch } from '../batch/entities/batch.entity'; 
 import { User } from '../users/entities/user.entity';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class CandidatesService {
@@ -80,6 +80,56 @@ export class CandidatesService {
       relations: ['user', 'batch'] 
     });
   }
+
+  async resetPassword(candidateId: string, tempPassword: string, newPassword: string): Promise<Candidate> {
+    const candidate = await this.candidateRepository.findOne({
+      where: { candidate_id: candidateId },
+    });
+
+    if (!candidate) {
+      throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
+    }
+
+    if (candidate.tempPassword !== tempPassword) {
+      throw new BadRequestException('Invalid temporary password');
+    }
+
+    // Update candidate status to registered and clear temp password
+    candidate.status = 'registered';
+    candidate.tempPassword = null; // Clear temp password
+
+    // Save candidate data
+    await this.candidateRepository.save(candidate);
+
+    // Create or update user record
+    const existingUser = await this.userRepository.findOne({ where: { candidate: candidate } });
+
+    if (!existingUser) {
+      // Create new user if it doesn't exist
+      const newUser = new User();
+      newUser.name = candidate.name;
+      newUser.email = candidate.email;
+      newUser.password = newPassword; // Hash the password in a real implementation
+      newUser.role = 'student';
+      newUser.phoneNumber = candidate.phoneNo;
+      newUser.status = 'registered';
+      newUser.batch = candidate.batch;
+      newUser.candidate = candidate;
+      await this.userRepository.save(newUser);
+    } else {
+      // Update existing user
+      existingUser.password = newPassword; // Hash the password in a real implementation
+      existingUser.status = 'registered';
+      existingUser.name = candidate.name;
+      existingUser.email = candidate.email;
+      existingUser.phoneNumber = candidate.phoneNo;
+      existingUser.batch = candidate.batch;
+      await this.userRepository.save(existingUser);
+    }
+
+    return candidate;
+  }
+
 
   async update(id: string, updateCandidateInput: UpdateCandidateInput): Promise<Candidate> {
     const candidate = await this.candidateRepository.findOne({
