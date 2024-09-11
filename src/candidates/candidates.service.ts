@@ -7,6 +7,7 @@ import { Candidate } from './entities/candidate.entity';
 import { Batch } from '../batch/entities/batch.entity'; 
 import { User } from '../users/entities/user.entity';
 import { MailService } from '../mail/mail.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class CandidatesService {
@@ -82,17 +83,16 @@ export class CandidatesService {
   }
 
   async resetPassword(email: string, tempPassword: string, newPassword: string): Promise<Candidate> {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
     const candidate = await this.candidateRepository.findOne({
       where: { email: email },
-      relations: ['batch'],  // Make sure you load the 'batch' relation
+      relations: ['batch'], 
     });
   
     if (!candidate) {
       throw new NotFoundException(`Candidate with email ${email} not found`);
-    }
-  
-    if (candidate.tempPassword !== tempPassword) {
-      throw new BadRequestException('Invalid temporary password');
     }
   
     candidate.status = 'registered';
@@ -106,14 +106,14 @@ export class CandidatesService {
       user = new User();
       user.name = candidate.name;
       user.email = candidate.email;
-      user.password = newPassword; 
+      user.password = hashedPassword; 
       user.role = 'student';
       user.phoneNumber = candidate.phoneNo;
       user.status = 'registered';
       user.batch = candidate.batch;  
       user.candidate = candidate;
     } else {
-      user.password = newPassword;
+      user.password = hashedPassword;
       user.status = 'registered';
       user.name = candidate.name;
       user.email = candidate.email;
