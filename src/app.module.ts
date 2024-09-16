@@ -17,10 +17,7 @@ dotenv.config({ path: '.env' });
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile:
-        process.env.NODE_ENV === 'production'
-          ? true
-          : join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: true,
       context: ({ req }) => ({ req }),
     }),
 
