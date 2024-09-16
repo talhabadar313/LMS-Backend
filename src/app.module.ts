@@ -11,19 +11,19 @@ import { CandidatesModule } from './candidates/candidates.module';
 import { MailModule } from './mail/mail.module';
 import { ChangehistoryModule } from './changehistory/changehistory.module';
 
-
-
-dotenv.config({path:'.env'});
+dotenv.config({ path: '.env' });
 
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: process.env.NODE_ENV === 'production' ? true : join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile:
+        process.env.NODE_ENV === 'production'
+          ? true
+          : join(process.cwd(), 'src/schema.gql'),
       context: ({ req }) => ({ req }),
-      
     }),
-    
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST,
