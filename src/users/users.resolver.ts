@@ -3,32 +3,39 @@ import { UsersService } from './users.service';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
-import { UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
-
+import { RequestPasswordResetInput } from './dto/request-password.input';
+import { ResetPasswordInput } from './dto/reset-password';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles('admin', 'teacher')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Mutation(() => User)
-  async createUser(@Args('createUserInput') createUserInput: CreateUserInput): Promise<User> {
+  async createUser(
+    @Args('createUserInput') createUserInput: CreateUserInput,
+  ): Promise<User> {
     const { batchId, role, ...userData } = createUserInput;
-  
-    if ((role === 'student') && !batchId) {
+
+    if (role === 'student' && !batchId) {
       throw new Error('Batch ID is required for students and teachers');
     }
-  
+
     const userCreateData = {
       ...userData,
       role,
       batchId,
     };
-  
+
     return this.usersService.create(userCreateData);
   }
 
@@ -57,7 +64,7 @@ export class UsersResolver {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')
   findTeachers() {
-   return this.usersService.findTeachers()
+    return this.usersService.findTeachers();
   }
   @Mutation(() => User)
   @UseGuards(AuthGuard, RolesGuard)
@@ -67,12 +74,47 @@ export class UsersResolver {
   }
 
   @Mutation(() => String)
-@UseGuards(AuthGuard, RolesGuard)
-@Roles('admin', 'teacher')
-async removeUser(@Args('id', { type: () => String }) id: string): Promise<string> {
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  async removeUser(
+    @Args('id', { type: () => String }) id: string,
+  ): Promise<string> {
     await this.usersService.remove(id);
     return `User with id ${id} has been removed`;
-}
+  }
 
-}
+  @Mutation(() => Boolean)
+  async requestPasswordReset(
+    @Args('input') requestPasswordResetInput: RequestPasswordResetInput,
+  ): Promise<boolean> {
+    try {
+      await this.usersService.requestPasswordReset(
+        requestPasswordResetInput.email,
+      );
+      return true;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw new BadRequestException('Error processing password reset request');
+    }
+  }
 
+  @Mutation(() => Boolean)
+  async resetPassword(
+    @Args('input') resetPasswordInput: ResetPasswordInput,
+  ): Promise<boolean> {
+    try {
+      await this.usersService.resetPassword(
+        resetPasswordInput.email,
+        resetPasswordInput.newPassword,
+      );
+      return true;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      }
+      throw new BadRequestException('Error resetting password');
+    }
+  }
+}

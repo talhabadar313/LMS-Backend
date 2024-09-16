@@ -111,6 +111,8 @@ type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: String!): String!
+  requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
+  resetPassword(input: ResetPasswordInput!): Boolean!
   createCandidate(createCandidateInput: CreateCandidateInput!): Candidate!
   updateCandidate(updateCandidateInput: UpdateCandidateInput!): Candidate!
   removeCandidate(id: String!): Candidate!
@@ -149,6 +151,15 @@ input UpdateUserInput {
   phoneNumber: String
   status: String
   watchlisted: Boolean
+}
+
+input RequestPasswordResetInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  email: String!
+  newPassword: String!
 }
 
 input CreateCandidateInput {
