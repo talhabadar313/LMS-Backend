@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm'; 
+import { Repository } from 'typeorm';
 import { CreateCandidateInput } from './dto/create-candidate.input';
 import { UpdateCandidateInput } from './dto/update-candidate.input';
 import { Candidate } from './entities/candidate.entity';
-import { Batch } from '../batch/entities/batch.entity'; 
+import { Batch } from '../batch/entities/batch.entity';
 import { User } from '../users/entities/user.entity';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
@@ -16,10 +20,10 @@ export class CandidatesService {
     @InjectRepository(Candidate)
     private readonly candidateRepository: Repository<Candidate>,
 
-    @InjectRepository(Batch) 
+    @InjectRepository(Batch)
     private readonly batchRepository: Repository<Batch>,
 
-    @InjectRepository(User) 
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
     private readonly mailService: MailService,
@@ -32,8 +36,8 @@ export class CandidatesService {
       throw new BadRequestException('Batch ID is required.');
     }
 
-    const batch = await this.batchRepository.findOne({ 
-      where: { batch_id: createCandidateInput.batchId }
+    const batch = await this.batchRepository.findOne({
+      where: { batch_id: createCandidateInput.batchId },
     });
 
     if (!batch) {
@@ -55,7 +59,7 @@ export class CandidatesService {
   }
 
   async findCandidateByEmail(email: string): Promise<Candidate | undefined> {
-    return this.candidateRepository.findOne({ 
+    return this.candidateRepository.findOne({
       where: { email },
       relations: ['batch', 'user'],
     });
@@ -66,55 +70,71 @@ export class CandidatesService {
       where: { batch: { batch_id: batchId } },
       relations: ['user', 'batch'],
     });
-    
+
     console.log('Fetched candidates:', candidates);
- 
-    candidates.forEach(candidate => {
+
+    candidates.forEach((candidate) => {
       if (!candidate.candidate_id) {
-        console.error('Candidate with null ID:', candidate); 
+        console.error('Candidate with null ID:', candidate);
       }
     });
-  
+
     return candidates;
   }
 
   findOne(id: string): Promise<Candidate> {
-    return this.candidateRepository.findOne({ 
-      where: { candidate_id: id }, 
-      relations: ['user', 'batch'] 
+    return this.candidateRepository.findOne({
+      where: { candidate_id: id },
+      relations: ['user', 'batch'],
     });
   }
 
-  async resetPassword(email: string, tempPassword: string, newPassword: string): Promise<Candidate> {
+  async resetPassword(
+    email: string,
+    tempPassword: string,
+    newPassword: string,
+  ): Promise<Candidate> {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
     const candidate = await this.candidateRepository.findOne({
       where: { email: email },
-      relations: ['batch'], 
+      relations: ['batch'],
     });
-  
+
     if (!candidate) {
       throw new NotFoundException(`Candidate with email ${email} not found`);
     }
-    
 
+    const oldStatus = candidate.status;
     candidate.status = 'registered';
-    candidate.tempPassword = null; 
-  
+    candidate.tempPassword = null;
+
+    // Save candidate with updated status
     await this.candidateRepository.save(candidate);
-  
-    let user = await this.userRepository.findOne({ where: { candidate: candidate } });
-  
+
+    // Record status change
+    if (oldStatus !== candidate.status) {
+      await this.changeHistoryService.addChangeHistory(
+        candidate,
+        oldStatus,
+        candidate.status,
+      );
+    }
+
+    let user = await this.userRepository.findOne({
+      where: { candidate: candidate },
+    });
+
     if (!user) {
       user = new User();
       user.name = candidate.name;
       user.email = candidate.email;
-      user.password = hashedPassword; 
+      user.password = hashedPassword;
       user.role = 'student';
       user.phoneNumber = candidate.phoneNo;
       user.status = 'registered';
-      user.batch = candidate.batch;  
+      user.batch = candidate.batch;
       user.candidate = candidate;
     } else {
       user.password = hashedPassword;
@@ -122,16 +142,18 @@ export class CandidatesService {
       user.name = candidate.name;
       user.email = candidate.email;
       user.phoneNumber = candidate.phoneNo;
-      user.batch = candidate.batch;  
+      user.batch = candidate.batch;
     }
-  
+
     await this.userRepository.save(user);
-  
+
     return candidate;
   }
-  
 
-  async update(id: string, updateCandidateInput: UpdateCandidateInput): Promise<Candidate> {
+  async update(
+    id: string,
+    updateCandidateInput: UpdateCandidateInput,
+  ): Promise<Candidate> {
     const candidate = await this.candidateRepository.findOne({
       where: { candidate_id: id },
       relations: ['batch', 'user'],
@@ -143,9 +165,13 @@ export class CandidatesService {
     const oldStatus = candidate.status;
 
     if (updateCandidateInput.batchName) {
-      const batch = await this.batchRepository.findOne({ where: { name: updateCandidateInput.batchName } });
+      const batch = await this.batchRepository.findOne({
+        where: { name: updateCandidateInput.batchName },
+      });
       if (!batch) {
-        throw new NotFoundException(`Batch with name ${updateCandidateInput.batchName} not found`);
+        throw new NotFoundException(
+          `Batch with name ${updateCandidateInput.batchName} not found`,
+        );
       }
       candidate.batch = batch;
     }
@@ -154,44 +180,34 @@ export class CandidatesService {
 
     if (updateCandidateInput.status === 'invited') {
       const tempPassword = this.generateTempPassword();
-      candidate.tempPassword = tempPassword; 
-      const loginUrl = "https://lms-alpha-five.vercel.app/"
-      
-      await this.mailService.sendInvitationEmail(candidate.email, candidate.name, tempPassword, loginUrl);
+      candidate.tempPassword = tempPassword;
+      const loginUrl = 'https://lms-alpha-five.vercel.app/';
+
+      await this.mailService.sendInvitationEmail(
+        candidate.email,
+        candidate.name,
+        tempPassword,
+        loginUrl,
+      );
     }
 
     if (updateCandidateInput.status === 'rejected') {
-      await this.mailService.sendRejectionEmail(candidate.email, candidate.name);
+      await this.mailService.sendRejectionEmail(
+        candidate.email,
+        candidate.name,
+      );
     }
-  
-    // if (updateCandidateInput.status === 'registered') {
-    //   if (!candidate.user) {
-    //     const newUser = new User();
-    //     newUser.name = candidate.name;
-    //     newUser.email = candidate.email;
-    //     newUser.password = 'default123'; 
-    //     newUser.role = 'student';
-    //     newUser.phoneNumber = candidate.phoneNo;
-    //     newUser.status = candidate.status;
-    //     newUser.batch = candidate.batch; 
-    //     newUser.candidate = candidate;
-    //     await this.userRepository.save(newUser);
-    //   } else {
-    //     candidate.user.status = 'registered';
-    //     candidate.user.name = candidate.name;
-    //     candidate.user.email = candidate.email;
-    //     candidate.user.phoneNumber = candidate.phoneNo;
-    //     candidate.user.batch = candidate.batch;
-    //     await this.userRepository.save(candidate.user);
-    //   }
-    // }
 
     await this.candidateRepository.save(candidate);
 
-    const newStatus = candidate.status; 
+    const newStatus = candidate.status;
 
     if (oldStatus !== newStatus) {
-      await this.changeHistoryService.addChangeHistory(candidate, oldStatus, newStatus);
+      await this.changeHistoryService.addChangeHistory(
+        candidate,
+        oldStatus,
+        newStatus,
+      );
     }
 
     return this.candidateRepository.findOne({
@@ -200,9 +216,8 @@ export class CandidatesService {
     });
   }
 
- 
   private generateTempPassword(): string {
-    return Math.random().toString(36).slice(-8); 
+    return Math.random().toString(36).slice(-8);
   }
   async remove(id: string): Promise<void> {
     await this.candidateRepository.delete(id);

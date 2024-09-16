@@ -13,8 +13,10 @@ export class CandidatesResolver {
 
   @Mutation(() => Candidate)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin","teacher")
-  createCandidate(@Args('createCandidateInput') createCandidateInput: CreateCandidateInput) {
+  @Roles('admin', 'teacher')
+  createCandidate(
+    @Args('createCandidateInput') createCandidateInput: CreateCandidateInput,
+  ) {
     return this.candidatesService.create(createCandidateInput);
   }
 
@@ -26,15 +28,16 @@ export class CandidatesResolver {
   @Query(() => [Candidate], { name: 'batchcandidates' })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')
-  async findByBatch(@Args('id', { type: () => String }) id: string): Promise<Candidate[]> {
-  const candidates = await this.candidatesService.findByBatchId(id);
-  return candidates;
-}
-
+  async findByBatch(
+    @Args('id', { type: () => String }) id: string,
+  ): Promise<Candidate[]> {
+    const candidates = await this.candidatesService.findByBatchId(id);
+    return candidates;
+  }
 
   @Query(() => Candidate, { name: 'candidate' })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin","teacher")
+  @Roles('admin', 'teacher')
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.candidatesService.findOne(id);
   }
@@ -47,25 +50,33 @@ export class CandidatesResolver {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin","teacher")
+  @Roles('admin', 'teacher')
   @Mutation(() => Candidate)
-  updateCandidate(@Args('updateCandidateInput') updateCandidateInput: UpdateCandidateInput) {
-    return this.candidatesService.update(updateCandidateInput.candidate_id, updateCandidateInput);
+  updateCandidate(
+    @Args('updateCandidateInput') updateCandidateInput: UpdateCandidateInput,
+  ) {
+    return this.candidatesService.update(
+      updateCandidateInput.candidate_id,
+      updateCandidateInput,
+    );
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin","teacher")
+  @Roles('admin', 'teacher')
   @Mutation(() => Candidate)
   removeCandidate(@Args('id', { type: () => String }) id: string) {
     return this.candidatesService.remove(id);
   }
   @Mutation(() => Candidate)
-
   resetCandidatePassword(
     @Args('email', { type: () => String }) email: string,
     @Args('tempPassword', { type: () => String }) tempPassword: string,
     @Args('newPassword', { type: () => String }) newPassword: string,
   ) {
-    return this.candidatesService.resetPassword(email, tempPassword, newPassword);
+    return this.candidatesService.resetPassword(
+      email,
+      tempPassword,
+      newPassword,
+    );
   }
 }
