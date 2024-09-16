@@ -40,11 +40,15 @@ export class BatchResolver {
     return this.batchService.removeTeacherFromBatch(batchId, teacherId);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Query(() => [Batch], { name: 'batches' })
   findAll() {
     return this.batchService.findAll();
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Query(() => Batch, { name: 'batch' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.batchService.findOne(id);
