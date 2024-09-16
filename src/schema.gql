@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ChangeHistory {
+  id: ID!
+  oldStatus: String!
+  newStatus: String!
+  changeDate: DateTime!
+  candidate: Candidate!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Candidate {
   candidate_id: ID!
   name: String!
@@ -19,12 +32,8 @@ type Candidate {
   createdOn: DateTime!
   user: User!
   batch: Batch!
+  changeHistories: [ChangeHistory!]
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type Batch {
   batch_id: ID!
@@ -91,6 +100,7 @@ type Query {
   batchcandidates(id: String!): [Candidate!]!
   candidate(id: String!): Candidate!
   candidateByEmail(email: String!): Candidate!
+  getChangeHistoryByCandidate(candidateId: String!): [ChangeHistory!]!
   batches: [Batch!]!
   batch(id: String!): Batch!
   getApplicationsPerDay(id: String!): ApplicationsResponse!
@@ -105,6 +115,7 @@ type Mutation {
   updateCandidate(updateCandidateInput: UpdateCandidateInput!): Candidate!
   removeCandidate(id: String!): Candidate!
   resetCandidatePassword(email: String!, tempPassword: String!, newPassword: String!): Candidate!
+  updateCandidateStatus(candidateId: String!, newStatus: String!): ChangeHistory!
   createBatch(createBatchInput: CreateBatchInput!): Batch!
   addTeachersToBatch(batchId: String!, teacherIds: [String!]!): Batch!
   removeTeacherFromBatch(batchId: String!, teacherId: String!): Batch!

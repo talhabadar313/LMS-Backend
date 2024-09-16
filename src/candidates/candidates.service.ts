@@ -8,6 +8,7 @@ import { Batch } from '../batch/entities/batch.entity';
 import { User } from '../users/entities/user.entity';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
+import { ChangeHistoryService } from '../changehistory/changehistory.service';
 
 @Injectable()
 export class CandidatesService {
@@ -22,6 +23,8 @@ export class CandidatesService {
     private readonly userRepository: Repository<User>,
 
     private readonly mailService: MailService,
+
+    private readonly changeHistoryService: ChangeHistoryService,
   ) {}
 
   async create(createCandidateInput: CreateCandidateInput): Promise<Candidate> {
@@ -94,7 +97,8 @@ export class CandidatesService {
     if (!candidate) {
       throw new NotFoundException(`Candidate with email ${email} not found`);
     }
-  
+    
+
     candidate.status = 'registered';
     candidate.tempPassword = null; 
   
@@ -136,6 +140,7 @@ export class CandidatesService {
     if (!candidate) {
       throw new NotFoundException(`Candidate with ID ${id} not found`);
     }
+    const oldStatus = candidate.status;
 
     if (updateCandidateInput.batchName) {
       const batch = await this.batchRepository.findOne({ where: { name: updateCandidateInput.batchName } });
@@ -183,6 +188,12 @@ export class CandidatesService {
 
     await this.candidateRepository.save(candidate);
 
+    const newStatus = candidate.status; 
+
+    if (oldStatus !== newStatus) {
+      await this.changeHistoryService.addChangeHistory(candidate, oldStatus, newStatus);
+    }
+
     return this.candidateRepository.findOne({
       where: { candidate_id: id },
       relations: ['batch', 'user'],
@@ -195,5 +206,8 @@ export class CandidatesService {
   }
   async remove(id: string): Promise<void> {
     await this.candidateRepository.delete(id);
+  }
+  async save(candidate: Candidate): Promise<Candidate> {
+    return this.candidateRepository.save(candidate);
   }
 }

@@ -1,13 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express'; // Correct import for Express
+import express from 'express'; 
 
 async function bootstrap() {
-  const server = express(); // Create the Express server
+  const server = express(); 
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
-  // Enable CORS
   app.enableCors({
     origin: ['http://localhost:3001', 'https://lms-alpha-five.vercel.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -15,9 +14,8 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.init(); // Initialize the NestJS app
+  await app.init();
 
-  // Start the server on localhost if not in production (like Vercel)
   if (process.env.NODE_ENV !== 'production') {
     server.listen(3000, () => {
       console.log('Server is running on http://localhost:3000');
@@ -25,11 +23,10 @@ async function bootstrap() {
     });
   }
 
-  return server; // Return the server for serverless platforms
+  return server;
 }
 
-// Bootstrap the application
-const server = bootstrap(); // Assign the server variable and initialize
+const server = bootstrap(); 
 
-// Export the server handler for platforms like Vercel
 export default server;
+

@@ -1,7 +1,8 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, PrimaryGeneratedColumn, Entity , OneToOne, ManyToOne, JoinColumn} from 'typeorm';
+import { Column, PrimaryGeneratedColumn, Entity , OneToOne, ManyToOne, JoinColumn, OneToMany} from 'typeorm';
+import { ChangeHistory } from 'src/changehistory/entities/changehistory.entity';
 
 @ObjectType()
 @Entity()
@@ -71,6 +72,10 @@ export class Candidate {
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch)
   batch?: Batch;
+
+  @OneToMany(() => ChangeHistory, (changeHistory) => changeHistory.candidate, { cascade: true })
+  @Field(() => [ChangeHistory], { nullable: true })
+  changeHistories?: ChangeHistory[];
 }
 function CreateDateColumn(): (target: Candidate, propertyKey: "createdOn") => void {
   throw new Error('Function not implemented.');
