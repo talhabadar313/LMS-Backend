@@ -129,7 +129,7 @@ export class UsersService {
       throw new NotFoundException(`User with email ${email} not found`);
     }
 
-    user.password = hashedPassword;
+    user.password = await bcrypt.hash(hashedPassword, 10);
     await this.userRepository.save(user);
 
     return user;
