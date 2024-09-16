@@ -15,7 +15,7 @@ export class BatchResolver {
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'teacher')
   createBatch(@Args('createBatchInput') createBatchInput: CreateBatchInput) {
     return this.batchService.create(createBatchInput);
   }
@@ -40,11 +40,17 @@ export class BatchResolver {
     return this.batchService.removeTeacherFromBatch(batchId, teacherId);
   }
 
+  @Mutation(() => Batch)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Query(() => [Batch], { name: 'batches' })
   findAll() {
     return this.batchService.findAll();
   }
 
+  @Mutation(() => Batch)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Query(() => Batch, { name: 'batch' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.batchService.findOne(id);
@@ -67,7 +73,7 @@ export class BatchResolver {
     return this.batchService.remove(id);
   }
 
-  @Query(() => ApplicationsResponse)
+  @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')
   getApplicationsPerDay(@Args('id', { type: () => String }) batchId: string) {
