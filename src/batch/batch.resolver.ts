@@ -15,14 +15,14 @@ export class BatchResolver {
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles('admin', 'teacher')
   createBatch(@Args('createBatchInput') createBatchInput: CreateBatchInput) {
     return this.batchService.create(createBatchInput);
   }
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles('admin')
   async addTeachersToBatch(
     @Args('batchId') batchId: string,
     @Args('teacherIds', { type: () => [String] }) teacherIds: string[],
@@ -32,7 +32,7 @@ export class BatchResolver {
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles('admin')
   async removeTeacherFromBatch(
     @Args('batchId') batchId: string,
     @Args('teacherId') teacherId: string,
@@ -40,11 +40,17 @@ export class BatchResolver {
     return this.batchService.removeTeacherFromBatch(batchId, teacherId);
   }
 
+  @Mutation(() => Batch)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Query(() => [Batch], { name: 'batches' })
   findAll() {
     return this.batchService.findAll();
   }
 
+  @Mutation(() => Batch)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
   @Query(() => Batch, { name: 'batch' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.batchService.findOne(id);
@@ -52,21 +58,24 @@ export class BatchResolver {
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin" , "teacher")
+  @Roles('admin', 'teacher')
   updateBatch(@Args('updateBatchInput') updateBatchInput: UpdateBatchInput) {
-    return this.batchService.update(updateBatchInput.batch_id, updateBatchInput);
+    return this.batchService.update(
+      updateBatchInput.batch_id,
+      updateBatchInput,
+    );
   }
 
   @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles('admin')
   removeBatch(@Args('id', { type: () => String }) id: string) {
     return this.batchService.remove(id);
   }
 
-    @Query(() => ApplicationsResponse)
+  @Mutation(() => Batch)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles("admin" , "teacher")
+  @Roles('admin', 'teacher')
   getApplicationsPerDay(@Args('id', { type: () => String }) batchId: string) {
     return this.batchService.getApplicationsPerDay(batchId);
   }
