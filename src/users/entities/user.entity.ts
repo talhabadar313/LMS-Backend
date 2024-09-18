@@ -1,9 +1,18 @@
-
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { Candidate } from 'src/candidates/entities/candidate.entity';
 import { ID } from '@nestjs/graphql';
+import { Post } from 'src/posts/entities/post.entity';
 
 @ObjectType()
 @Entity('user')
@@ -39,17 +48,21 @@ export class User {
   @Column({ type: 'boolean', default: false, nullable: true })
   watchlisted?: boolean;
 
-  @OneToOne(() => Candidate, candidate => candidate.user, { nullable: true })
+  @OneToOne(() => Candidate, (candidate) => candidate.user, { nullable: true })
   @JoinColumn({ name: 'candidateId' })
   @Field(() => Candidate, { nullable: true })
   candidate?: Candidate;
 
-  @ManyToOne(() => Batch, batch => batch.users, { nullable: true })
+  @ManyToOne(() => Batch, (batch) => batch.users, { nullable: true })
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch, { nullable: true })
   batch?: Batch;
 
-  @ManyToMany(() => Batch, batch => batch.teachers)
+  @ManyToMany(() => Batch, (batch) => batch.teachers)
   @Field(() => [Batch], { nullable: true })
   teachingBatches?: Batch[];
+
+  @OneToMany(() => Post, (post) => post.user)
+  @Field(() => [Post], { nullable: true })
+  posts?: Post[];
 }

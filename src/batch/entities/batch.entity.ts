@@ -1,9 +1,17 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { User } from 'src/users/entities/user.entity';
-import { Column, PrimaryGeneratedColumn, Entity, OneToMany, ManyToMany, JoinTable, AfterLoad } from 'typeorm';
-
+import {
+  Column,
+  PrimaryGeneratedColumn,
+  Entity,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+  AfterLoad,
+} from 'typeorm';
 
 import { Candidate } from 'src/candidates/entities/candidate.entity';
+import { Post } from 'src/posts/entities/post.entity';
 
 @ObjectType()
 @Entity('batch')
@@ -60,18 +68,18 @@ export class Batch {
   @Column({ nullable: true })
   classUpdatedOn?: string;
 
-  @OneToMany(() => User, user => user.batch)
+  @OneToMany(() => User, (user) => user.batch)
   @Field(() => [User], { nullable: true })
   users: User[];
 
-  @ManyToMany(() => User, user => user.teachingBatches)
+  @ManyToMany(() => User, (user) => user.teachingBatches)
   @JoinTable()
   @Field(() => [User], { nullable: true })
   teachers?: User[];
 
   @Field(() => Int)
   totalCandidates?: number;
-  
+
   @Field(() => Int)
   newCandidates?: number;
 
@@ -87,36 +95,62 @@ export class Batch {
   @Field(() => Int)
   rejectedCandidates?: number;
 
-  @Field(()=> Int)
+  @Field(() => Int)
   maleCandidates?: number;
 
-  @Field(()=> Int)
+  @Field(() => Int)
   femaleCandidates?: number;
 
-  @OneToMany(() => Candidate, candidate => candidate.batch)
+  @OneToMany(() => Candidate, (candidate) => candidate.batch)
   @Field(() => [Candidate], { nullable: true })
   candidates?: Candidate[];
+
+  @OneToMany(() => Post, (post) => post.batch)
+  @Field(() => [Post], { nullable: true })
+  posts?: Post[];
 
   @AfterLoad()
   async calculateFields() {
     if (this.category === 'open') {
       if (this.candidates) {
         this.totalCandidates = this.candidates.length;
-        this.maleCandidates = this.candidates.filter(candidate => candidate.gender==="male").length;
-        this.femaleCandidates = this.candidates.filter(candidate => candidate.gender==="female").length;
-        this.newCandidates = this.candidates.filter(candidate => candidate.status==='new').length;
-        this.interviewedCandidates = this.candidates.filter(candidate => candidate.status === 'interviewed').length;
-        this.invitedCandidates = this.candidates.filter(candidate => candidate.status === 'invited').length;
-        this.rejectedCandidates = this.candidates.filter(candidate => candidate.status === 'rejected').length;
-        this.registeredCandidates = this.candidates.filter(candidate => candidate.status === 'registered').length;
+        this.maleCandidates = this.candidates.filter(
+          (candidate) => candidate.gender === 'male',
+        ).length;
+        this.femaleCandidates = this.candidates.filter(
+          (candidate) => candidate.gender === 'female',
+        ).length;
+        this.newCandidates = this.candidates.filter(
+          (candidate) => candidate.status === 'new',
+        ).length;
+        this.interviewedCandidates = this.candidates.filter(
+          (candidate) => candidate.status === 'interviewed',
+        ).length;
+        this.invitedCandidates = this.candidates.filter(
+          (candidate) => candidate.status === 'invited',
+        ).length;
+        this.rejectedCandidates = this.candidates.filter(
+          (candidate) => candidate.status === 'rejected',
+        ).length;
+        this.registeredCandidates = this.candidates.filter(
+          (candidate) => candidate.status === 'registered',
+        ).length;
       }
     } else {
       if (this.users) {
         this.totalCandidates = this.users.length;
-        this.maleCandidates = this.candidates.filter(candidate => candidate.gender==="male").length;
-        this.femaleCandidates = this.candidates.filter(candidate => candidate.gender==="female").length;
-        this.interviewedCandidates = this.users.filter(user => user.status === 'interviewed').length;
-        this.registeredCandidates = this.users.filter(user => user.status === 'registered').length;
+        this.maleCandidates = this.candidates.filter(
+          (candidate) => candidate.gender === 'male',
+        ).length;
+        this.femaleCandidates = this.candidates.filter(
+          (candidate) => candidate.gender === 'female',
+        ).length;
+        this.interviewedCandidates = this.users.filter(
+          (user) => user.status === 'interviewed',
+        ).length;
+        this.registeredCandidates = this.users.filter(
+          (user) => user.status === 'registered',
+        ).length;
       }
     }
   }

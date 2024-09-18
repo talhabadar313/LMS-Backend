@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express'; // Correct import for Express
+// @ts-ignore
+import { graphqlUploadExpress } from 'graphql-upload';
 
 async function bootstrap() {
   const server = express(); // Create the Express server
@@ -15,6 +17,7 @@ async function bootstrap() {
     credentials: true,
   });
 
+  server.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
   await app.init(); // Initialize the NestJS app
 
   // Start the server on localhost if not in production (like Vercel)
