@@ -21,8 +21,8 @@ export class CreatePostInput {
   @IsString()
   content: string;
 
-  @Field(() => GraphQLUpload, { nullable: true })
-  file?: FileUpload;
+  @Field(() => [GraphQLUpload], { nullable: true })
+  files?: Promise<FileUpload>[];
 
   @Field(() => Int, { defaultValue: 0 })
   @IsNumber()

@@ -16,17 +16,12 @@ export class PostResolver {
   async createPost(
     @Args('createPostInput') createPostInput: CreatePostInput,
   ): Promise<Post> {
-    // Log the received input data
-    console.log('Received createPostInput:', createPostInput);
-
     return this.postService.createPost(createPostInput);
   }
 
   @Query(() => [Post], { name: 'getPostsByBatchId' })
   async postsByBatchId(@Args('batchId') batchId: string): Promise<Post[]> {
-    // Log the received batch ID
     console.log('Received batchId:', batchId);
-
     return this.postService.getPostsByBatchId(batchId);
   }
 }

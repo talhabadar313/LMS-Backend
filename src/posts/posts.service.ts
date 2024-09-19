@@ -25,83 +25,65 @@ export class PostService {
   ) {}
 
   async createPost(createPostInput: CreatePostInput): Promise<Post> {
-    console.log('Processing createPostInput:', createPostInput);
-
-    const { title, category, createdBy, content, batch_id, user_id, file } =
+    const { title, category, createdBy, content, batch_id, user_id, files } =
       createPostInput;
+    console.log('Files received:', files);
 
-    // Validate batch_id
-    const batch = await this.batchRepository.findOne({
-      where: { batch_id },
-    });
-    if (!batch) {
-      throw new NotFoundException('Batch not found.');
-    }
+    const batch = await this.batchRepository.findOne({ where: { batch_id } });
+    if (!batch) throw new NotFoundException('Batch not found.');
 
-    // Validate user_id
-    const user = await this.userRepository.findOne({
-      where: { user_id },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found.');
-    }
+    const user = await this.userRepository.findOne({ where: { user_id } });
+    if (!user) throw new NotFoundException('User not found.');
 
-    // Handle file upload
-    let fileUrl = null;
-    let fileType = null;
-    if (file) {
-      console.log('Processing file upload...');
+    let fileUrls: string[] = [];
+    let fileTypes: string[] = [];
 
-      const resolvedFile = await file;
-      const { createReadStream, mimetype, filename } = resolvedFile;
+    if (files && files.length > 0) {
+      for (const filePromise of files) {
+        try {
+          const resolvedFile = await filePromise;
+          const { createReadStream, mimetype, filename } = resolvedFile;
 
-      // Allowed MIME types
-      const allowedMimeTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+          // Validate file types
+          const allowedMimeTypes = [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+          ];
+          if (!allowedMimeTypes.includes(mimetype)) {
+            throw new BadRequestException('Invalid file type.');
+          }
 
-      if (!allowedMimeTypes.includes(mimetype)) {
-        throw new BadRequestException(
-          'Invalid file type. Only JPEG, PNG, and PDF files are allowed.',
-        );
-      }
+          // Read file stream
+          const stream = createReadStream();
+          const chunks: Buffer[] = [];
+          for await (const chunk of stream) {
+            chunks.push(chunk);
+          }
+          const buffer = Buffer.concat(chunks);
 
-      try {
-        // Convert the stream to a buffer
-        const stream = createReadStream();
-        const chunks = [];
-        for await (const chunk of stream) {
-          chunks.push(chunk);
+          // Upload to Supabase
+          const { data, error } = await supabase.storage
+            .from('LMS Bucket')
+            .upload(`posts/${filename}`, buffer, { contentType: mimetype });
+
+          if (error) {
+            throw new Error(`File upload error: ${error.message}`);
+          }
+
+          // Save file URL
+          const fileUrl = data?.path
+            ? `${supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data.publicUrl}`
+            : null;
+
+          fileUrls.push(fileUrl);
+          fileTypes.push(mimetype);
+
+          console.log('File uploaded successfully. URL:', fileUrl);
+        } catch (err) {
+          console.error('Supabase upload error:', err);
+          throw new Error(`File upload error: ${err.message}`);
         }
-        const buffer = Buffer.concat(chunks);
-
-        // Determine file type based on MIME type
-        if (mimetype === 'image/jpeg') {
-          fileType = 'image/jpeg';
-        } else if (mimetype === 'image/png') {
-          fileType = 'image/png';
-        } else if (mimetype === 'application/pdf') {
-          fileType = 'application/pdf';
-        }
-
-        // Upload the buffer to Supabase
-        const { data, error } = await supabase.storage
-          .from('LMS Bucket')
-          .upload(`posts/${filename}`, buffer, {
-            contentType: mimetype,
-          });
-
-        if (error) {
-          throw new Error(`File upload error: ${error.message}`);
-        }
-
-        // Generate the public URL for the file
-        fileUrl = data?.path
-          ? `${supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data.publicUrl}`
-          : null;
-
-        console.log('File uploaded successfully. URL:', fileUrl);
-      } catch (err) {
-        console.error('Supabase upload error:', err);
-        throw new Error(`File upload error: ${err.message}`);
       }
     }
 
@@ -111,19 +93,16 @@ export class PostService {
       category,
       createdBy,
       content,
-      fileSrc: fileUrl,
-      fileType: fileType, // Save the fileType
+      fileSrc: fileUrls,
+      fileType: fileTypes,
       batch,
       user,
     });
-
-    console.log('Saving new post:', newPost);
 
     return this.postRepository.save(newPost);
   }
 
   async getPostsByBatchId(batchId: string): Promise<Post[]> {
-    // Validate batch_id
     const batch = await this.batchRepository.findOne({
       where: { batch_id: batchId },
     });
@@ -131,10 +110,9 @@ export class PostService {
       throw new NotFoundException('Batch not found.');
     }
 
-    // Retrieve posts associated with the batch
     return this.postRepository.find({
       where: { batch: batch },
-      relations: ['batch', 'user'], // Optional: to include relations if needed
+      relations: ['batch', 'user'],
     });
   }
 }

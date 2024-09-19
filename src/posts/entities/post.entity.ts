@@ -40,13 +40,13 @@ export class Post {
   @Column({ type: 'int', default: 0, nullable: true })
   likeCount: number;
 
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  fileType?: string;
+  @Field(() => [String], { nullable: true })
+  @Column('text', { array: true, nullable: true })
+  fileType?: string[]; // Array of file types
 
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  fileSrc?: string;
+  @Field(() => [String], { nullable: true })
+  @Column('text', { array: true, nullable: true })
+  fileSrc?: string[]; // Array of file URLs
 
   @Field()
   @Column({ type: 'boolean', default: false })
