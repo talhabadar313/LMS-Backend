@@ -13,7 +13,12 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:3001', 'https://lms-alpha-five.vercel.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization',
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-apollo-operation-name',
+      'apollo-require-preflight',
+    ],
     credentials: true,
   });
 
