@@ -29,6 +29,7 @@ export class PostService {
       createPostInput;
     console.log('Files received:', files);
 
+    // Fetch batch and user
     const batch = await this.batchRepository.findOne({ where: { batch_id } });
     if (!batch) throw new NotFoundException('Batch not found.');
 
@@ -39,6 +40,8 @@ export class PostService {
     let fileTypes: string[] = [];
 
     if (files && files.length > 0) {
+      console.log('Processing multiple file uploads...');
+
       for (const filePromise of files) {
         try {
           const resolvedFile = await filePromise;
