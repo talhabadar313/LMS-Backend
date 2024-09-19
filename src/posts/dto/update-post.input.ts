@@ -8,6 +8,10 @@ export class UpdatePostInput {
 
   @Field()
   @IsString()
+  title: string;
+
+  @Field()
+  @IsString()
   catgeory: string;
 
   @Field()

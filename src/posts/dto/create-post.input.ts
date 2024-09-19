@@ -7,6 +7,10 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreatePostInput {
   @Field()
   @IsString()
+  title: string;
+
+  @Field()
+  @IsString()
   category: string;
 
   @Field()

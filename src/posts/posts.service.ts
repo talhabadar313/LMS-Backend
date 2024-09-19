@@ -25,7 +25,7 @@ export class PostService {
   ) {}
 
   async createPost(createPostInput: CreatePostInput): Promise<Post> {
-    const { category, createdBy, content, batch_id, user_id, file } =
+    const { title, category, createdBy, content, batch_id, user_id, file } =
       createPostInput;
 
     // Validate batch_id
@@ -101,6 +101,7 @@ export class PostService {
 
     // Create and save the new post
     const newPost = this.postRepository.create({
+      title,
       category,
       createdBy,
       content,

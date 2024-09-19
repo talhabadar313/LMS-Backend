@@ -18,6 +18,10 @@ export class Post {
 
   @Field()
   @Column()
+  title: string;
+
+  @Field()
+  @Column()
   category: string;
 
   @Field()
