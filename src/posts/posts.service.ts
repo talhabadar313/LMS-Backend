@@ -25,6 +25,8 @@ export class PostService {
   ) {}
 
   async createPost(createPostInput: CreatePostInput): Promise<Post> {
+    console.log('Processing createPostInput:', createPostInput);
+
     const { title, category, createdBy, content, batch_id, user_id, file } =
       createPostInput;
 
@@ -48,6 +50,8 @@ export class PostService {
     let fileUrl = null;
     let fileType = null;
     if (file) {
+      console.log('Processing file upload...');
+
       const resolvedFile = await file;
       const { createReadStream, mimetype, filename } = resolvedFile;
 
@@ -93,6 +97,8 @@ export class PostService {
         fileUrl = data?.path
           ? `${supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data.publicUrl}`
           : null;
+
+        console.log('File uploaded successfully. URL:', fileUrl);
       } catch (err) {
         console.error('Supabase upload error:', err);
         throw new Error(`File upload error: ${err.message}`);
@@ -111,6 +117,24 @@ export class PostService {
       user,
     });
 
+    console.log('Saving new post:', newPost);
+
     return this.postRepository.save(newPost);
+  }
+
+  async getPostsByBatchId(batchId: string): Promise<Post[]> {
+    // Validate batch_id
+    const batch = await this.batchRepository.findOne({
+      where: { batch_id: batchId },
+    });
+    if (!batch) {
+      throw new NotFoundException('Batch not found.');
+    }
+
+    // Retrieve posts associated with the batch
+    return this.postRepository.find({
+      where: { batch: batch },
+      relations: ['batch', 'user'], // Optional: to include relations if needed
+    });
   }
 }

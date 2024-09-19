@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { PostService } from './posts.service';
 import { Post } from './entities/post.entity';
 import { CreatePostInput } from './dto/create-post.input';
@@ -6,7 +6,6 @@ import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { UseGuards } from '@nestjs/common';
-
 @Resolver(() => Post)
 export class PostResolver {
   constructor(private readonly postService: PostService) {}
@@ -17,6 +16,17 @@ export class PostResolver {
   async createPost(
     @Args('createPostInput') createPostInput: CreatePostInput,
   ): Promise<Post> {
+    // Log the received input data
+    console.log('Received createPostInput:', createPostInput);
+
     return this.postService.createPost(createPostInput);
+  }
+
+  @Query(() => [Post], { name: 'getPostsByBatchId' })
+  async postsByBatchId(@Args('batchId') batchId: string): Promise<Post[]> {
+    // Log the received batch ID
+    console.log('Received batchId:', batchId);
+
+    return this.postService.getPostsByBatchId(batchId);
   }
 }
