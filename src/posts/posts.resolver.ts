@@ -19,6 +19,13 @@ export class PostResolver {
     return this.postService.createPost(createPostInput);
   }
 
+  @Mutation(() => Post)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  async deletePost(@Args('post_id') post_id: string): Promise<Post> {
+    return this.postService.deletePost(post_id);
+  }
+
   @Query(() => [Post], { name: 'getPostsByBatchId' })
   async postsByBatchId(@Args('batchId') batchId: string): Promise<Post[]> {
     console.log('Received batchId:', batchId);

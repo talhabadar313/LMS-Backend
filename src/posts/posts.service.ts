@@ -118,4 +118,16 @@ export class PostService {
       relations: ['batch', 'user'],
     });
   }
+
+  async deletePost(post_id: string): Promise<Post> {
+    const post = await this.postRepository.findOne({
+      where: { post_id: post_id },
+    });
+    if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
+
+    post.deleted = true;
+    return this.postRepository.save(post);
+  }
 }
