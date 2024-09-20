@@ -6,6 +6,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { UseGuards } from '@nestjs/common';
+import { UpdatePostInput } from './dto/update-post.input';
 @Resolver(() => Post)
 export class PostResolver {
   constructor(private readonly postService: PostService) {}
@@ -30,5 +31,14 @@ export class PostResolver {
   async postsByBatchId(@Args('batchId') batchId: string): Promise<Post[]> {
     console.log('Received batchId:', batchId);
     return this.postService.getPostsByBatchId(batchId);
+  }
+
+  @Mutation(() => Post)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  async updatePost(
+    @Args('updatePostInput') updatePostInput: UpdatePostInput,
+  ): Promise<Post> {
+    return this.postService.updatePost(updatePostInput);
   }
 }

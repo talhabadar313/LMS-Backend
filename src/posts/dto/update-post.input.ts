@@ -1,5 +1,7 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
+//@ts-ignore
+import { GraphQLUpload, FileUpload } from 'graphql-upload';
 
 @InputType()
 export class UpdatePostInput {
@@ -12,18 +14,14 @@ export class UpdatePostInput {
 
   @Field()
   @IsString()
-  catgeory: string;
-
-  @Field()
-  @IsString()
-  createdBy: string;
+  category: string;
 
   @Field()
   @IsString()
   content: string;
 
-  @Field()
-  createdOn: Date;
+  @Field(() => [GraphQLUpload], { nullable: true })
+  files?: Promise<FileUpload>[];
 
   @Field(() => Int, { defaultValue: 0 })
   @IsNumber()

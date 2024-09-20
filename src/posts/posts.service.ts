@@ -11,6 +11,7 @@ import { Batch } from '../batch/entities/batch.entity';
 import { User } from '../users/entities/user.entity';
 import { CreatePostInput } from './dto/create-post.input';
 import { LikesService } from 'src/likes/likes.service';
+import { UpdatePostInput } from './dto/update-post.input';
 
 @Injectable()
 export class PostService {
@@ -24,7 +25,7 @@ export class PostService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    private readonly likesService: LikesService, // Add this line
+    private readonly likesService: LikesService,
   ) {}
 
   async createPost(createPostInput: CreatePostInput): Promise<Post> {
@@ -32,7 +33,6 @@ export class PostService {
       createPostInput;
     console.log('Files received:', files);
 
-    // Fetch batch and user
     const batch = await this.batchRepository.findOne({ where: { batch_id } });
     if (!batch) throw new NotFoundException('Batch not found.');
 
@@ -50,7 +50,6 @@ export class PostService {
           const resolvedFile = await filePromise;
           const { createReadStream, mimetype, filename } = resolvedFile;
 
-          // Validate file types
           const allowedMimeTypes = [
             'image/jpeg',
             'image/png',
@@ -60,7 +59,6 @@ export class PostService {
             throw new BadRequestException('Invalid file type.');
           }
 
-          // Read file stream
           const stream = createReadStream();
           const chunks: Buffer[] = [];
           for await (const chunk of stream) {
@@ -68,7 +66,6 @@ export class PostService {
           }
           const buffer = Buffer.concat(chunks);
 
-          // Upload to Supabase
           const { data, error } = await supabase.storage
             .from('LMS Bucket')
             .upload(`posts/${filename}`, buffer, { contentType: mimetype });
@@ -77,7 +74,6 @@ export class PostService {
             throw new Error(`File upload error: ${error.message}`);
           }
 
-          // Save file URL
           const fileUrl = data?.path
             ? `${supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data.publicUrl}`
             : null;
@@ -93,7 +89,6 @@ export class PostService {
       }
     }
 
-    // Create and save the new post
     const newPost = this.postRepository.create({
       title,
       category,
@@ -118,7 +113,7 @@ export class PostService {
 
     const posts = await this.postRepository.find({
       where: { batch: batch },
-      relations: ['batch', 'user', 'likes', 'likes.user'], // Include likes and user relation
+      relations: ['batch', 'user', 'likes', 'likes.user'],
     });
 
     return posts.map((post) => {
@@ -129,6 +124,105 @@ export class PostService {
         userNames,
       };
     });
+  }
+
+  async updatePost(updatePostInput: UpdatePostInput): Promise<Post> {
+    const { post_id, title, category, content, files } = updatePostInput;
+
+    const post = await this.postRepository.findOne({
+      where: { post_id },
+      relations: ['batch', 'user'],
+    });
+    if (!post) throw new NotFoundException('Post not found.');
+
+    let newFileUrls: string[] = [];
+    let newFileTypes: string[] = [];
+
+    const existingFileUrls = post.fileSrc || [];
+
+    const filesToDelete: string[] = existingFileUrls.filter(
+      (existingFileUrl) => {
+        const fileName = existingFileUrl.split('/').pop();
+        return (
+          !files ||
+          !files.some(async (filePromise) => {
+            const resolvedFile = await filePromise;
+            return resolvedFile.filename === fileName;
+          })
+        );
+      },
+    );
+
+    for (const fileUrl of filesToDelete) {
+      const fileName = fileUrl.split('/').pop(); // Get file name
+      console.log(
+        `Attempting to delete file: ${fileName} from Supabase storage`,
+      );
+
+      const { data, error } = await supabase.storage
+        .from('LMS Bucket')
+        .remove([`posts/${fileName}`]); // Use the correct path for removal
+
+      if (error) {
+        console.error(`Failed to delete file ${fileUrl}:`, error.message);
+        throw new Error(`File deletion error: ${error.message}`);
+      } else {
+        console.log(`Successfully deleted file: ${fileUrl}`);
+        console.log(`Supabase response data:`, data);
+      }
+    }
+
+    // Process new files
+    if (files && files.length > 0) {
+      for (const filePromise of files) {
+        const resolvedFile = await filePromise;
+        const { createReadStream, mimetype, filename } = resolvedFile;
+
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+        if (!allowedMimeTypes.includes(mimetype)) {
+          throw new BadRequestException('Invalid file type.');
+        }
+
+        const stream = createReadStream();
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+        const buffer = Buffer.concat(chunks);
+
+        // Check if file already exists before uploading
+        const existingFileUrl = existingFileUrls.find((url) =>
+          url.endsWith(filename),
+        );
+        if (!existingFileUrl) {
+          const { data, error } = await supabase.storage
+            .from('LMS Bucket')
+            .upload(`posts/${filename}`, buffer, { contentType: mimetype });
+
+          if (error) {
+            throw new Error(`File upload error: ${error.message}`);
+          }
+
+          const fileUrl = data?.path
+            ? `${supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data.publicUrl}`
+            : null;
+
+          newFileUrls.push(fileUrl);
+          newFileTypes.push(mimetype);
+        } else {
+          newFileUrls.push(existingFileUrl);
+          newFileTypes.push(mimetype);
+        }
+      }
+    }
+
+    post.title = title || post.title;
+    post.category = category || post.category;
+    post.content = content || post.content;
+    post.fileSrc = newFileUrls;
+    post.fileType = newFileTypes;
+
+    return this.postRepository.save(post);
   }
 
   async deletePost(post_id: string): Promise<Post> {
