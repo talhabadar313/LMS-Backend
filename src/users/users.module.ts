@@ -17,6 +17,6 @@ import { MailModule } from '../mail/mail.module';
     TypeOrmModule.forFeature([User, Candidate]),
   ],
   providers: [UsersService, UsersResolver],
-  exports: [UsersService],
+  exports: [UsersService, TypeOrmModule],
 })
 export class UsersModule {}

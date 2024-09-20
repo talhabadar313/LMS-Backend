@@ -10,6 +10,7 @@ import { CandidatesModule } from './candidates/candidates.module';
 import { MailModule } from './mail/mail.module';
 import { ChangehistoryModule } from './changehistory/changehistory.module';
 import { PostsModule } from './posts/posts.module';
+import { LikesModule } from './likes/likes.module';
 
 dotenv.config({ path: '.env' });
 
@@ -41,6 +42,7 @@ dotenv.config({ path: '.env' });
     MailModule,
     ChangehistoryModule,
     PostsModule,
+    LikesModule,
   ],
   controllers: [],
   providers: [],

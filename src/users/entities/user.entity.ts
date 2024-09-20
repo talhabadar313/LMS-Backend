@@ -13,6 +13,7 @@ import { Batch } from 'src/batch/entities/batch.entity';
 import { Candidate } from 'src/candidates/entities/candidate.entity';
 import { ID } from '@nestjs/graphql';
 import { Post } from 'src/posts/entities/post.entity';
+import { Like } from 'src/likes/entities/like.entity';
 
 @ObjectType()
 @Entity('user')
@@ -65,4 +66,8 @@ export class User {
   @OneToMany(() => Post, (post) => post.user)
   @Field(() => [Post], { nullable: true })
   posts?: Post[];
+
+  @OneToMany(() => Like, (like) => like.user)
+  @Field(() => [Like], { nullable: true })
+  likes?: Like[];
 }

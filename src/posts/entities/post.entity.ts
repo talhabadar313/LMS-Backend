@@ -1,11 +1,13 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Batch } from 'src/batch/entities/batch.entity';
+import { Like } from 'src/likes/entities/like.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -42,15 +44,19 @@ export class Post {
 
   @Field(() => [String], { nullable: true })
   @Column('text', { array: true, nullable: true })
-  fileType?: string[]; // Array of file types
+  fileType?: string[];
 
   @Field(() => [String], { nullable: true })
   @Column('text', { array: true, nullable: true })
-  fileSrc?: string[]; // Array of file URLs
+  fileSrc?: string[];
 
   @Field()
   @Column({ type: 'boolean', default: false })
   deleted: boolean;
+
+  @OneToMany(() => Like, (like) => like.post)
+  @Field(() => [Like], { nullable: true })
+  likes: Like[];
 
   @ManyToOne(() => Batch, (batch) => batch.posts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'batchId' })

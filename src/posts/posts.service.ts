@@ -10,6 +10,7 @@ import { supabase } from '../supabase.config';
 import { Batch } from '../batch/entities/batch.entity';
 import { User } from '../users/entities/user.entity';
 import { CreatePostInput } from './dto/create-post.input';
+import { LikesService } from 'src/likes/likes.service';
 
 @Injectable()
 export class PostService {
@@ -22,6 +23,8 @@ export class PostService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly likesService: LikesService, // Add this line
   ) {}
 
   async createPost(createPostInput: CreatePostInput): Promise<Post> {
@@ -105,7 +108,7 @@ export class PostService {
     return this.postRepository.save(newPost);
   }
 
-  async getPostsByBatchId(batchId: string): Promise<Post[]> {
+  async getPostsByBatchId(batchId: string): Promise<any[]> {
     const batch = await this.batchRepository.findOne({
       where: { batch_id: batchId },
     });
@@ -113,9 +116,18 @@ export class PostService {
       throw new NotFoundException('Batch not found.');
     }
 
-    return this.postRepository.find({
+    const posts = await this.postRepository.find({
       where: { batch: batch },
-      relations: ['batch', 'user'],
+      relations: ['batch', 'user', 'likes', 'likes.user'], // Include likes and user relation
+    });
+
+    return posts.map((post) => {
+      const userNames = post.likes.map((like) => like.user.name);
+      return {
+        ...post,
+        likeCount: post.likes.length,
+        userNames,
+      };
     });
   }
 
