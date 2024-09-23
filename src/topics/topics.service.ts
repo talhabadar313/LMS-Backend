@@ -3,7 +3,7 @@ import { CreateTopicInput } from './dto/create-topic.input';
 import { UpdateTopicInput } from './dto/update-topic.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Batch } from 'src/batch/entities/batch.entity';
+import { Batch } from '../batch/entities/batch.entity';
 import { Topic } from './entities/topic.entity';
 
 @Injectable()

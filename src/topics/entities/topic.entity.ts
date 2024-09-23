@@ -1,10 +1,13 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { Batch } from 'src/batch/entities/batch.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -23,4 +26,8 @@ export class Topic {
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch)
   batch: Batch;
+
+  @ManyToMany(() => Assignment, (assignment) => assignment.topics)
+  @Field(() => [Assignment])
+  assignments: Assignment[];
 }

@@ -4,9 +4,9 @@ import { Topic } from './entities/topic.entity';
 import { CreateTopicInput } from './dto/create-topic.input';
 import { UpdateTopicInput } from './dto/update-topic.input';
 import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/auth/role.guard';
-import { Roles } from 'src/auth/role.decorator';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
 
 @Resolver(() => Topic)
 export class TopicsResolver {
