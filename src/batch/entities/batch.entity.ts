@@ -12,6 +12,7 @@ import {
 
 import { Candidate } from 'src/candidates/entities/candidate.entity';
 import { Post } from 'src/posts/entities/post.entity';
+import { Topic } from 'src/topics/entities/topic.entity';
 
 @ObjectType()
 @Entity('batch')
@@ -108,6 +109,10 @@ export class Batch {
   @OneToMany(() => Post, (post) => post.batch)
   @Field(() => [Post], { nullable: true })
   posts?: Post[];
+
+  @OneToMany(() => Topic, (topic) => topic.batch)
+  @Field(() => Topic, { nullable: true })
+  topics?: Topic[];
 
   @AfterLoad()
   async calculateFields() {
