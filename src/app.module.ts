@@ -35,6 +35,9 @@ dotenv.config({ path: '.env' });
       autoLoadEntities: true,
       synchronize: true,
       logging: true,
+      extra: {
+        connectionTimeoutMillis: 60000,
+      },
     }),
 
     AuthModule,

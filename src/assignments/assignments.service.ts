@@ -7,6 +7,10 @@ import { Batch } from '../batch/entities/batch.entity';
 import { In, Repository } from 'typeorm';
 import { Topic } from '../topics/entities/topic.entity';
 import { supabase } from '../supabase.config';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
 
 @Injectable()
 export class AssignmentsService {
