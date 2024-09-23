@@ -21,40 +21,40 @@ export class AssignmentsResolver {
     return this.assignmentsService.create(createAssignmentInput);
   }
 
-  @Query(() => [Assignment], { name: 'getAllAssignments' })
-  @Mutation(() => Assignment, { name: 'createAssignment' })
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
-  findAll() {
-    return this.assignmentsService.findAll();
-  }
+  // @Query(() => [Assignment], { name: 'getAllAssignments' })
+  // @Mutation(() => Assignment, { name: 'createAssignment' })
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles('admin', 'teacher')
+  // findAll() {
+  //   return this.assignmentsService.findAll();
+  // }
 
-  @Query(() => Assignment, { name: 'getOneAssignment' })
-  @Mutation(() => Assignment, { name: 'createAssignment' })
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
-  findOne(@Args('id', { type: () => String }) id: string) {
-    return this.assignmentsService.findOne(id);
-  }
+  // @Query(() => Assignment, { name: 'getOneAssignment' })
+  // @Mutation(() => Assignment, { name: 'createAssignment' })
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles('admin', 'teacher')
+  // findOne(@Args('id', { type: () => String }) id: string) {
+  //   return this.assignmentsService.findOne(id);
+  // }
 
-  @Mutation(() => Assignment, { name: 'updateAssignment' })
-  @Mutation(() => Assignment, { name: 'createAssignment' })
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
-  updateAssignment(
-    @Args('updateAssignmentInput') updateAssignmentInput: UpdateAssignmentInput,
-  ) {
-    return this.assignmentsService.update(
-      updateAssignmentInput.assignment_id,
-      updateAssignmentInput,
-    );
-  }
+  // @Mutation(() => Assignment, { name: 'updateAssignment' })
+  // @Mutation(() => Assignment, { name: 'createAssignment' })
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles('admin', 'teacher')
+  // updateAssignment(
+  //   @Args('updateAssignmentInput') updateAssignmentInput: UpdateAssignmentInput,
+  // ) {
+  //   return this.assignmentsService.update(
+  //     updateAssignmentInput.assignment_id,
+  //     updateAssignmentInput,
+  //   );
+  // }
 
-  @Mutation(() => Assignment, { name: 'removeAssignment' })
-  @Mutation(() => Assignment, { name: 'createAssignment' })
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
-  removeAssignment(@Args('id', { type: () => String }) id: string) {
-    return this.assignmentsService.remove(id);
-  }
+  // @Mutation(() => Assignment, { name: 'removeAssignment' })
+  // @Mutation(() => Assignment, { name: 'createAssignment' })
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles('admin', 'teacher')
+  // removeAssignment(@Args('id', { type: () => String }) id: string) {
+  //   return this.assignmentsService.remove(id);
+  // }
 }

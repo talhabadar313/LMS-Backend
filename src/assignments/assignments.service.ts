@@ -7,10 +7,6 @@ import { Batch } from '../batch/entities/batch.entity';
 import { In, Repository } from 'typeorm';
 import { Topic } from '../topics/entities/topic.entity';
 import { supabase } from '../supabase.config';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
-import { RolesGuard } from '../auth/role.guard';
-import { Roles } from '../auth/role.decorator';
 
 @Injectable()
 export class AssignmentsService {
@@ -125,21 +121,5 @@ export class AssignmentsService {
     await this.assignmentRepository.save(assignment);
 
     return assignment;
-  }
-
-  findAll() {
-    return `This action returns all assignments`;
-  }
-
-  findOne(id: string) {
-    return `This action returns a #${id} assignment`;
-  }
-
-  update(id: string, updateAssignmentInput: UpdateAssignmentInput) {
-    return `This action updates a #${id} assignment`;
-  }
-
-  remove(id: string) {
-    return `This action removes a #${id} assignment`;
   }
 }
