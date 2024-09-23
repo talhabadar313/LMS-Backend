@@ -34,7 +34,7 @@ dotenv.config({ path: '.env' });
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       autoLoadEntities: true,
       synchronize: true,
-      logging: true,
+      logging: ['query', 'error'],
       extra: {
         connectionTimeoutMillis: 60000,
         statement_timeout: 30000,
