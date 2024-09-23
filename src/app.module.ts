@@ -37,6 +37,7 @@ dotenv.config({ path: '.env' });
       logging: true,
       extra: {
         connectionTimeoutMillis: 60000,
+        statement_timeout: 30000,
       },
     }),
 
