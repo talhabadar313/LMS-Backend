@@ -29,8 +29,12 @@ export class TopicsService {
     return await this.topicRepository.save(newTopic);
   }
 
-  async findAll(): Promise<Topic[]> {
-    return await this.topicRepository.find({ relations: ['batch'] });
+  async findAll(batchId: string): Promise<Topic[]> {
+    const batch = await this.batchRepository.findOneBy({ batch_id: batchId });
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+    return await this.topicRepository.findBy({ batch });
   }
 
   async update(id: string, updateTopicInput: UpdateTopicInput): Promise<Topic> {

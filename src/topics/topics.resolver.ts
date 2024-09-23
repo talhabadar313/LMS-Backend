@@ -19,11 +19,11 @@ export class TopicsResolver {
     return this.topicsService.create(createTopicInput);
   }
 
-  @Query(() => [Topic], { name: 'getAllTopics' })
+  @Query(() => [Topic], { name: 'getAllTopicsByBatch' })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')
-  findAll() {
-    return this.topicsService.findAll();
+  findAll(@Args('batchId', { type: () => String }) batchId: string) {
+    return this.topicsService.findAll(batchId);
   }
 
   @Mutation(() => Topic, { name: 'updateTopic' })
