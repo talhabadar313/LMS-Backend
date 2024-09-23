@@ -30,8 +30,8 @@ export class Assignment {
   creationDate: Date;
 
   @Field()
-  @Column({ type: 'date' })
-  dueDate: Date;
+  @Column()
+  dueDate: String;
 
   @Field()
   @Column({ type: 'int' })

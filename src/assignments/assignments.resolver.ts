@@ -21,13 +21,12 @@ export class AssignmentsResolver {
     return this.assignmentsService.create(createAssignmentInput);
   }
 
-  // @Query(() => [Assignment], { name: 'getAllAssignments' })
-  // @Mutation(() => Assignment, { name: 'createAssignment' })
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles('admin', 'teacher')
-  // findAll() {
-  //   return this.assignmentsService.findAll();
-  // }
+  @Query(() => [Assignment], { name: 'getAllAssignmentsByBatch' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  findAll(@Args('batchId', { type: () => String }) batchId: string) {
+    return this.assignmentsService.findAll(batchId);
+  }
 
   // @Query(() => Assignment, { name: 'getOneAssignment' })
   // @Mutation(() => Assignment, { name: 'createAssignment' })

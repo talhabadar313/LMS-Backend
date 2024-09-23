@@ -34,6 +34,8 @@ export class AssignmentsService {
       files,
     } = createAssignmentInput;
 
+    console.log('Files received:', files);
+
     if (!batchId) {
       throw new BadRequestException('BatchId is required');
     }
@@ -121,5 +123,19 @@ export class AssignmentsService {
     await this.assignmentRepository.save(assignment);
 
     return assignment;
+  }
+
+  async findAll(batchId: string): Promise<Assignment[]> {
+    if (!batchId) {
+      throw new BadRequestException('BatchId is required');
+    }
+    const batch = await this.batchrepository.findOneBy({ batch_id: batchId });
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+    return await this.assignmentRepository.find({
+      where: { batch: batch },
+      relations: ['batch', 'topics'],
+    });
   }
 }

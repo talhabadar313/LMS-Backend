@@ -12,8 +12,8 @@ export class CreateAssignmentInput {
   @Field()
   createdBy: string;
 
-  @Field(() => Date)
-  dueDate: Date;
+  @Field(() => String)
+  dueDate: string;
 
   @Field()
   totalmarks: number;
