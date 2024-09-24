@@ -6,10 +6,12 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { Topic } from 'src/topics/entities/topic.entity';
+import { Submission } from 'src/submissions/entities/submission.entity';
 @ObjectType()
 @Entity()
 export class Assignment {
@@ -58,4 +60,8 @@ export class Assignment {
   @JoinTable()
   @Field(() => [Topic])
   topics: Topic[];
+
+  @OneToMany(() => Submission, (submission) => submission)
+  @Field(() => [Submission])
+  submissions: Submission[];
 }

@@ -2,7 +2,6 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { AssignmentsService } from './assignments.service';
 import { Assignment } from './entities/assignment.entity';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
-import { UpdateAssignmentInput } from './dto/update-assignment.input';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../auth/role.guard';
@@ -28,13 +27,12 @@ export class AssignmentsResolver {
     return this.assignmentsService.findAll(batchId);
   }
 
-  // @Query(() => Assignment, { name: 'getOneAssignment' })
-  // @Mutation(() => Assignment, { name: 'createAssignment' })
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles('admin', 'teacher')
-  // findOne(@Args('id', { type: () => String }) id: string) {
-  //   return this.assignmentsService.findOne(id);
-  // }
+  @Query(() => Assignment, { name: 'getOneAssignment' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  findOne(@Args('assignmentId', { type: () => String }) assignmentId: string) {
+    return this.assignmentsService.findOne(assignmentId);
+  }
 
   // @Mutation(() => Assignment, { name: 'updateAssignment' })
   // @Mutation(() => Assignment, { name: 'createAssignment' })

@@ -138,4 +138,21 @@ export class AssignmentsService {
       relations: ['batch', 'topics'],
     });
   }
+
+  async findOne(assignmentId: string): Promise<Assignment> {
+    if (!assignmentId) {
+      throw new BadRequestException('AssignmentId is required');
+    }
+
+    const assignment = await this.assignmentRepository.findOne({
+      where: { assignment_id: assignmentId },
+      relations: ['batch', 'topics'],
+    });
+
+    if (!assignment) {
+      throw new BadRequestException('Assignment not found');
+    }
+
+    return assignment;
+  }
 }

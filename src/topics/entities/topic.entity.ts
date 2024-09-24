@@ -1,13 +1,13 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { Batch } from 'src/batch/entities/batch.entity';
+import { Quiz } from 'src/quizs/entities/quiz.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -30,4 +30,8 @@ export class Topic {
   @ManyToMany(() => Assignment, (assignment) => assignment.topics)
   @Field(() => [Assignment])
   assignments: Assignment[];
+
+  @ManyToMany(() => Quiz, (quiz) => quiz.topics)
+  @Field(() => Quiz)
+  quizzes: Quiz;
 }

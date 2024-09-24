@@ -13,6 +13,8 @@ import { PostsModule } from './posts/posts.module';
 import { LikesModule } from './likes/likes.module';
 import { TopicsModule } from './topics/topics.module';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { QuizsModule } from './quizs/quizs.module';
+import { SubmissionsModule } from './submissions/submissions.module';
 
 dotenv.config({ path: '.env' });
 
@@ -51,6 +53,8 @@ dotenv.config({ path: '.env' });
     LikesModule,
     TopicsModule,
     AssignmentsModule,
+    QuizsModule,
+    SubmissionsModule,
   ],
   controllers: [],
   providers: [],

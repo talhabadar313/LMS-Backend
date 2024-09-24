@@ -15,5 +15,6 @@ import { AuthModule } from '../auth/auth.module';
     AuthModule,
   ],
   providers: [AssignmentsResolver, AssignmentsService],
+  exports: [TypeOrmModule],
 })
 export class AssignmentsModule {}

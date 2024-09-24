@@ -14,6 +14,7 @@ import { Candidate } from 'src/candidates/entities/candidate.entity';
 import { ID } from '@nestjs/graphql';
 import { Post } from 'src/posts/entities/post.entity';
 import { Like } from 'src/likes/entities/like.entity';
+import { Submission } from 'src/submissions/entities/submission.entity';
 
 @ObjectType()
 @Entity('user')
@@ -70,4 +71,8 @@ export class User {
   @OneToMany(() => Like, (like) => like.user)
   @Field(() => [Like], { nullable: true })
   likes?: Like[];
+
+  @OneToMany(() => Submission, (submission) => submission.student)
+  @Field(() => [Submission], { nullable: true })
+  submissions?: Submission[];
 }
