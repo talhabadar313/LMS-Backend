@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SubmissionsService } from './submissions.service';
 import { SubmissionsResolver } from './submissions.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,10 +10,11 @@ import { QuizsModule } from '../quizs/quizs.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Submission]),
+    forwardRef(() => AssignmentsModule),
     UsersModule,
-    AssignmentsModule,
     QuizsModule,
   ],
   providers: [SubmissionsResolver, SubmissionsService],
+  exports: [TypeOrmModule],
 })
 export class SubmissionsModule {}

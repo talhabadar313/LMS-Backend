@@ -80,28 +80,28 @@ export class Batch {
   @Field(() => [User], { nullable: true })
   teachers?: User[];
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   totalCandidates?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   newCandidates?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   interviewedCandidates?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   invitedCandidates?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   registeredCandidates?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   rejectedCandidates?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   maleCandidates?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   femaleCandidates?: number;
 
   @OneToMany(() => Candidate, (candidate) => candidate.batch)
@@ -123,50 +123,4 @@ export class Batch {
   @OneToMany(() => Quiz, (quiz) => quiz.batch)
   @Field(() => Quiz)
   quizzes?: Quiz[];
-
-  @AfterLoad()
-  async calculateFields() {
-    if (this.category === 'open') {
-      if (this.candidates) {
-        this.totalCandidates = this.candidates.length;
-        this.maleCandidates = this.candidates.filter(
-          (candidate) => candidate.gender === 'male',
-        ).length;
-        this.femaleCandidates = this.candidates.filter(
-          (candidate) => candidate.gender === 'female',
-        ).length;
-        this.newCandidates = this.candidates.filter(
-          (candidate) => candidate.status === 'new',
-        ).length;
-        this.interviewedCandidates = this.candidates.filter(
-          (candidate) => candidate.status === 'interviewed',
-        ).length;
-        this.invitedCandidates = this.candidates.filter(
-          (candidate) => candidate.status === 'invited',
-        ).length;
-        this.rejectedCandidates = this.candidates.filter(
-          (candidate) => candidate.status === 'rejected',
-        ).length;
-        this.registeredCandidates = this.candidates.filter(
-          (candidate) => candidate.status === 'registered',
-        ).length;
-      }
-    } else {
-      if (this.users) {
-        this.totalCandidates = this.users.length;
-        this.maleCandidates = this.candidates.filter(
-          (candidate) => candidate.gender === 'male',
-        ).length;
-        this.femaleCandidates = this.candidates.filter(
-          (candidate) => candidate.gender === 'female',
-        ).length;
-        this.interviewedCandidates = this.users.filter(
-          (user) => user.status === 'interviewed',
-        ).length;
-        this.registeredCandidates = this.users.filter(
-          (user) => user.status === 'registered',
-        ).length;
-      }
-    }
-  }
 }

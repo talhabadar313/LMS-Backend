@@ -6,23 +6,28 @@ export class CreateSubmissionInput {
   @Field(() => String)
   submissionType: SubmissionType;
 
-  // Marking assignmentId and quizId as nullable
   @Field(() => ID, { nullable: true })
-  assignmentId?: string; // Optional
+  assignmentId?: string;
 
   @Field(() => ID, { nullable: true })
-  quizId?: string; // Optional
+  quizId?: string;
 
   @Field(() => ID)
   studentId: string;
 
   @Field(() => [SubmittedDataInput], { nullable: true })
   SubmittedData?: SubmittedDataInput[];
+
+  @Field(() => Date, { nullable: true })
+  checkedAt?: Date;
+
+  @Field(() => String, { nullable: true })
+  checkedBy?: string;
 }
 
 @InputType()
 export class SubmittedDataInput {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   key: string;
 
   @Field(() => String)

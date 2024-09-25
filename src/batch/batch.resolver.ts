@@ -77,4 +77,11 @@ export class BatchResolver {
   getApplicationsPerDay(@Args('id', { type: () => String }) batchId: string) {
     return this.batchService.getApplicationsPerDay(batchId);
   }
+
+  @Query(() => Batch, { name: 'getStudentsByBatch' })
+  findStudentsByBatchId(
+    @Args('batchId', { type: () => String }) batchId: string,
+  ) {
+    return this.batchService.findStudentsByBatchId(batchId);
+  }
 }

@@ -33,7 +33,7 @@ export class Submission {
   })
   status: SubmissionStatus;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   @Column({ type: 'int', nullable: true })
   score: number;
 
@@ -61,6 +61,14 @@ export class Submission {
   @Field(() => [SubmittedData], { nullable: true })
   @Column('json', { nullable: true })
   SubmittedData?: SubmittedData[];
+
+  @Field(() => Date, { nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
+  checkedAt?: Date;
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  checkedBy?: string;
 }
 
 @ObjectType()
@@ -74,17 +82,3 @@ export class SubmittedData {
   @Field(() => String)
   value: string;
 }
-
-// const sub = {
-//   id,
-//   type,
-//   status,
-//   submittedId:
-//   submissionDate,
-//   submittedWork: {
-//     temp1: 3,
-//     prac: 2,
-//   },
-//   checkedAt,
-//   checkedBy:
-// };

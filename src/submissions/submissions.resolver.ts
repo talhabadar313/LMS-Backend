@@ -3,6 +3,7 @@ import { SubmissionsService } from './submissions.service';
 import { Submission } from './entities/submission.entity';
 import { CreateSubmissionInput } from './dto/create-submission.input';
 import { UpdateSubmissionInput } from './dto/update-submission.input';
+import { AssignMarsksToAssignmentInput } from './dto/assign-assignmentmarks-input';
 
 @Resolver(() => Submission)
 export class SubmissionsResolver {
@@ -15,9 +16,9 @@ export class SubmissionsResolver {
     return this.submissionsService.create(createSubmissionInput);
   }
 
-  @Query(() => [Submission], { name: 'submissions' })
-  findAll() {
-    return this.submissionsService.findAll();
+  @Query(() => [Submission], { name: 'getAllSubmissionsByAssignment' })
+  findAll(@Args('assignmentId', { type: () => String }) assignmentId: string) {
+    return this.submissionsService.findAll(assignmentId);
   }
 
   @Query(() => Submission, { name: 'submission' })
@@ -38,5 +39,15 @@ export class SubmissionsResolver {
   @Mutation(() => Submission)
   removeSubmission(@Args('id', { type: () => String }) id: string) {
     return this.submissionsService.remove(id);
+  }
+
+  @Mutation(() => Submission, { name: 'assignMarksToAssignment' })
+  assignMarksToAssignment(
+    @Args('assignMarsksToAssignmentInput')
+    assignMarsksToAssignmentInput: AssignMarsksToAssignmentInput,
+  ) {
+    return this.submissionsService.assignMarksToAssignment(
+      assignMarsksToAssignmentInput,
+    );
   }
 }

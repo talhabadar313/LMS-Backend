@@ -7,6 +7,7 @@ import { Batch } from '../batch/entities/batch.entity';
 import { In, Repository } from 'typeorm';
 import { Topic } from '../topics/entities/topic.entity';
 import { supabase } from '../supabase.config';
+import { Submission } from 'src/submissions/entities/submission.entity';
 
 @Injectable()
 export class AssignmentsService {
@@ -19,6 +20,9 @@ export class AssignmentsService {
 
     @InjectRepository(Topic)
     private readonly topicRepository: Repository<Topic>,
+
+    @InjectRepository(Submission)
+    private readonly submissionRepository: Repository<Submission>,
   ) {}
   async create(
     createAssignmentInput: CreateAssignmentInput,
@@ -129,14 +133,47 @@ export class AssignmentsService {
     if (!batchId) {
       throw new BadRequestException('BatchId is required');
     }
+
     const batch = await this.batchrepository.findOneBy({ batch_id: batchId });
     if (!batch) {
       throw new BadRequestException('Batch not found');
     }
-    return await this.assignmentRepository.find({
+
+    const assignments = await this.assignmentRepository.find({
       where: { batch: batch },
       relations: ['batch', 'topics'],
     });
+
+    const submissions = await this.submissionRepository.find({
+      where: {
+        assignment: {
+          assignment_id: In(assignments.map((a) => a.assignment_id)),
+        },
+      },
+      relations: ['assignment'],
+    });
+
+    console.log('Assignments:', assignments);
+    console.log('Submissions with Assignment Details:', submissions);
+
+    const assignmentsWithSubmissions = assignments.map((assignment) => {
+      const totalSubmissions = submissions.filter(
+        (sub) =>
+          sub.assignment &&
+          sub.assignment.assignment_id === assignment.assignment_id,
+      ).length;
+
+      console.log(
+        `Assignment ID: ${assignment.assignment_id}, Total Submissions: ${totalSubmissions}`,
+      );
+
+      return {
+        ...assignment,
+        totalSubmissions,
+      };
+    });
+
+    return assignmentsWithSubmissions;
   }
 
   async findOne(assignmentId: string): Promise<Assignment> {
@@ -144,15 +181,24 @@ export class AssignmentsService {
       throw new BadRequestException('AssignmentId is required');
     }
 
-    const assignment = await this.assignmentRepository.findOne({
+    const assignments = await this.assignmentRepository.findOne({
       where: { assignment_id: assignmentId },
       relations: ['batch', 'topics'],
     });
 
-    if (!assignment) {
+    if (!assignments) {
       throw new BadRequestException('Assignment not found');
     }
 
-    return assignment;
+    const submissions = await this.submissionRepository.find({
+      where: { assignment: { assignment_id: assignmentId } },
+    });
+
+    const assignmentsWithSubmissions = {
+      ...assignments,
+      totalSubmissions: submissions.length,
+    };
+
+    return assignmentsWithSubmissions;
   }
 }

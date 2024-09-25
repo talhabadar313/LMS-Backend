@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -42,6 +42,9 @@ export class Assignment {
   @Field()
   @Column()
   description: string;
+
+  @Field(() => Int, { nullable: true })
+  totalSubmissions: number;
 
   @Field(() => [String], { nullable: true })
   @Column('text', { array: true, nullable: true })
