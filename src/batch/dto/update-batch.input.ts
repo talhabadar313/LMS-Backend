@@ -3,7 +3,6 @@ import { IsOptional, IsString, IsArray, IsInt } from 'class-validator';
 
 @InputType()
 export class UpdateBatchInput {
-
   @Field(() => ID)
   batch_id: string;
 
@@ -20,7 +19,7 @@ export class UpdateBatchInput {
   @IsOptional()
   createdOn: Date;
 
-  @Field()
+  @Field(() => ID)
   @IsOptional()
   createdBy: string;
 

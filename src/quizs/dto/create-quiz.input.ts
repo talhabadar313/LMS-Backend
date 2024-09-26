@@ -7,7 +7,7 @@ export class CreateQuizInput {
   @Column()
   title: string;
 
-  @Field(() => String)
+  @Field(() => ID)
   @Column()
   createdBy: string;
 

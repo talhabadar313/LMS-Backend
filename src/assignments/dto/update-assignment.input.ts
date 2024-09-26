@@ -11,9 +11,6 @@ export class UpdateAssignmentInput {
   @IsString()
   title: string;
 
-  @Field()
-  createdBy: string;
-
   @Field(() => Date)
   dueDate: Date;
 

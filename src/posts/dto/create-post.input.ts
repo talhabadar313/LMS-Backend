@@ -31,9 +31,6 @@ export class CreatePostInput {
   @Field(() => String)
   batch_id: string;
 
-  @Field(() => String)
-  user_id: string;
-
   @Field({ defaultValue: false, nullable: true })
   @IsOptional()
   @IsBoolean()

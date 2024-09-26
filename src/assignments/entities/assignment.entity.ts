@@ -7,11 +7,13 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { Topic } from 'src/topics/entities/topic.entity';
 import { Submission } from 'src/submissions/entities/submission.entity';
+import { User } from 'src/users/entities/user.entity';
 @ObjectType()
 @Entity()
 export class Assignment {
@@ -23,9 +25,10 @@ export class Assignment {
   @Column()
   title: string;
 
-  @Field()
-  @Column()
-  createdBy: string;
+  @ManyToOne(() => User, (user) => user.assignmentsCreated)
+  @JoinColumn({ name: 'createdBy' })
+  @Field(() => User)
+  createdBy: User;
 
   @Field({ nullable: true })
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })

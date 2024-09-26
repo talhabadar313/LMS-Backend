@@ -1,4 +1,4 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { InputType, Field, Int, ID } from '@nestjs/graphql';
 import { IsOptional, IsString, IsArray, IsInt } from 'class-validator';
 
 @InputType()
@@ -22,7 +22,7 @@ export class CreateBatchInput {
   @IsOptional()
   defaultMessage: string;
 
-  @Field()
+  @Field(() => ID)
   createdBy: string;
 
   @Field({ nullable: true })

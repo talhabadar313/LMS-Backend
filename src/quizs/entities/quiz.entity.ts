@@ -2,6 +2,7 @@ import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { Submission } from 'src/submissions/entities/submission.entity';
 import { Topic } from 'src/topics/entities/topic.entity';
+import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
@@ -24,9 +25,10 @@ export class Quiz {
   @Column()
   title: string;
 
-  @Field(() => String)
-  @Column()
-  createdBy: string;
+  @ManyToOne(() => User, (user) => user.quizsCreated)
+  @JoinColumn({ name: 'createdBy' })
+  @Field(() => User)
+  createdBy: User;
 
   @Field(() => Date)
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })

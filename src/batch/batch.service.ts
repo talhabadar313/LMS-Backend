@@ -24,7 +24,21 @@ export class BatchService {
 
   async create(createBatchInput: CreateBatchInput): Promise<Batch> {
     const { teacherIds, ...batchData } = createBatchInput;
-    const batch = this.batchRepository.create(batchData);
+
+    const user = await this.userRepository.findOneBy({
+      user_id: createBatchInput.createdBy,
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const batchInput = {
+      ...batchData,
+      createdBy: user,
+    };
+
+    const batch = this.batchRepository.create(batchInput);
 
     try {
       await this.batchRepository.save(batch);
@@ -88,7 +102,7 @@ export class BatchService {
 
   async findAll(): Promise<Batch[]> {
     const batches = await this.batchRepository.find({
-      relations: ['teachers', 'candidates'],
+      relations: ['teachers', 'candidates', 'createdBy'],
     });
 
     return batches.map((batch) => this.calculateOtherFields(batch));
@@ -113,7 +127,7 @@ export class BatchService {
   async findOne(batch_id: string): Promise<Batch> {
     const batch = await this.batchRepository.findOne({
       where: { batch_id },
-      relations: ['teachers', 'users', 'candidates'],
+      relations: ['teachers', 'users', 'candidates', 'createdBy'],
     });
 
     if (!batch) {
@@ -197,7 +211,7 @@ export class BatchService {
 
     return this.batchRepository.findOne({
       where: { batch_id },
-      relations: ['teachers'],
+      relations: ['teachers', 'createdBy'],
     });
   }
 

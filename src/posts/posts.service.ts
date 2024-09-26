@@ -29,15 +29,12 @@ export class PostService {
   ) {}
 
   async createPost(createPostInput: CreatePostInput): Promise<Post> {
-    const { title, category, createdBy, content, batch_id, user_id, files } =
+    const { title, category, createdBy, content, batch_id, files } =
       createPostInput;
     console.log('Files received:', files);
 
     const batch = await this.batchRepository.findOne({ where: { batch_id } });
     if (!batch) throw new NotFoundException('Batch not found.');
-
-    const user = await this.userRepository.findOne({ where: { user_id } });
-    if (!user) throw new NotFoundException('User not found.');
 
     let fileUrls: string[] = [];
     let fileTypes: string[] = [];
@@ -89,15 +86,21 @@ export class PostService {
       }
     }
 
+    const userData = await this.userRepository.findOneBy({
+      user_id: createdBy,
+    });
+    if (!userData) {
+      throw new BadRequestException('User not found');
+    }
+
     const newPost = this.postRepository.create({
       title,
       category,
-      createdBy,
+      createdBy: userData,
       content,
       fileSrc: fileUrls,
       fileType: fileTypes,
       batch,
-      user,
     });
 
     return this.postRepository.save(newPost);
@@ -113,7 +116,7 @@ export class PostService {
 
     const posts = await this.postRepository.find({
       where: { batch: batch },
-      relations: ['batch', 'user', 'likes', 'likes.user'],
+      relations: ['batch', 'likes', 'likes.user', 'createdBy'],
     });
 
     return posts.map((post) => {
@@ -154,14 +157,14 @@ export class PostService {
     );
 
     for (const fileUrl of filesToDelete) {
-      const fileName = fileUrl.split('/').pop(); // Get file name
+      const fileName = fileUrl.split('/').pop();
       console.log(
         `Attempting to delete file: ${fileName} from Supabase storage`,
       );
 
       const { data, error } = await supabase.storage
         .from('LMS Bucket')
-        .remove([`posts/${fileName}`]); // Use the correct path for removal
+        .remove([`posts/${fileName}`]);
 
       if (error) {
         console.error(`Failed to delete file ${fileUrl}:`, error.message);
@@ -172,7 +175,6 @@ export class PostService {
       }
     }
 
-    // Process new files
     if (files && files.length > 0) {
       for (const filePromise of files) {
         const resolvedFile = await filePromise;
@@ -190,7 +192,6 @@ export class PostService {
         }
         const buffer = Buffer.concat(chunks);
 
-        // Check if file already exists before uploading
         const existingFileUrl = existingFileUrls.find((url) =>
           url.endsWith(filename),
         );

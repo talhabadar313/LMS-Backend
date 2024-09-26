@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, ID, InputType } from '@nestjs/graphql';
 import { IsArray, IsString, IsUUID } from 'class-validator';
 //@ts-ignore
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
@@ -9,7 +9,7 @@ export class CreateAssignmentInput {
   @IsString()
   title: string;
 
-  @Field()
+  @Field(() => ID)
   createdBy: string;
 
   @Field(() => String)

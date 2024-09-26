@@ -12,10 +12,6 @@ export class UpdateQuizInput {
 
   @Field(() => String)
   @Column()
-  createdBy: string;
-
-  @Field(() => String)
-  @Column()
   Date: String;
 
   @Field(() => Int)

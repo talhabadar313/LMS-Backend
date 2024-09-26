@@ -8,12 +8,16 @@ import { In, Repository } from 'typeorm';
 import { Topic } from '../topics/entities/topic.entity';
 import { supabase } from '../supabase.config';
 import { Submission } from 'src/submissions/entities/submission.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AssignmentsService {
   constructor(
     @InjectRepository(Assignment)
     private readonly assignmentRepository: Repository<Assignment>,
+
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
 
     @InjectRepository(Batch)
     private readonly batchrepository: Repository<Batch>,
@@ -98,10 +102,14 @@ export class AssignmentsService {
         }
       }
     }
+    const user = await this.userRepository.findOneBy({ user_id: createdBy });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
 
     const assignment = this.assignmentRepository.create({
       title,
-      createdBy,
+      createdBy: user,
       description,
       dueDate,
       totalmarks,
@@ -141,7 +149,7 @@ export class AssignmentsService {
 
     const assignments = await this.assignmentRepository.find({
       where: { batch: batch },
-      relations: ['batch', 'topics'],
+      relations: ['batch', 'topics', 'createdBy'],
     });
 
     const submissions = await this.submissionRepository.find({
@@ -183,7 +191,7 @@ export class AssignmentsService {
 
     const assignments = await this.assignmentRepository.findOne({
       where: { assignment_id: assignmentId },
-      relations: ['batch', 'topics'],
+      relations: ['batch', 'topics', 'createdBy'],
     });
 
     if (!assignments) {

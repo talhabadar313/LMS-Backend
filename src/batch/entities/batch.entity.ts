@@ -8,6 +8,8 @@ import {
   ManyToMany,
   JoinTable,
   AfterLoad,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 import { Candidate } from 'src/candidates/entities/candidate.entity';
@@ -43,9 +45,10 @@ export class Batch {
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createdOn: Date;
 
-  @Field()
-  @Column()
-  createdBy: string;
+  @ManyToOne(() => User, (user) => user.batchCreated)
+  @JoinColumn({ name: 'createdBy' })
+  @Field(() => User)
+  createdBy: User;
 
   @Field({ nullable: true })
   @Column({ type: 'date', nullable: true })

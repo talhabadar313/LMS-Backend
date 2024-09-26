@@ -1,13 +1,9 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { SubmissionStatus } from 'src/util/enum';
 
 @InputType()
 export class AssignMarsksToAssignmentInput {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   submissionId: string;
-
-  @Field(() => String)
-  status: SubmissionStatus;
 
   @Field(() => Number)
   score: number;
@@ -15,6 +11,9 @@ export class AssignMarsksToAssignmentInput {
   @Field(() => ID)
   studentId: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => ID, { nullable: true })
+  assignmentId: string;
+
+  @Field(() => ID, { nullable: true })
   checkedBy?: string;
 }

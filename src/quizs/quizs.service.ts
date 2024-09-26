@@ -6,6 +6,7 @@ import { Quiz } from './entities/quiz.entity';
 import { In, Repository } from 'typeorm';
 import { Batch } from '../batch/entities/batch.entity';
 import { Topic } from '../topics/entities/topic.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class QuizsService {
@@ -18,6 +19,9 @@ export class QuizsService {
 
     @InjectRepository(Topic)
     private readonly topicRepository: Repository<Topic>,
+
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
   async create(createQuizInput: CreateQuizInput): Promise<Quiz> {
     const {
@@ -49,9 +53,14 @@ export class QuizsService {
       throw new BadRequestException('One or more TopicIds are invalid');
     }
 
+    const user = await this.userRepository.findOneBy({ user_id: createdBy });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
     const newQuiz = await this.quizRepository.create({
       title,
-      createdBy,
+      createdBy: user,
       Date,
       topics,
       totalmarks,
@@ -75,7 +84,7 @@ export class QuizsService {
 
     return await this.quizRepository.find({
       where: { batch: batch },
-      relations: ['batch', 'topics'],
+      relations: ['batch', 'topics', 'createdBy'],
     });
   }
 

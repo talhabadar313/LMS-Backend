@@ -26,9 +26,10 @@ export class Post {
   @Column()
   category: string;
 
-  @Field()
-  @Column()
-  createdBy: string;
+  @ManyToOne(() => User, (user) => user.postsCreated)
+  @JoinColumn({ name: 'createdBy' })
+  @Field(() => User)
+  createdBy: User;
 
   @Field()
   @Column()
@@ -62,9 +63,4 @@ export class Post {
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch, { nullable: true })
   batch: Batch;
-
-  @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
-  @Field(() => User, { nullable: true })
-  user: User;
 }

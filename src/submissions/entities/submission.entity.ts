@@ -8,6 +8,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -37,9 +38,13 @@ export class Submission {
   @Column({ type: 'int', nullable: true })
   score: number;
 
-  @Field(() => String)
-  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  submissionDate: string;
+  @Field(() => String, { nullable: true })
+  @Column({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
+  submissionDate: string | null;
 
   @ManyToOne(() => Assignment, (assignment) => assignment.submissions, {
     nullable: true,
@@ -66,9 +71,10 @@ export class Submission {
   @Column({ type: 'timestamptz', nullable: true })
   checkedAt?: Date;
 
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  checkedBy?: string;
+  @ManyToOne(() => User, (user) => user.checkedBy, { nullable: true })
+  @JoinColumn({ name: 'checkedBy' })
+  @Field(() => User, { nullable: true })
+  checkedBy?: User;
 }
 
 @ObjectType()

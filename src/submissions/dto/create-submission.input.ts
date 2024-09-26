@@ -21,7 +21,7 @@ export class CreateSubmissionInput {
   @Field(() => Date, { nullable: true })
   checkedAt?: Date;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => ID, { nullable: true })
   checkedBy?: string;
 }
 

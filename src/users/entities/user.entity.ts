@@ -15,6 +15,8 @@ import { ID } from '@nestjs/graphql';
 import { Post } from 'src/posts/entities/post.entity';
 import { Like } from 'src/likes/entities/like.entity';
 import { Submission } from 'src/submissions/entities/submission.entity';
+import { Assignment } from 'src/assignments/entities/assignment.entity';
+import { Quiz } from 'src/quizs/entities/quiz.entity';
 
 @ObjectType()
 @Entity('user')
@@ -64,10 +66,6 @@ export class User {
   @Field(() => [Batch], { nullable: true })
   teachingBatches?: Batch[];
 
-  @OneToMany(() => Post, (post) => post.user)
-  @Field(() => [Post], { nullable: true })
-  posts?: Post[];
-
   @OneToMany(() => Like, (like) => like.user)
   @Field(() => [Like], { nullable: true })
   likes?: Like[];
@@ -75,4 +73,24 @@ export class User {
   @OneToMany(() => Submission, (submission) => submission.student)
   @Field(() => [Submission], { nullable: true })
   submissions?: Submission[];
+
+  @OneToMany(() => Submission, (submission) => submission.checkedBy)
+  @Field(() => Submission, { nullable: true })
+  checkedBy?: Submission[];
+
+  @OneToMany(() => Assignment, (assignment) => assignment.createdBy)
+  @Field(() => [Assignment], { nullable: true })
+  assignmentsCreated?: Assignment[];
+
+  @OneToMany(() => Quiz, (quiz) => quiz.createdBy)
+  @Field(() => [Quiz], { nullable: true })
+  quizsCreated?: Quiz[];
+
+  @OneToMany(() => Post, (post) => post.createdBy)
+  @Field(() => [Post], { nullable: true })
+  postsCreated?: Post[];
+
+  @OneToMany(() => Batch, (batch) => batch.createdBy)
+  @Field(() => [Batch], { nullable: true })
+  batchCreated?: Batch[];
 }
