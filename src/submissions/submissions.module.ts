@@ -11,8 +11,8 @@ import { QuizsModule } from '../quizs/quizs.module';
   imports: [
     TypeOrmModule.forFeature([Submission]),
     forwardRef(() => AssignmentsModule),
+    forwardRef(() => QuizsModule),
     UsersModule,
-    QuizsModule,
   ],
   providers: [SubmissionsResolver, SubmissionsService],
   exports: [TypeOrmModule],

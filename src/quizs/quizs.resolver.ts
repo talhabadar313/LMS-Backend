@@ -18,6 +18,11 @@ export class QuizsResolver {
     return this.quizsService.findAll(batchId);
   }
 
+  @Query(() => Quiz, { name: 'getOneQuiz' })
+  findOne(@Args('quizId', { type: () => String }) quizId: string) {
+    return this.quizsService.findOne(quizId);
+  }
+
   @Mutation(() => Quiz, { name: 'updateQuiz' })
   updateQuiz(@Args('updateQuizInput') updateQuizInput: UpdateQuizInput) {
     return this.quizsService.update(updateQuizInput.quiz_id, updateQuizInput);

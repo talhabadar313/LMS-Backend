@@ -1,11 +1,8 @@
-import { Field, ID, InputType } from '@nestjs/graphql';
-import { SubmissionStatus, SubmissionType } from 'src/util/enum';
+import { Field, ID, InputType, Int } from '@nestjs/graphql';
+import { SubmissionType } from 'src/util/enum';
 
 @InputType()
 export class CreateSubmissionInput {
-  @Field(() => String)
-  submissionType: SubmissionType;
-
   @Field(() => ID, { nullable: true })
   assignmentId?: string;
 
@@ -14,6 +11,9 @@ export class CreateSubmissionInput {
 
   @Field(() => ID)
   studentId: string;
+
+  @Field(() => Int, { nullable: true })
+  score: number;
 
   @Field(() => [SubmittedDataInput], { nullable: true })
   SubmittedData?: SubmittedDataInput[];

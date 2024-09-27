@@ -42,6 +42,9 @@ export class Quiz {
   @Column()
   totalmarks: number;
 
+  @Field(() => Int, { nullable: true })
+  totalSubmissions: number;
+
   @ManyToOne(() => Batch, (batch) => batch.quizzes)
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch)

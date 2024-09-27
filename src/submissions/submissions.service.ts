@@ -27,8 +27,15 @@ export class SubmissionsService {
     private readonly userRepository: Repository<User>,
   ) {}
   async create(createSubmissionInput: CreateSubmissionInput) {
-    const { submissionType, assignmentId, quizId, SubmittedData, studentId } =
-      createSubmissionInput;
+    const {
+      assignmentId,
+      quizId,
+      SubmittedData,
+      studentId,
+      score,
+      checkedAt,
+      checkedBy,
+    } = createSubmissionInput;
 
     const student = await this.userRepository.findOneBy({ user_id: studentId });
     if (!student) {
@@ -37,6 +44,8 @@ export class SubmissionsService {
 
     let assignment: Assignment | null = null;
     let quiz: Quiz | null = null;
+    let submissionStatus: SubmissionStatus;
+    let determinedSubmissionType: SubmissionType;
 
     if (assignmentId) {
       assignment = await this.assignmentRepository.findOneBy({
@@ -58,6 +67,9 @@ export class SubmissionsService {
           'Student has already submitted for this assignment',
         );
       }
+
+      determinedSubmissionType = SubmissionType.ASSIGNMENT;
+      submissionStatus = SubmissionStatus.NotAssigned;
     } else if (quizId) {
       quiz = await this.quizRepository.findOneBy({ quiz_id: quizId });
 
@@ -76,10 +88,18 @@ export class SubmissionsService {
           'Student has already submitted for this quiz',
         );
       }
+
+      determinedSubmissionType = SubmissionType.QUIZ;
+      submissionStatus = SubmissionStatus.Assigned;
     } else {
       throw new BadRequestException(
         'Either assignmentId or quizId must be provided',
       );
+    }
+
+    const user = await this.userRepository.findOneBy({ user_id: checkedBy });
+    if (!user) {
+      throw new BadRequestException('Checked by user not found');
     }
 
     const processedSubmittedData = SubmittedData?.map((data, index) => ({
@@ -89,17 +109,22 @@ export class SubmissionsService {
     }));
 
     const newSubmission = this.submissionRepository.create({
-      submissionType,
       assignment,
       quiz,
       student,
+      score,
+      checkedBy: user,
+      checkedAt: checkedAt,
+      submissionType: determinedSubmissionType,
+      status: submissionStatus,
       SubmittedData: processedSubmittedData,
     });
-
     return await this.submissionRepository.save(newSubmission);
   }
 
-  async findAll(assignmentId: string): Promise<Submission[]> {
+  async findAllAssignmentSubmissions(
+    assignmentId: string,
+  ): Promise<Submission[]> {
     if (!assignmentId) {
       throw new BadRequestException('AssignmentId is required');
     }
@@ -114,6 +139,25 @@ export class SubmissionsService {
 
     return await this.submissionRepository.find({
       where: { assignment: { assignment_id: assignmentId } },
+      relations: ['assignment', 'quiz', 'student', 'checkedBy'],
+    });
+  }
+
+  async findAllQuizSubmissions(quizId: string): Promise<Submission[]> {
+    if (!quizId) {
+      throw new BadRequestException('QuizId is required');
+    }
+
+    const quiz = await this.quizRepository.findOne({
+      where: { quiz_id: quizId },
+    });
+
+    if (!quiz) {
+      throw new BadRequestException('Quiz not found');
+    }
+
+    return await this.submissionRepository.find({
+      where: { quiz: { quiz_id: quizId } },
       relations: ['assignment', 'quiz', 'student', 'checkedBy'],
     });
   }

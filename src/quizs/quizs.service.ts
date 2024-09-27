@@ -7,6 +7,7 @@ import { In, Repository } from 'typeorm';
 import { Batch } from '../batch/entities/batch.entity';
 import { Topic } from '../topics/entities/topic.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Submission } from 'src/submissions/entities/submission.entity';
 
 @Injectable()
 export class QuizsService {
@@ -22,6 +23,9 @@ export class QuizsService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(Submission)
+    private readonly submissionRepository: Repository<Submission>,
   ) {}
   async create(createQuizInput: CreateQuizInput): Promise<Quiz> {
     const {
@@ -82,12 +86,57 @@ export class QuizsService {
       throw new BadRequestException('Batch not found');
     }
 
-    return await this.quizRepository.find({
+    const quizs = await this.quizRepository.find({
       where: { batch: batch },
       relations: ['batch', 'topics', 'createdBy'],
     });
-  }
 
+    const submissions = await this.submissionRepository.find({
+      where: {
+        quiz: {
+          quiz_id: In(quizs.map((a) => a.quiz_id)),
+        },
+      },
+      relations: ['quiz'],
+    });
+
+    const quizsWithSubmissions = quizs.map((quiz) => {
+      const totalSubmissions = submissions.filter(
+        (sub) => sub.quiz && sub.quiz.quiz_id === quiz.quiz_id,
+      ).length;
+
+      return {
+        ...quiz,
+        totalSubmissions,
+      };
+    });
+    return quizsWithSubmissions;
+  }
+  async findOne(quizId: string): Promise<Quiz> {
+    if (!quizId) {
+      throw new BadRequestException('AssignmentId is required');
+    }
+
+    const quiz = await this.quizRepository.findOne({
+      where: { quiz_id: quizId },
+      relations: ['batch', 'topics', 'createdBy'],
+    });
+
+    if (!quiz) {
+      throw new BadRequestException('Quiz not found');
+    }
+
+    const submissions = await this.submissionRepository.find({
+      where: { quiz: { quiz_id: quizId } },
+    });
+
+    const quizWithSubmissions = {
+      ...quiz,
+      totalSubmissions: submissions.length,
+    };
+
+    return quizWithSubmissions;
+  }
   update(id: string, updateQuizInput: UpdateQuizInput) {
     return `This action updates a #${id} quiz`;
   }

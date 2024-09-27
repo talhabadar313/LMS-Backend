@@ -17,10 +17,18 @@ export class SubmissionsResolver {
   }
 
   @Query(() => [Submission], { name: 'getAllSubmissionsByAssignment' })
-  findAll(@Args('assignmentId', { type: () => String }) assignmentId: string) {
-    return this.submissionsService.findAll(assignmentId);
+  findAllSubmissionsOfAssignment(
+    @Args('assignmentId', { type: () => String }) assignmentId: string,
+  ) {
+    return this.submissionsService.findAllAssignmentSubmissions(assignmentId);
   }
 
+  @Query(() => [Submission], { name: 'getAllSubmissionsByQuiz' })
+  findAllSubmissionsOfQuiz(
+    @Args('quizId', { type: () => String }) assignmentId: string,
+  ) {
+    return this.submissionsService.findAllQuizSubmissions(assignmentId);
+  }
   @Query(() => Submission, { name: 'submission' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.submissionsService.findOne(id);
