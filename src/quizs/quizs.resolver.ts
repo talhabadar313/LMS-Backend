@@ -29,7 +29,7 @@ export class QuizsResolver {
   }
 
   @Mutation(() => Quiz, { name: 'removeQuiz' })
-  removeQuiz(@Args('id', { type: () => String }) id: string) {
-    return this.quizsService.remove(id);
+  removeQuiz(@Args('quizId', { type: () => String }) quizId: string) {
+    return this.quizsService.remove(quizId);
   }
 }

@@ -1,6 +1,7 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
 import { IsArray, IsString, IsUUID } from 'class-validator';
-
+//@ts-ignore
+import { FileUpload, GraphQLUpload } from 'graphql-upload';
 @InputType()
 export class UpdateAssignmentInput {
   @Field(() => ID)
@@ -29,9 +30,8 @@ export class UpdateAssignmentInput {
   @IsString()
   attachmentSrc?: string[];
 
-  @Field(() => String)
-  @IsUUID()
-  batchId: string;
+  @Field(() => [GraphQLUpload], { nullable: true })
+  files?: Promise<FileUpload>[];
 
   @Field(() => [String])
   @IsArray()

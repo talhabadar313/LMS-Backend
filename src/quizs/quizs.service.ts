@@ -141,7 +141,19 @@ export class QuizsService {
     return `This action updates a #${id} quiz`;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} quiz`;
+  async remove(quizId: string): Promise<{ quiz_id: string }> {
+    if (!quizId) {
+      throw new BadRequestException('QuizId is required');
+    }
+    const quiz = await this.quizRepository.findOneBy({
+      quiz_id: quizId,
+    });
+
+    if (!quiz) {
+      throw new BadRequestException('Quiz not found');
+    }
+
+    await this.quizRepository.remove(quiz);
+    return { quiz_id: quizId };
   }
 }

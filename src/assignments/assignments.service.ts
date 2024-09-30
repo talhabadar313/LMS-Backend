@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
 import { UpdateAssignmentInput } from './dto/update-assignment.input';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -161,19 +166,12 @@ export class AssignmentsService {
       relations: ['assignment'],
     });
 
-    console.log('Assignments:', assignments);
-    console.log('Submissions with Assignment Details:', submissions);
-
     const assignmentsWithSubmissions = assignments.map((assignment) => {
       const totalSubmissions = submissions.filter(
         (sub) =>
           sub.assignment &&
           sub.assignment.assignment_id === assignment.assignment_id,
       ).length;
-
-      console.log(
-        `Assignment ID: ${assignment.assignment_id}, Total Submissions: ${totalSubmissions}`,
-      );
 
       return {
         ...assignment,
@@ -208,5 +206,138 @@ export class AssignmentsService {
     };
 
     return assignmentsWithSubmissions;
+  }
+
+  async updateAssignment(
+    updateAssignmentInput: UpdateAssignmentInput,
+  ): Promise<Assignment> {
+    const {
+      assignment_id,
+      title,
+      dueDate,
+      totalmarks,
+      description,
+      files,
+      topicId,
+    } = updateAssignmentInput;
+
+    console.log('Files Received', files);
+
+    const assignment = await this.assignmentRepository.findOne({
+      where: { assignment_id },
+      relations: ['batch'],
+    });
+
+    if (!assignment) throw new NotFoundException('Assignment not found.');
+
+    const existingFileUrls = assignment.attachmentSrc || [];
+    const existingFileTypes = assignment.attachmentType || [];
+
+    let newFileUrls: string[] = [];
+    let newFileTypes: string[] = [];
+
+    if (files && files.length > 0) {
+      for (const filePromise of files) {
+        const resolvedFile = await filePromise;
+        const { filename, mimetype } = resolvedFile;
+
+        const existingFileUrl = existingFileUrls.find((url) =>
+          url.endsWith(filename),
+        );
+
+        if (!existingFileUrl) {
+          const { createReadStream } = resolvedFile;
+          const stream = createReadStream();
+          const chunks: Buffer[] = [];
+          for await (const chunk of stream) {
+            chunks.push(chunk);
+          }
+          const buffer = Buffer.concat(chunks);
+
+          const { data, error } = await supabase.storage
+            .from('LMS Bucket')
+            .upload(`posts/${filename}`, buffer, { contentType: mimetype });
+
+          if (error) {
+            console.error(`File upload error: ${error.message}`);
+            continue;
+          }
+
+          const fileUrl = data?.path
+            ? supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data
+                .publicUrl
+            : null;
+
+          if (fileUrl) {
+            newFileUrls.push(fileUrl);
+            newFileTypes.push(mimetype);
+          }
+        } else {
+          newFileUrls.push(existingFileUrl);
+          const existingFileType =
+            existingFileTypes[existingFileUrls.indexOf(existingFileUrl)];
+          newFileTypes.push(existingFileType || mimetype);
+          console.log(`Retained existing file: ${existingFileUrl}`);
+        }
+      }
+    }
+
+    // Delete old files if they're no longer present
+    const filesToRemove = existingFileUrls.filter(
+      (url) => !newFileUrls.includes(url),
+    );
+    for (const fileUrl of filesToRemove) {
+      const fileName = fileUrl.split('/').pop(); // Extract filename
+      const { error: deleteError } = await supabase.storage
+        .from('LMS Bucket')
+        .remove([`posts/${fileName}`]); // Remove file from Supabase
+
+      if (deleteError) {
+        console.error(
+          `Error removing file from Supabase: ${deleteError.message}`,
+        );
+      }
+    }
+
+    if (!topicId || topicId.length === 0) {
+      throw new BadRequestException('At least one TopicId is required');
+    }
+
+    const topics = await this.topicRepository.find({
+      where: { topic_id: In(topicId) },
+    });
+
+    if (topics.length === 0) {
+      throw new BadRequestException('One or more TopicIds are invalid');
+    }
+
+    assignment.title = title || assignment.title;
+    assignment.description = description || assignment.description;
+    assignment.totalmarks = totalmarks || assignment.totalmarks;
+    assignment.dueDate = dueDate || assignment.dueDate;
+
+    // Update attachmentSrc and attachmentType
+    assignment.attachmentSrc = [...newFileUrls];
+    assignment.attachmentType = [...newFileTypes];
+
+    assignment.topics = topics;
+
+    return this.assignmentRepository.save(assignment);
+  }
+
+  async remove(assignmentId: string): Promise<{ assignment_id: string }> {
+    if (!assignmentId) {
+      throw new BadRequestException('AssignmentId is required');
+    }
+    const assignment = await this.assignmentRepository.findOneBy({
+      assignment_id: assignmentId,
+    });
+
+    if (!assignment) {
+      throw new BadRequestException('Assignment not found');
+    }
+
+    await this.assignmentRepository.remove(assignment);
+    return { assignment_id: assignmentId };
   }
 }

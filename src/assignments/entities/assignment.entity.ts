@@ -34,9 +34,9 @@ export class Assignment {
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   creationDate: Date;
 
-  @Field()
-  @Column()
-  dueDate: String;
+  @Field({ nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
+  dueDate: Date;
 
   @Field()
   @Column({ type: 'int' })
