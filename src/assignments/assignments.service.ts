@@ -281,16 +281,14 @@ export class AssignmentsService {
         }
       }
     }
-
-    // Delete old files if they're no longer present
     const filesToRemove = existingFileUrls.filter(
       (url) => !newFileUrls.includes(url),
     );
     for (const fileUrl of filesToRemove) {
-      const fileName = fileUrl.split('/').pop(); // Extract filename
+      const fileName = fileUrl.split('/').pop(); 
       const { error: deleteError } = await supabase.storage
         .from('LMS Bucket')
-        .remove([`posts/${fileName}`]); // Remove file from Supabase
+        .remove([`posts/${fileName}`]); 
 
       if (deleteError) {
         console.error(
@@ -315,8 +313,6 @@ export class AssignmentsService {
     assignment.description = description || assignment.description;
     assignment.totalmarks = totalmarks || assignment.totalmarks;
     assignment.dueDate = dueDate || assignment.dueDate;
-
-    // Update attachmentSrc and attachmentType
     assignment.attachmentSrc = [...newFileUrls];
     assignment.attachmentType = [...newFileTypes];
 
