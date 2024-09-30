@@ -4,6 +4,7 @@ import { Submission } from './entities/submission.entity';
 import { CreateSubmissionInput } from './dto/create-submission.input';
 import { UpdateSubmissionInput } from './dto/update-submission.input';
 import { AssignMarsksToAssignmentInput } from './dto/assign-assignmentmarks-input';
+import { AssignMarsksToQuizInput } from './dto/assign-quizmarks-input';
 
 @Resolver(() => Submission)
 export class SubmissionsResolver {
@@ -57,5 +58,12 @@ export class SubmissionsResolver {
     return this.submissionsService.assignMarksToAssignment(
       assignMarsksToAssignmentInput,
     );
+  }
+  @Mutation(() => Submission, { name: 'assignMarksToQuiz' })
+  assignMarksToQuiz(
+    @Args('assignMarsksToQuizInput')
+    assignMarsksToQuizInput: AssignMarsksToQuizInput,
+  ) {
+    return this.submissionsService.assignMarksToQuiz(assignMarsksToQuizInput);
   }
 }

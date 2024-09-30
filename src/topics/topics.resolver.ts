@@ -30,10 +30,7 @@ export class TopicsResolver {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')
   updateTopic(@Args('updateTopicInput') updateTopicInput: UpdateTopicInput) {
-    return this.topicsService.update(
-      updateTopicInput.topic_id,
-      updateTopicInput,
-    );
+    return this.topicsService.update(updateTopicInput);
   }
 
   @Mutation(() => Topic, { name: 'removeTopic' })

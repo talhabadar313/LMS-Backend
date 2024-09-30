@@ -37,13 +37,26 @@ export class TopicsService {
     return await this.topicRepository.findBy({ batch });
   }
 
-  async update(id: string, updateTopicInput: UpdateTopicInput): Promise<Topic> {
-    const topic = await this.topicRepository.findOneBy({ topic_id: id });
+  async update(updateTopicInput: UpdateTopicInput): Promise<Topic> {
+    const { batchId, name, topic_id } = updateTopicInput;
+
+    if (!batchId || !name || !topic_id) {
+      throw new BadRequestException('batchId, topicId and name are required');
+    }
+    const batch = await this.batchRepository.findOneBy({ batch_id: batchId });
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+    const topic = await this.topicRepository.findOneBy({ topic_id: topic_id });
     if (!topic) {
       throw new BadRequestException('Topic Not Found');
     }
-    await this.topicRepository.save(updateTopicInput);
-    return await this.topicRepository.findOneBy({ topic_id: id });
+
+    topic.name = name;
+    topic.batch = batch;
+
+    await this.topicRepository.save(topic);
+    return topic;
   }
 
   async remove(id: string): Promise<String> {

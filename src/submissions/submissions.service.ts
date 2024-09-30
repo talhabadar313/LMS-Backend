@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { AssignMarsksToAssignmentInput } from './dto/assign-assignmentmarks-input';
 import { SubmissionStatus, SubmissionType } from 'src/util/enum';
 import { v4 as uuidv4 } from 'uuid';
+import { AssignMarsksToQuizInput } from './dto/assign-quizmarks-input';
 
 @Injectable()
 export class SubmissionsService {
@@ -201,10 +202,7 @@ export class SubmissionsService {
       if (!submission) {
         throw new BadRequestException('Submission not found');
       }
-
-      // Do not change the submissionDate if submission exists
     } else {
-      // Handle the case for missing submissions
       if (!assignmentId) {
         throw new BadRequestException(
           'AssignmentId is required for missing students',
@@ -219,7 +217,6 @@ export class SubmissionsService {
         throw new BadRequestException('Assignment not found');
       }
 
-      // Generate a new submissionId
       const generatedSubmissionId = uuidv4();
       submission = this.submissionRepository.create({
         submissionid: generatedSubmissionId,
@@ -230,15 +227,59 @@ export class SubmissionsService {
         checkedAt: new Date(),
         checkedBy: user,
         score: score,
-        submissionDate: null, // Ensure submissionDate is null for missing students
+        submissionDate: null,
       });
     }
 
-    // Update submission properties regardless of whether it's new or existing
     submission.status = SubmissionStatus.Assigned;
     submission.checkedAt = new Date();
     submission.checkedBy = user;
     submission.score = score;
+
+    return await this.submissionRepository.save(submission);
+  }
+
+  async assignMarksToQuiz(assignMarksToQuiz: AssignMarsksToQuizInput) {
+    const { submissionId, studentId, checkedBy, score, quizId, SubmittedData } =
+      assignMarksToQuiz;
+
+    if (
+      !submissionId ||
+      !studentId ||
+      !checkedBy ||
+      !quizId ||
+      !SubmittedData
+    ) {
+      throw new BadRequestException(
+        'SubmissionId, StudentId, checkedBy, quizId, and SubmittedData are required',
+      );
+    }
+
+    const user = await this.userRepository.findOneBy({ user_id: checkedBy });
+    if (!user) {
+      throw new BadRequestException('CheckedBy user not found');
+    }
+
+    const submission = await this.submissionRepository.findOneBy({
+      submissionid: submissionId,
+      student: { user_id: studentId },
+      quiz: { quiz_id: quizId },
+    });
+
+    if (!submission) {
+      throw new BadRequestException(
+        'Submission not found for the provided quiz and student',
+      );
+    }
+
+    submission.checkedAt = new Date();
+    submission.checkedBy = user;
+    submission.score = score;
+    submission.SubmittedData = SubmittedData?.map((data, index) => ({
+      key: (index + 1).toString(),
+      name: data.name,
+      value: data.value,
+    }));
 
     return await this.submissionRepository.save(submission);
   }
