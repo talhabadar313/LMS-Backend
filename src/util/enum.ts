@@ -17,3 +17,13 @@ registerEnumType(SubmissionStatus, {
   name: 'SubmissionStatus',
   description: 'The type of status (assigned or not assigned)',
 });
+
+export enum AttendanceStatus {
+  PRESENT = 'present',
+  ABSENT = 'absent',
+}
+
+registerEnumType(AttendanceStatus, {
+  name: 'AttendanceStatus',
+  description: 'The type of status (present or absent)',
+});

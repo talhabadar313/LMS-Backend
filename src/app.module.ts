@@ -15,6 +15,8 @@ import { TopicsModule } from './topics/topics.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { QuizsModule } from './quizs/quizs.module';
 import { SubmissionsModule } from './submissions/submissions.module';
+import { AttendanceModule } from './attendance/attendance.module';
+import { AttendanceRecordModule } from './attendance-record/attendance-record.module';
 
 dotenv.config({ path: '.env' });
 
@@ -55,6 +57,8 @@ dotenv.config({ path: '.env' });
     AssignmentsModule,
     QuizsModule,
     SubmissionsModule,
+    AttendanceModule,
+    AttendanceRecordModule,
   ],
   controllers: [],
   providers: [],

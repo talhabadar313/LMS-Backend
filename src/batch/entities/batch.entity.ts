@@ -17,6 +17,7 @@ import { Post } from 'src/posts/entities/post.entity';
 import { Topic } from 'src/topics/entities/topic.entity';
 import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { Quiz } from 'src/quizs/entities/quiz.entity';
+import { Attendance } from 'src/attendance/entities/attendance.entity';
 
 @ObjectType()
 @Entity('batch')
@@ -126,4 +127,8 @@ export class Batch {
   @OneToMany(() => Quiz, (quiz) => quiz.batch)
   @Field(() => Quiz)
   quizzes?: Quiz[];
+
+  @OneToMany(() => Attendance, (attendance) => attendance.batch)
+  @Field(() => [Attendance])
+  attendances?: Attendance[];
 }

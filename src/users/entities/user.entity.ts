@@ -17,6 +17,8 @@ import { Like } from 'src/likes/entities/like.entity';
 import { Submission } from 'src/submissions/entities/submission.entity';
 import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { Quiz } from 'src/quizs/entities/quiz.entity';
+import { Attendance } from 'src/attendance/entities/attendance.entity';
+import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
 
 @ObjectType()
 @Entity('user')
@@ -93,4 +95,22 @@ export class User {
   @OneToMany(() => Batch, (batch) => batch.createdBy)
   @Field(() => [Batch], { nullable: true })
   batchCreated?: Batch[];
+
+  @OneToMany(() => Attendance, (attendance) => attendance.createdBy)
+  @Field(() => [Attendance], { nullable: true })
+  attendanceCreated?: Attendance[];
+
+  @OneToMany(
+    () => AttendanceRecord,
+    (attendancerecord) => attendancerecord.student,
+  )
+  @Field(() => [AttendanceRecord], { nullable: true })
+  attendanceRecords?: AttendanceRecord[];
+
+  @OneToMany(
+    () => AttendanceRecord,
+    (attendancerecord) => attendancerecord.markedBy,
+  )
+  @Field(() => [AttendanceRecord], { nullable: true })
+  markedBy?: AttendanceRecord[];
 }
