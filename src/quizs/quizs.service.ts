@@ -137,8 +137,34 @@ export class QuizsService {
 
     return quizWithSubmissions;
   }
-  update(id: string, updateQuizInput: UpdateQuizInput) {
-    return `This action updates a #${id} quiz`;
+  async update(updateQuizInput: UpdateQuizInput): Promise<Quiz> {
+    const { quiz_id, topicId, totalmarks, marksBreakDown, Date, title } =
+      updateQuizInput;
+    if (!quiz_id) {
+      throw new BadRequestException('QuizId is required');
+    }
+    const quiz = await this.quizRepository.findOneBy({ quiz_id: quiz_id });
+    if (!quiz) {
+      throw new BadRequestException('Quiz not found');
+    }
+    if (!topicId) {
+      throw new BadRequestException('TopicId is required');
+    }
+
+    const topics = await this.topicRepository.find({
+      where: { topic_id: In(topicId) },
+    });
+
+    if (topics.length === 0) {
+      throw new BadRequestException('One or more TopicIds are invalid');
+    }
+
+    quiz.title = title;
+    quiz.topics = topics;
+    quiz.totalmarks = totalmarks;
+    quiz.marksBreakDown = marksBreakDown;
+    quiz.Date = Date;
+    return await this.quizRepository.save(quiz);
   }
 
   async remove(quizId: string): Promise<{ quiz_id: string }> {

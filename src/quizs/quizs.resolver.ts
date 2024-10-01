@@ -25,7 +25,7 @@ export class QuizsResolver {
 
   @Mutation(() => Quiz, { name: 'updateQuiz' })
   updateQuiz(@Args('updateQuizInput') updateQuizInput: UpdateQuizInput) {
-    return this.quizsService.update(updateQuizInput.quiz_id, updateQuizInput);
+    return this.quizsService.update(updateQuizInput);
   }
 
   @Mutation(() => Quiz, { name: 'removeQuiz' })

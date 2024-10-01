@@ -1,4 +1,4 @@
-import { Field, ID, InputType, Int } from '@nestjs/graphql';
+import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Column } from 'typeorm';
 
 @InputType()
@@ -18,9 +18,18 @@ export class UpdateQuizInput {
   @Column()
   totalmarks: number;
 
-  @Field(() => ID)
-  batchId: string;
-
   @Field(() => [ID])
   topicId: string[];
+
+  @Field(() => [quizMarksBreakDown])
+  marksBreakDown?: quizMarksBreakDown[];
+}
+
+@InputType()
+export class quizMarksBreakDown {
+  @Field(() => String)
+  name: string;
+
+  @Field(() => Int)
+  value: number;
 }
