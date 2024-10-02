@@ -8,7 +8,7 @@ import {
   ManyToMany,
   OneToMany,
 } from 'typeorm';
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Batch } from 'src/batch/entities/batch.entity';
 import { Candidate } from 'src/candidates/entities/candidate.entity';
 import { ID } from '@nestjs/graphql';
@@ -113,4 +113,7 @@ export class User {
   )
   @Field(() => [AttendanceRecord], { nullable: true })
   markedBy?: AttendanceRecord[];
+
+  @Field(() => Int, { nullable: true })
+  absences?: number;
 }

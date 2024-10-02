@@ -11,6 +11,9 @@ import { User } from '../users/entities/user.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
 import { ApplicationsResponse } from '../candidates/dto/applications-response';
+import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
+import { StudentResponse } from './dto/students-response';
+import { Submission } from 'src/submissions/entities/submission.entity';
 
 @Injectable()
 export class BatchService {
@@ -20,6 +23,12 @@ export class BatchService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    @InjectRepository(AttendanceRecord)
+    private attendanceRepository: Repository<AttendanceRecord>,
+
+    @InjectRepository(Submission)
+    private submissionRepository: Repository<Submission>,
   ) {}
 
   async create(createBatchInput: CreateBatchInput): Promise<Batch> {
@@ -285,14 +294,56 @@ export class BatchService {
     return daysOfWeek;
   }
 
-  async findStudentsByBatchId(batchId: string): Promise<Batch> {
+  async findStudentsByBatchId(batchId: string): Promise<StudentResponse[]> {
     if (!batchId) {
       throw new BadRequestException('BatchId is required');
     }
 
-    return await this.batchRepository.findOne({
+    const batch = await this.batchRepository.findOne({
       where: { batch_id: batchId },
       relations: ['users'],
     });
+
+    if (!batch) {
+      throw new NotFoundException('Batch not found');
+    }
+
+    const studentsDataWithAbsencesAndAssignments = await Promise.all(
+      batch.users.map(async (student) => {
+        // Fetch attendance records
+        const attendanceRecords = await this.attendanceRepository.find({
+          where: { student: { user_id: student.user_id } },
+          relations: ['attendance'],
+        });
+
+        // Fetch assignment records
+        const assignmentsRecords = await this.submissionRepository.find({
+          where: { student: { user_id: student.user_id } },
+          relations: ['assignment'],
+        });
+
+        // Calculate absence count
+        const absences = attendanceRecords.filter(
+          (record) => record.status === 'absent',
+        ).length;
+
+        // Map assignment records to include title and score
+        const assignments = assignmentsRecords.map((record) => ({
+          title: record.assignment.title, // Assuming assignment has a title property
+          score: record.score,
+        }));
+
+        // Return structured student data
+        return {
+          user_id: student.user_id,
+          name: student.name,
+          email: student.email,
+          absences: absences,
+          assignments: assignments, // Include assignments in the response
+        };
+      }),
+    );
+
+    return studentsDataWithAbsencesAndAssignments;
   }
 }

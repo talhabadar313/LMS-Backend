@@ -101,7 +101,46 @@ export class AttendanceRecordService {
     return `This action returns a #${id} attendanceRecord`;
   }
 
-  update(updateAttendanceRecordInput: UpdateAttendanceRecordInput) {
-    return `This action updates a attendanceRecord`;
+  async update(
+    updateAttendanceRecordInput: UpdateAttendanceRecordInput,
+  ): Promise<AttendanceRecord[]> {
+    const attendanceRecords: AttendanceRecord[] = [];
+
+    const { studentIds, status, attendanceId } = updateAttendanceRecordInput;
+
+    for (let i = 0; i < studentIds.length; i++) {
+      const studentId = studentIds[i];
+      const studentStatus = status[i];
+
+      const student = await this.userRepository.findOneBy({
+        user_id: studentId,
+      });
+      if (!student) {
+        throw new BadRequestException(`Student not found: ${studentId}`);
+      }
+
+      const existingRecord = await this.attendanceRecordRepository.findOne({
+        where: { attendance: { attendance_id: attendanceId }, student },
+        relations: ['student'],
+      });
+
+      if (existingRecord) {
+        existingRecord.status = studentStatus;
+        const updatedRecord =
+          await this.attendanceRecordRepository.save(existingRecord);
+        attendanceRecords.push(updatedRecord);
+      } else {
+        const newRecord = this.attendanceRecordRepository.create({
+          attendance: { attendance_id: attendanceId },
+          student,
+          status: studentStatus,
+        });
+        const savedRecord =
+          await this.attendanceRecordRepository.save(newRecord);
+        attendanceRecords.push(savedRecord);
+      }
+    }
+
+    return attendanceRecords;
   }
 }

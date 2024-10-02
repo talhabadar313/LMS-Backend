@@ -25,7 +25,7 @@ export class AttendanceResolver {
     return this.attendanceService.findOne(attendanceId);
   }
 
-  @Mutation(() => Attendance)
+  @Mutation(() => Attendance, { name: 'updateAttendance' })
   updateAttendance(
     @Args('updateAttendanceInput') updateAttendanceInput: UpdateAttendanceInput,
   ) {

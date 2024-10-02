@@ -26,7 +26,8 @@ export class AttendanceService {
   async create(
     createAttendanceInput: CreateAttendanceInput,
   ): Promise<Attendance> {
-    const { sessionDate, batchId, createdBy } = createAttendanceInput;
+    const { sessionDate, sessionName, batchId, createdBy } =
+      createAttendanceInput;
     if (!batchId) {
       throw new BadRequestException('BatchId is required');
     }
@@ -48,6 +49,7 @@ export class AttendanceService {
     }
 
     const attendance = this.attendanceRepository.create({
+      sessionName: sessionName,
       sessionDate: new Date(sessionDate).toISOString(),
       batch: batch,
       createdBy: user,
@@ -87,8 +89,26 @@ export class AttendanceService {
     return `This action returns a #${attendanceId} attendance`;
   }
 
-  update(updateAttendanceInput: UpdateAttendanceInput) {
-    return `This action updates a  attendance`;
+  async update(updateAttendanceInput: UpdateAttendanceInput) {
+    const { attendanceId, sessionDate, sessionName } = updateAttendanceInput;
+    if (!attendanceId) {
+      throw new BadRequestException('AttendanceId is required');
+    }
+    if (!sessionDate) {
+      throw new BadRequestException('SessionDate is required');
+    }
+
+    const attendance = await this.attendanceRepository.findOneBy({
+      attendance_id: attendanceId,
+    });
+
+    if (!attendance) {
+      throw new BadRequestException('Attendance Session Not Found');
+    }
+
+    attendance.sessionName = sessionName;
+    attendance.sessionDate = new Date(sessionDate).toISOString();
+    return this.attendanceRepository.save(attendance);
   }
 
   async remove(attendanceId: string): Promise<{ attendance_id: string }> {

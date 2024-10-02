@@ -9,4 +9,7 @@ export class UpdateAttendanceInput {
 
   @Field()
   sessionDate: Date;
+
+  @Field({ nullable: true })
+  sessionName: string;
 }

@@ -8,6 +8,8 @@ import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { ApplicationsResponse } from '../candidates/dto/applications-response';
+import { User } from 'src/users/entities/user.entity';
+import { StudentResponse } from './dto/students-response';
 
 @Resolver(() => Batch)
 export class BatchResolver {
@@ -78,7 +80,7 @@ export class BatchResolver {
     return this.batchService.getApplicationsPerDay(batchId);
   }
 
-  @Query(() => Batch, { name: 'getStudentsByBatch' })
+  @Query(() => [StudentResponse], { name: 'getStudentsByBatch' })
   findStudentsByBatchId(
     @Args('batchId', { type: () => String }) batchId: string,
   ) {

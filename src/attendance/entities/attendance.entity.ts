@@ -21,6 +21,10 @@ export class Attendance {
   @Column({ type: 'timestamptz' })
   sessionDate: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  sessionName: string;
+
   @ManyToOne(() => Batch, (batch) => batch.attendances)
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch)

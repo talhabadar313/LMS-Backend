@@ -30,11 +30,15 @@ export class AttendanceRecordResolver {
     return this.attendanceRecordService.findOne(recordId);
   }
 
-  @Mutation(() => AttendanceRecord)
-  updateAttendanceRecord(
+  @Mutation(() => [AttendanceRecord], { name: 'updateAttendanceRecord' })
+  async updateAttendanceRecord(
     @Args('updateAttendanceRecordInput')
     updateAttendanceRecordInput: UpdateAttendanceRecordInput,
-  ) {
-    return this.attendanceRecordService.update(updateAttendanceRecordInput);
+  ): Promise<AttendanceRecord[]> {
+    const records = await this.attendanceRecordService.update(
+      updateAttendanceRecordInput,
+    );
+
+    return records;
   }
 }

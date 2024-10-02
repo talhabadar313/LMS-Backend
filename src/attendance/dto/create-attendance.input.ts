@@ -7,6 +7,10 @@ export class CreateAttendanceInput {
   @IsString()
   sessionDate: Date;
 
+  @Field({ nullable: true })
+  @IsString()
+  sessionName: string;
+
   @Field(() => ID)
   @IsUUID()
   batchId: string;
