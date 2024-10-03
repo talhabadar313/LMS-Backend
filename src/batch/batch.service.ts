@@ -11,9 +11,7 @@ import { User } from '../users/entities/user.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
 import { ApplicationsResponse } from '../candidates/dto/applications-response';
-import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
 import { StudentResponse } from './dto/students-response';
-import { Submission } from 'src/submissions/entities/submission.entity';
 
 @Injectable()
 export class BatchService {
@@ -23,12 +21,6 @@ export class BatchService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
-
-    @InjectRepository(AttendanceRecord)
-    private attendanceRepository: Repository<AttendanceRecord>,
-
-    @InjectRepository(Submission)
-    private submissionRepository: Repository<Submission>,
   ) {}
 
   async create(createBatchInput: CreateBatchInput): Promise<Batch> {
@@ -121,12 +113,12 @@ export class BatchService {
     batch.totalCandidates = batch.candidates ? batch.candidates.length : 0;
     batch.interviewedCandidates = batch.candidates
       ? batch.candidates.filter(
-          (candidate) => candidate.status === 'interviewed',
+          (candidate) => candidate.status === 'Interviewed',
         ).length
       : 0;
     batch.registeredCandidates = batch.candidates
       ? batch.candidates.filter(
-          (candidate) => candidate.status === 'registered',
+          (candidate) => candidate.status === 'Registered',
         ).length
       : 0;
 
@@ -157,19 +149,19 @@ export class BatchService {
           (candidate) => candidate.gender === 'female',
         ).length;
         batch.newCandidates = batch.candidates.filter(
-          (candidate) => candidate.status === 'new',
+          (candidate) => candidate.status === 'New',
         ).length;
         batch.interviewedCandidates = batch.candidates.filter(
-          (candidate) => candidate.status === 'interviewed',
+          (candidate) => candidate.status === 'Interviewed',
         ).length;
         batch.invitedCandidates = batch.candidates.filter(
-          (candidate) => candidate.status === 'invited',
+          (candidate) => candidate.status === 'Invited',
         ).length;
         batch.rejectedCandidates = batch.candidates.filter(
-          (candidate) => candidate.status === 'rejected',
+          (candidate) => candidate.status === 'Rejected',
         ).length;
         batch.registeredCandidates = batch.candidates.filter(
-          (candidate) => candidate.status === 'registered',
+          (candidate) => candidate.status === 'Registered',
         ).length;
       }
     } else {
@@ -182,10 +174,10 @@ export class BatchService {
           (candidate) => candidate.gender === 'female',
         ).length;
         batch.interviewedCandidates = batch.users.filter(
-          (user) => user.status === 'interviewed',
+          (user) => user.status === 'Interviewed',
         ).length;
         batch.registeredCandidates = batch.users.filter(
-          (user) => user.status === 'registered',
+          (user) => user.status === 'Registered',
         ).length;
       }
     }
@@ -293,15 +285,32 @@ export class BatchService {
 
     return daysOfWeek;
   }
+  async findStudentsByBatchId(batchId: string): Promise<Batch> {
+    if (!batchId) {
+      throw new BadRequestException('BatchId is required');
+    }
 
-  async findStudentsByBatchId(batchId: string): Promise<StudentResponse[]> {
+    return await this.batchRepository.findOne({
+      where: { batch_id: batchId },
+      relations: ['users'],
+    });
+  }
+  async findStudentsDetailsByBatchId(
+    batchId: string,
+  ): Promise<StudentResponse[]> {
     if (!batchId) {
       throw new BadRequestException('BatchId is required');
     }
 
     const batch = await this.batchRepository.findOne({
       where: { batch_id: batchId },
-      relations: ['users'],
+      relations: [
+        'candidates',
+        'candidates.user.attendanceRecords',
+        'candidates.user.submissions',
+        'candidates.user.submissions.assignment',
+        'candidates.user',
+      ],
     });
 
     if (!batch) {
@@ -309,37 +318,38 @@ export class BatchService {
     }
 
     const studentsDataWithAbsencesAndAssignments = await Promise.all(
-      batch.users.map(async (student) => {
-        // Fetch attendance records
-        const attendanceRecords = await this.attendanceRepository.find({
-          where: { student: { user_id: student.user_id } },
-          relations: ['attendance'],
-        });
+      batch.candidates.map(async (candidate) => {
+        const student = candidate?.user;
 
-        // Fetch assignment records
-        const assignmentsRecords = await this.submissionRepository.find({
-          where: { student: { user_id: student.user_id } },
-          relations: ['assignment'],
-        });
-
-        // Calculate absence count
-        const absences = attendanceRecords.filter(
+        const absences = student?.attendanceRecords.filter(
           (record) => record.status === 'absent',
         ).length;
 
-        // Map assignment records to include title and score
-        const assignments = assignmentsRecords.map((record) => ({
-          title: record.assignment.title, // Assuming assignment has a title property
-          score: record.score,
+        const assignments = student?.submissions.map((submission) => ({
+          title: submission.assignment.title,
+          totalmarks: submission.assignment.totalmarks,
+          dueDate: submission.assignment.dueDate,
+          score: submission.score,
         }));
 
-        // Return structured student data
         return {
-          user_id: student.user_id,
-          name: student.name,
-          email: student.email,
+          user_id: candidate?.candidate_id,
+          name: candidate?.name,
+          email: candidate?.email,
+          status: candidate?.status,
+          watchlisted: student?.watchlisted,
+          gender: candidate?.gender,
+          age: candidate?.age,
+          laptopAvailability: candidate?.laptopAvailability,
+          qualification: candidate?.qualification,
+          institutionName: candidate?.institutionName,
+          allotedHours: candidate?.allocatedHours,
+          purpose: candidate?.purpose,
+          phoneNo: candidate?.phoneNo,
+          batchId: batch?.batch_id,
+          batchName: batch?.name,
           absences: absences,
-          assignments: assignments, // Include assignments in the response
+          assignments: assignments,
         };
       }),
     );

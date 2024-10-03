@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { BatchService } from './batch.service';
 import { Batch } from './entities/batch.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
@@ -80,10 +80,18 @@ export class BatchResolver {
     return this.batchService.getApplicationsPerDay(batchId);
   }
 
-  @Query(() => [StudentResponse], { name: 'getStudentsByBatch' })
+  @Query(() => Batch, { name: 'getStudentsByBatch' })
   findStudentsByBatchId(
     @Args('batchId', { type: () => String }) batchId: string,
   ) {
     return this.batchService.findStudentsByBatchId(batchId);
+  }
+
+  @Query(() => [StudentResponse], { name: 'getStudentsDetailsByBatch' })
+  findStudentsDetailsByBatchId(
+    @Args('batchId', { type: () => String }) batchId: string,
+    offset: number,
+  ) {
+    return this.batchService.findStudentsDetailsByBatchId(batchId);
   }
 }

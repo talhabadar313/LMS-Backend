@@ -46,7 +46,7 @@ export class UsersService {
     };
 
     if (createUserInput.role === 'student' && !createUserInput.status) {
-      userData.status = 'registered';
+      userData.status = 'Registered';
     }
 
     if (createUserInput.batchId) {

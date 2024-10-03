@@ -107,13 +107,11 @@ export class CandidatesService {
     }
 
     const oldStatus = candidate.status;
-    candidate.status = 'registered';
+    candidate.status = 'Registered';
     candidate.tempPassword = null;
 
-    // Save candidate with updated status
     await this.candidateRepository.save(candidate);
 
-    // Record status change
     if (oldStatus !== candidate.status) {
       await this.changeHistoryService.addChangeHistory(
         candidate,
@@ -133,12 +131,12 @@ export class CandidatesService {
       user.password = hashedPassword;
       user.role = 'student';
       user.phoneNumber = candidate.phoneNo;
-      user.status = 'registered';
+      user.status = 'Registered';
       user.batch = candidate.batch;
       user.candidate = candidate;
     } else {
       user.password = hashedPassword;
-      user.status = 'registered';
+      user.status = 'Registered';
       user.name = candidate.name;
       user.email = candidate.email;
       user.phoneNumber = candidate.phoneNo;
@@ -164,6 +162,24 @@ export class CandidatesService {
     }
     const oldStatus = candidate.status;
 
+    if (oldStatus === 'Registered') {
+      console.log(`Updating user for candidate ID: ${candidate.candidate_id}`);
+
+      const user = await this.userRepository.findOne({
+        where: { candidate: candidate },
+      });
+
+      if (!user) {
+        throw new NotFoundException(
+          `User associated with candidate ID ${id} not found`,
+        );
+      }
+
+      user.name = candidate.name;
+      user.phoneNumber = candidate.phoneNo;
+      await this.userRepository.save(user);
+    }
+
     if (updateCandidateInput.batchName) {
       const batch = await this.batchRepository.findOne({
         where: { name: updateCandidateInput.batchName },
@@ -178,7 +194,7 @@ export class CandidatesService {
 
     Object.assign(candidate, updateCandidateInput);
 
-    if (updateCandidateInput.status === 'invited') {
+    if (updateCandidateInput.status === 'Invited') {
       const tempPassword = this.generateTempPassword();
       candidate.tempPassword = tempPassword;
       const loginUrl = 'https://lms-alpha-five.vercel.app/';
@@ -191,7 +207,7 @@ export class CandidatesService {
       );
     }
 
-    if (updateCandidateInput.status === 'rejected') {
+    if (updateCandidateInput.status === 'Rejected') {
       await this.mailService.sendRejectionEmail(
         candidate.email,
         candidate.name,

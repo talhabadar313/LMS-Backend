@@ -1,30 +1,70 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-// Rename the Assignment class
 @ObjectType()
 export class StudentAssignment {
   @Field()
   title: string;
 
-  @Field({ nullable: true })
+  @Field()
+  totalmarks: number;
+
+  @Field()
+  dueDate: Date;
+
+  @Field()
   score: number | null;
 }
 
-// Update the StudentResponse class to use the renamed class
 @ObjectType()
 export class StudentResponse {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   user_id: string;
 
-  @Field()
+  @Field({ nullable: true })
   name: string;
 
-  @Field()
+  @Field({ nullable: true })
   email: string;
 
-  @Field()
+  @Field({ nullable: true })
+  phoneNo: string;
+
+  @Field({ nullable: true })
+  gender: string;
+
+  @Field({ nullable: true })
+  age: number;
+
+  @Field({ nullable: true })
+  laptopAvailability: string;
+
+  @Field({ nullable: true })
+  qualification: string;
+
+  @Field({ nullable: true })
+  institutionName: string;
+
+  @Field({ nullable: true })
+  allotedHours: number;
+
+  @Field({ nullable: true })
+  purpose: string;
+
+  @Field({ nullable: true })
+  status: string;
+
+  @Field({ nullable: true })
+  batchId: string;
+
+  @Field({ nullable: true })
+  batchName: string;
+
+  @Field({ nullable: true })
+  watchlisted: boolean;
+
+  @Field({ nullable: true })
   absences: number;
 
-  @Field(() => [StudentAssignment]) // Update reference to the renamed class
-  assignments: StudentAssignment[]; // List of assignments with titles and scores
+  @Field(() => [StudentAssignment], { nullable: true })
+  assignments: StudentAssignment[];
 }

@@ -1,8 +1,7 @@
-import { InputType, Field, Int , ID} from '@nestjs/graphql';
+import { InputType, Field, Int, ID } from '@nestjs/graphql';
 import { IsUUID } from 'class-validator';
 @InputType()
 export class CreateCandidateInput {
-
   @Field()
   name: string;
 
@@ -18,7 +17,7 @@ export class CreateCandidateInput {
   @Field()
   laptopAvailability: string;
 
-  @Field({defaultValue:"new"})
+  @Field({ defaultValue: 'New' })
   status: string;
 
   @Field(() => Int)
@@ -30,7 +29,7 @@ export class CreateCandidateInput {
   @Field()
   institutionName: string;
 
-  @Field(() => Int , {nullable:true})
+  @Field(() => Int, { nullable: true })
   allocatedHours: number;
 
   @Field()
@@ -39,5 +38,4 @@ export class CreateCandidateInput {
   @Field(() => ID)
   @IsUUID()
   batchId?: string;
-
 }

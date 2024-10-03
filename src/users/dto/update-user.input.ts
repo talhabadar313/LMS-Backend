@@ -1,4 +1,3 @@
-
 import { InputType, Field, ID } from '@nestjs/graphql';
 import { IsOptional, IsString, IsEmail, IsBoolean } from 'class-validator';
 
@@ -37,5 +36,4 @@ export class UpdateUserInput {
   @IsOptional()
   @IsBoolean()
   watchlisted?: boolean;
-
 }

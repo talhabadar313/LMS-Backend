@@ -2,7 +2,6 @@ import { InputType, Field, ID } from '@nestjs/graphql';
 import { IsUUID, IsOptional } from 'class-validator';
 @InputType()
 export class UpdateCandidateInput {
-
   @Field(() => ID)
   candidate_id: string;
 
@@ -20,8 +19,6 @@ export class UpdateCandidateInput {
   status: string;
 
   @Field()
-  @IsUUID()
   @IsOptional()
   batchName?: string;
-
 }
