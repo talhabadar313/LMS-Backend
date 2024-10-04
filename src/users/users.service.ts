@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { Batch } from '../batch/entities/batch.entity';
 import { Candidate } from '../candidates/entities/candidate.entity';
 import { MailService } from '../mail/mail.service';
+import { WatchlistUserInput } from './dto/watchlist-user-input';
 
 @Injectable()
 export class UsersService {
@@ -157,6 +158,37 @@ export class UsersService {
       where: { user_id },
       relations: ['batch', 'candidate'],
     });
+  }
+
+  async moveToWatchList(watchListUserInput: WatchlistUserInput): Promise<User> {
+    const { userId, warning, reason } = watchListUserInput;
+    if (!userId) {
+      throw new BadRequestException('UserId is required');
+    }
+    const user = await this.userRepository.findOneBy({ user_id: userId });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    user.watchlisted = true;
+    user.warning = warning;
+    user.reason = reason;
+    return this.userRepository.save(user);
+  }
+
+  async removeFromWatchList(userId: string): Promise<User> {
+    if (!userId) {
+      throw new BadRequestException('UserId is required');
+    }
+    const user = await this.userRepository.findOneBy({ user_id: userId });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    user.watchlisted = false;
+    user.warning = '';
+    user.reason = '';
+    return this.userRepository.save(user);
   }
 
   async remove(user_id: string): Promise<void> {

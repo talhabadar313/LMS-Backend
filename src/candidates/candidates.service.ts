@@ -166,7 +166,9 @@ export class CandidatesService {
       console.log(`Updating user for candidate ID: ${candidate.candidate_id}`);
 
       const user = await this.userRepository.findOne({
-        where: { candidate: candidate },
+        where: {
+          candidate: { candidate_id: updateCandidateInput.candidate_id },
+        },
       });
 
       if (!user) {
@@ -175,8 +177,8 @@ export class CandidatesService {
         );
       }
 
-      user.name = candidate.name;
-      user.phoneNumber = candidate.phoneNo;
+      user.name = updateCandidateInput.name || candidate.name;
+      user.phoneNumber = updateCandidateInput.phoneNo || candidate.phoneNo;
       await this.userRepository.save(user);
     }
 

@@ -17,6 +17,7 @@ import { QuizsModule } from './quizs/quizs.module';
 import { SubmissionsModule } from './submissions/submissions.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AttendanceRecordModule } from './attendance-record/attendance-record.module';
+import { NotesModule } from './notes/notes.module';
 
 dotenv.config({ path: '.env' });
 
@@ -59,6 +60,7 @@ dotenv.config({ path: '.env' });
     SubmissionsModule,
     AttendanceModule,
     AttendanceRecordModule,
+    NotesModule,
   ],
   controllers: [],
   providers: [],

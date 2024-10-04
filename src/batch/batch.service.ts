@@ -333,7 +333,8 @@ export class BatchService {
         }));
 
         return {
-          user_id: candidate?.candidate_id,
+          candidate_id: candidate?.candidate_id,
+          student_id: student?.user_id,
           name: candidate?.name,
           email: candidate?.email,
           status: candidate?.status,
@@ -346,6 +347,8 @@ export class BatchService {
           allotedHours: candidate?.allocatedHours,
           purpose: candidate?.purpose,
           phoneNo: candidate?.phoneNo,
+          warning: student?.warning,
+          reason: student?.reason,
           batchId: batch?.batch_id,
           batchName: batch?.name,
           absences: absences,

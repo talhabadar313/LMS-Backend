@@ -18,7 +18,10 @@ export class StudentAssignment {
 @ObjectType()
 export class StudentResponse {
   @Field(() => ID, { nullable: true })
-  user_id: string;
+  candidate_id: string;
+
+  @Field(() => ID, { nullable: true })
+  student_id: string;
 
   @Field({ nullable: true })
   name: string;
@@ -52,6 +55,12 @@ export class StudentResponse {
 
   @Field({ nullable: true })
   status: string;
+
+  @Field({ nullable: true })
+  warning: String;
+
+  @Field({ nullable: true })
+  reason: String;
 
   @Field({ nullable: true })
   batchId: string;

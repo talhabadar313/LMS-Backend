@@ -1,0 +1,36 @@
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { NotesService } from './notes.service';
+import { Note } from './entities/note.entity';
+import { CreateNoteInput } from './dto/create-note.input';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RolesGuard } from 'src/auth/role.guard';
+import { Roles } from 'src/auth/role.decorator';
+
+@Resolver(() => Note)
+export class NotesResolver {
+  constructor(private readonly notesService: NotesService) {}
+
+  @Mutation(() => [Note], { name: 'addNoteToStudent' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  createNote(
+    @Args('createNoteInput') createNoteInput: CreateNoteInput,
+  ): Promise<Note[]> {
+    return this.notesService.create(createNoteInput);
+  }
+
+  @Query(() => [Note], { name: 'getStudentNotes' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  findAll(@Args('userId', { type: () => String }) userId: string) {
+    return this.notesService.findAll(userId);
+  }
+
+  @Mutation(() => Note, { name: 'removeNoteFromStudent' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  removeNote(@Args('noteId', { type: () => String }) noteId: string) {
+    return this.notesService.remove(noteId);
+  }
+}

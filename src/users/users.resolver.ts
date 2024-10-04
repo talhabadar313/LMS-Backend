@@ -13,6 +13,7 @@ import { RolesGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { RequestPasswordResetInput } from './dto/request-password.input';
 import { ResetPasswordInput } from './dto/reset-password';
+import { WatchlistUserInput } from './dto/watchlist-user-input';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -116,5 +117,21 @@ export class UsersResolver {
       }
       throw new BadRequestException('Error resetting password');
     }
+  }
+
+  @Mutation(() => User, { name: 'moveStudentToWatchList' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  async moveToWatchList(
+    @Args('watchListUserInput') watchListUserInput: WatchlistUserInput,
+  ): Promise<User> {
+    return this.usersService.moveToWatchList(watchListUserInput);
+  }
+
+  @Mutation(() => User, { name: 'removeStudentFromWatchList' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  async removeFromWatchList(@Args('userId') userId: string): Promise<User> {
+    return this.usersService.removeFromWatchList(userId);
   }
 }

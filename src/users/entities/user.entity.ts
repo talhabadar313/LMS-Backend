@@ -19,6 +19,7 @@ import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { Quiz } from 'src/quizs/entities/quiz.entity';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
 import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
+import { Note } from 'src/notes/entities/note.entity';
 
 @ObjectType()
 @Entity('user')
@@ -53,6 +54,14 @@ export class User {
   @Field(() => Boolean, { nullable: true })
   @Column({ type: 'boolean', default: false, nullable: true })
   watchlisted?: boolean;
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  warning?: String;
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  reason?: String;
 
   @OneToOne(() => Candidate, (candidate) => candidate.user, { nullable: true })
   @JoinColumn({ name: 'candidateId' })
@@ -113,6 +122,14 @@ export class User {
   )
   @Field(() => [AttendanceRecord], { nullable: true })
   markedBy?: AttendanceRecord[];
+
+  @OneToMany(() => Note, (note) => note.user)
+  @Field(() => [Note], { nullable: true })
+  notes?: Note[];
+
+  @OneToMany(() => Note, (note) => note.createdBy)
+  @Field(() => [Note], { nullable: true })
+  notesCreated?: Note[];
 
   @Field(() => Int, { nullable: true })
   absences?: number;
