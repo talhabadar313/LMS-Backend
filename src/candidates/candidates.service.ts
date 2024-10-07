@@ -82,11 +82,13 @@ export class CandidatesService {
     return candidates;
   }
 
-  findOne(id: string): Promise<Candidate> {
-    return this.candidateRepository.findOne({
+  async findOne(id: string): Promise<Candidate> {
+    const candidate = await this.candidateRepository.findOne({
       where: { candidate_id: id },
       relations: ['user', 'batch'],
     });
+
+    return candidate;
   }
 
   async resetPassword(

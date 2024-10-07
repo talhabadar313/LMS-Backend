@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from './entities/note.entity';
 import { In, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { AddNoteInput } from './dto/add-note-input';
 
 @Injectable()
 export class NotesService {
@@ -87,6 +88,39 @@ export class NotesService {
     return newNotesToSave;
   }
 
+  async add(addNoteInput: AddNoteInput): Promise<Note[]> {
+    const { note, studentId, createdBy } = addNoteInput;
+
+    if (!studentId) {
+      throw new BadRequestException('StudentId is required');
+    }
+
+    if (!createdBy) {
+      throw new BadRequestException('CreatedBy ID is required');
+    }
+    if (!note) {
+      throw new BadRequestException('Note is required');
+    }
+    const student = await this.userRepository.findOneBy({ user_id: studentId });
+    if (!student) {
+      throw new BadRequestException('Student not found');
+    }
+    const user = await this.userRepository.findOneBy({
+      user_id: createdBy,
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const newNote = this.noteRepository.create({
+      note,
+      user: student,
+      createdBy: user,
+    });
+    const savedNote = await this.noteRepository.save(newNote);
+    return [savedNote];
+  }
   async findAll(userId: string): Promise<Note[]> {
     if (!userId) {
       throw new BadRequestException('UserId is required');

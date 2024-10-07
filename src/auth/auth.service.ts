@@ -4,14 +4,14 @@ import { UsersService } from '../users/users.service';
 import { LoginInput } from '../users/dto/login-user.input';
 import { JwtPayload } from 'jsonwebtoken';
 import { User } from '../users/entities/user.entity';
-import { CandidatesService } from '../candidates/candidates.service'; 
+import { CandidatesService } from '../candidates/candidates.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly candidatesService: CandidatesService, 
+    private readonly candidatesService: CandidatesService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -22,30 +22,35 @@ export class AuthService {
     return null;
   }
 
-  async login(loginInput: LoginInput): Promise<{ accessToken: string; user: User; needsPasswordReset?: boolean }> {
+  async login(loginInput: LoginInput): Promise<{
+    accessToken: string;
+    user: User;
+    needsPasswordReset?: boolean;
+  }> {
     const user = await this.validateUser(loginInput.email, loginInput.password);
 
     if (user) {
-      
-      const payload: JwtPayload = { 
-        id: user.user_id, 
-        name: user.name, 
+      const payload: JwtPayload = {
+        id: user.user_id,
+        name: user.name,
         email: user.email,
-        roles: user.role, 
+        roles: user.role,
+        terminated: user.terminated,
       };
       const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
 
-      return { accessToken, user,  needsPasswordReset: false };
-    } 
+      return { accessToken, user, needsPasswordReset: false };
+    }
 
-   
-    const candidate = await this.candidatesService.findCandidateByEmail(loginInput.email);
+    const candidate = await this.candidatesService.findCandidateByEmail(
+      loginInput.email,
+    );
 
     if (candidate && candidate.tempPassword === loginInput.password) {
-      return { 
-        user:null,
-        accessToken:"",
-        needsPasswordReset: true 
+      return {
+        user: null,
+        accessToken: '',
+        needsPasswordReset: true,
       };
     }
 

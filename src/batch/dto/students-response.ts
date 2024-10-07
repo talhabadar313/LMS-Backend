@@ -72,6 +72,9 @@ export class StudentResponse {
   watchlisted: boolean;
 
   @Field({ nullable: true })
+  terminated: boolean;
+
+  @Field({ nullable: true })
   absences: number;
 
   @Field(() => [StudentAssignment], { nullable: true })

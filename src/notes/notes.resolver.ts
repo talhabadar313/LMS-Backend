@@ -6,6 +6,7 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/auth/role.guard';
 import { Roles } from 'src/auth/role.decorator';
+import { AddNoteInput } from './dto/add-note-input';
 
 @Resolver(() => Note)
 export class NotesResolver {
@@ -18,6 +19,13 @@ export class NotesResolver {
     @Args('createNoteInput') createNoteInput: CreateNoteInput,
   ): Promise<Note[]> {
     return this.notesService.create(createNoteInput);
+  }
+
+  @Mutation(() => [Note], { name: 'addNote' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  addNote(@Args('addNoteInput') addNoteInput: AddNoteInput): Promise<Note[]> {
+    return this.notesService.add(addNoteInput);
   }
 
   @Query(() => [Note], { name: 'getStudentNotes' })

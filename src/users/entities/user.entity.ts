@@ -63,6 +63,10 @@ export class User {
   @Column({ nullable: true })
   reason?: String;
 
+  @Field(() => Boolean, { nullable: true })
+  @Column({ type: 'boolean', default: false, nullable: true })
+  terminated?: boolean;
+
   @OneToOne(() => Candidate, (candidate) => candidate.user, { nullable: true })
   @JoinColumn({ name: 'candidateId' })
   @Field(() => Candidate, { nullable: true })

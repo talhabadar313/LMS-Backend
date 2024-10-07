@@ -339,6 +339,7 @@ export class BatchService {
           email: candidate?.email,
           status: candidate?.status,
           watchlisted: student?.watchlisted,
+          terminated: student?.terminated,
           gender: candidate?.gender,
           age: candidate?.age,
           laptopAvailability: candidate?.laptopAvailability,

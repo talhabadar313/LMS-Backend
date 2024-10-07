@@ -134,4 +134,11 @@ export class UsersResolver {
   async removeFromWatchList(@Args('userId') userId: string): Promise<User> {
     return this.usersService.removeFromWatchList(userId);
   }
+
+  @Mutation(() => User, { name: 'teminateStudent' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher')
+  async terminateStudent(@Args('userId') userId: string): Promise<User> {
+    return this.usersService.terminateStudent(userId);
+  }
 }

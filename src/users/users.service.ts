@@ -44,6 +44,7 @@ export class UsersService {
       phoneNumber: createUserInput.phoneNumber,
       status: createUserInput.status,
       watchlisted: createUserInput.role === 'student' ? false : null,
+      terminated: createUserInput.role === 'student' ? false : null,
     };
 
     if (createUserInput.role === 'student' && !createUserInput.status) {
@@ -81,7 +82,7 @@ export class UsersService {
   findOne(user_id: string): Promise<User> {
     return this.userRepository.findOne({
       where: { user_id },
-      relations: ['batch', 'candidate'],
+      relations: ['batch', 'candidate', 'notes', 'notes.createdBy'],
     });
   }
 
@@ -193,5 +194,18 @@ export class UsersService {
 
   async remove(user_id: string): Promise<void> {
     await this.userRepository.delete(user_id);
+  }
+
+  async terminateStudent(userId: string): Promise<User> {
+    if (!userId) {
+      throw new BadRequestException('UserId is required');
+    }
+    const user = await this.userRepository.findOneBy({ user_id: userId });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    user.terminated = true;
+    return this.userRepository.save(user);
   }
 }
