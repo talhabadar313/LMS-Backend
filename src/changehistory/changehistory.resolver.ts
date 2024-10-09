@@ -1,31 +1,44 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { ChangeHistoryService } from './changehistory.service';
-import { CandidatesService } from '../candidates/candidates.service';
 import { ChangeHistory } from './entities/changehistory.entity';
 
 @Resolver(() => ChangeHistory)
 export class ChangeHistoryResolver {
-  constructor(
-    private readonly changeHistoryService: ChangeHistoryService,
-    private readonly candidateService: CandidatesService
-  ) {}
+  constructor(private readonly changeHistoryService: ChangeHistoryService) {}
 
   @Query(() => [ChangeHistory], { name: 'getChangeHistoryByCandidate' })
-  async getChangeHistoryByCandidate(@Args('candidateId') candidateId: string) {
+  getChangeHistoryByCandidate(@Args('candidateId') candidateId: string) {
     return this.changeHistoryService.getChangeHistoryByCandidateId(candidateId);
   }
 
   @Mutation(() => ChangeHistory)
-  async updateCandidateStatus(
+  updateCandidateStatus(
     @Args('candidateId') candidateId: string,
-    @Args('newStatus') newStatus: string
+    @Args('oldStatus') oldStatus: string,
+    @Args('newStatus') newStatus: string,
   ) {
-    const candidate = await this.candidateService.findOne(candidateId);
-    const oldStatus = candidate.status;
+    return this.changeHistoryService.addChangeHistory(
+      candidateId,
+      newStatus,
+      oldStatus,
+    );
+  }
 
-    candidate.status = newStatus;
-    await this.candidateService.save(candidate);
+  @Query(() => [ChangeHistory], { name: 'getClassTimingsChangeHistory' })
+  getClassTimingsChangeHistory(@Args('batchId') batchId: string) {
+    return this.changeHistoryService.getClassTimingsChangeHistory(batchId);
+  }
 
-    return this.changeHistoryService.addChangeHistory(candidate, oldStatus, newStatus);
+  @Mutation(() => ChangeHistory, { name: 'changeClassTimings' })
+  async updateBatchTimings(
+    @Args('batchId') batchId: string,
+    @Args('newTimings') newTimings: string,
+    @Args('changedBy') changedBy: string,
+  ) {
+    return this.changeHistoryService.addClassTimingsChangeHistory(
+      batchId,
+      newTimings,
+      changedBy,
+    );
   }
 }

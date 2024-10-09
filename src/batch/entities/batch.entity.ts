@@ -18,6 +18,7 @@ import { Topic } from 'src/topics/entities/topic.entity';
 import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { Quiz } from 'src/quizs/entities/quiz.entity';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
+import { ChangeHistory } from 'src/changehistory/entities/changehistory.entity';
 
 @ObjectType()
 @Entity('batch')
@@ -66,14 +67,6 @@ export class Batch {
   @Field({ nullable: true })
   @Column({ nullable: true })
   classTimings?: string;
-
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  classUpdatedBy?: string;
-
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  classUpdatedOn?: string;
 
   @OneToMany(() => User, (user) => user.batch)
   @Field(() => [User], { nullable: true })
@@ -131,4 +124,8 @@ export class Batch {
   @OneToMany(() => Attendance, (attendance) => attendance.batch)
   @Field(() => [Attendance])
   attendances?: Attendance[];
+
+  @OneToMany(() => ChangeHistory, (changeHistory) => changeHistory.batch)
+  @Field(() => [ChangeHistory])
+  classTimingsHistories?: ChangeHistory[];
 }

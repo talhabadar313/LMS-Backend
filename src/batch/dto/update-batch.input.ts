@@ -51,16 +51,6 @@ export class UpdateBatchInput {
   @IsString()
   classTimings?: string;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  classUpdatedBy?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  classUpdatedOn?: string;
-
   @Field(() => [ID], { nullable: 'items' })
   @IsOptional()
   @IsArray()

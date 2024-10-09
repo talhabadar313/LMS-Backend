@@ -116,9 +116,9 @@ export class CandidatesService {
 
     if (oldStatus !== candidate.status) {
       await this.changeHistoryService.addChangeHistory(
-        candidate,
-        oldStatus,
+        candidate.candidate_id,
         candidate.status,
+        oldStatus,
       );
     }
 
@@ -224,9 +224,9 @@ export class CandidatesService {
 
     if (oldStatus !== newStatus) {
       await this.changeHistoryService.addChangeHistory(
-        candidate,
-        oldStatus,
+        candidate.candidate_id,
         newStatus,
+        oldStatus,
       );
     }
 

@@ -1,5 +1,5 @@
 import { InputType, Field, Int, ID } from '@nestjs/graphql';
-import { IsOptional, IsString, IsArray, IsInt } from 'class-validator';
+import { IsOptional, IsString, IsArray, IsInt, IsUUID } from 'class-validator';
 
 @InputType()
 export class CreateBatchInput {
@@ -23,6 +23,7 @@ export class CreateBatchInput {
   defaultMessage: string;
 
   @Field(() => ID)
+  @IsUUID()
   createdBy: string;
 
   @Field({ nullable: true })
@@ -44,16 +45,6 @@ export class CreateBatchInput {
   @IsOptional()
   @IsString()
   classTimings?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  classUpdatedBy?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  classUpdatedOn?: string;
 
   @Field(() => [String])
   @IsOptional()

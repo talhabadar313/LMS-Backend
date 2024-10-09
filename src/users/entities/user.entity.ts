@@ -20,6 +20,7 @@ import { Quiz } from 'src/quizs/entities/quiz.entity';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
 import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
 import { Note } from 'src/notes/entities/note.entity';
+import { ChangeHistory } from 'src/changehistory/entities/changehistory.entity';
 
 @ObjectType()
 @Entity('user')
@@ -137,4 +138,8 @@ export class User {
 
   @Field(() => Int, { nullable: true })
   absences?: number;
+
+  @OneToMany(() => ChangeHistory, (changeHistory) => changeHistory.changedBy)
+  @Field(() => [ChangeHistory], { nullable: true })
+  changedBy?: ChangeHistory[];
 }

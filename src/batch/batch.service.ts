@@ -12,6 +12,9 @@ import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
 import { ApplicationsResponse } from '../candidates/dto/applications-response';
 import { StudentResponse } from './dto/students-response';
+import { Assignment } from 'src/assignments/entities/assignment.entity';
+import { ChangeHistoryService } from 'src/changehistory/changehistory.service';
+import { UpdateExistingBatchInput } from './dto/update-existingbatch-input';
 
 @Injectable()
 export class BatchService {
@@ -21,6 +24,11 @@ export class BatchService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    @InjectRepository(Assignment)
+    private assignmentRepository: Repository<Assignment>,
+
+    private readonly changeHistoryService: ChangeHistoryService,
   ) {}
 
   async create(createBatchInput: CreateBatchInput): Promise<Batch> {
@@ -55,7 +63,7 @@ export class BatchService {
 
       return this.batchRepository.findOne({
         where: { batch_id: batch.batch_id },
-        relations: ['teachers'],
+        relations: ['teachers', 'createdBy'],
       });
     } catch (error) {
       console.error('Error details:', error);
@@ -317,6 +325,10 @@ export class BatchService {
       throw new NotFoundException('Batch not found');
     }
 
+    const allAssignments = await this.assignmentRepository.find({
+      where: { batch: { batch_id: batchId } },
+    });
+
     const studentsDataWithAbsencesAndAssignments = await Promise.all(
       batch.candidates.map(async (candidate) => {
         const student = candidate?.user;
@@ -325,12 +337,24 @@ export class BatchService {
           (record) => record.status === 'absent',
         ).length;
 
-        const assignments = student?.submissions.map((submission) => ({
-          title: submission.assignment.title,
-          totalmarks: submission.assignment.totalmarks,
-          dueDate: submission.assignment.dueDate,
-          score: submission.score,
-        }));
+        const studentSubmissions =
+          student?.submissions?.filter(
+            (submission) => submission?.assignment != null,
+          ) || [];
+
+        const assignments = allAssignments.map((assignment) => {
+          const submission = studentSubmissions.find(
+            (sub) =>
+              sub?.assignment?.assignment_id === assignment?.assignment_id,
+          );
+
+          return {
+            title: assignment?.title,
+            totalmarks: assignment?.totalmarks,
+            dueDate: assignment?.dueDate,
+            score: submission ? submission?.score : null,
+          };
+        });
 
         return {
           candidate_id: candidate?.candidate_id,
@@ -359,5 +383,122 @@ export class BatchService {
     );
 
     return studentsDataWithAbsencesAndAssignments;
+  }
+
+  async updateClassTimings(
+    batchId: string,
+    newTimings: string,
+    changedBy: string,
+  ): Promise<Batch> {
+    if (!batchId) {
+      throw new BadRequestException('BatchId is required');
+    }
+
+    if (!changedBy) {
+      throw new BadRequestException('ChangedBy is required');
+    }
+
+    const batch = await this.batchRepository.findOne({
+      where: { batch_id: batchId },
+    });
+
+    const user = await this.userRepository.findOne({
+      where: { user_id: changedBy },
+    });
+
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const oldTimings = batch.classTimings;
+    batch.classTimings = newTimings;
+
+    if (oldTimings !== newTimings) {
+      await this.changeHistoryService.addClassTimingsChangeHistory(
+        batch.batch_id,
+        newTimings,
+        (changedBy = user.user_id),
+      );
+    }
+
+    return this.batchRepository.save(batch);
+  }
+
+  async updateExistingBatch(
+    updateExistingBatchInput: UpdateExistingBatchInput,
+  ): Promise<Batch> {
+    const {
+      batch_id,
+      teacherIds,
+      name,
+      maxAbsents,
+      defaultMessage,
+      movePupils,
+    } = updateExistingBatchInput;
+
+    if (!batch_id) {
+      throw new BadRequestException('BatchId is required');
+    }
+
+    const batch = await this.batchRepository.findOneBy({
+      batch_id: batch_id,
+    });
+
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+
+    if (!teacherIds || teacherIds.length === 0) {
+      throw new BadRequestException('TeacherIds are required');
+    }
+
+    const teachers = await this.userRepository.find({
+      where: { user_id: In(teacherIds) },
+    });
+
+    if (!teachers || teachers.length === 0) {
+      throw new BadRequestException('Teachers not found');
+    }
+
+    batch.name = name;
+    batch.teachers = teachers;
+
+    if (movePupils) {
+      const pupils = await this.userRepository.find({
+        where: { batch: batch },
+        relations: ['attendanceRecords'],
+      });
+
+      let studentsMovedToWatchlist = 0;
+
+      for (const pupil of pupils) {
+        const absences = pupil.attendanceRecords.filter(
+          (record) => record.status === 'absent',
+        ).length;
+
+        if (absences > maxAbsents) {
+          pupil.watchlisted = true;
+          pupil.warning = defaultMessage;
+          studentsMovedToWatchlist++;
+          console.log(
+            `Pupil ${pupil.user_id} added to watchlist with absences: ${absences}`,
+          );
+        } else {
+          pupil.watchlisted = false;
+          pupil.warning = null;
+        }
+
+        pupil.absences = absences;
+      }
+
+      await this.userRepository.save(pupils);
+
+      console.log(`${studentsMovedToWatchlist} students moved to watchlist.`);
+    }
+
+    return this.batchRepository.save(batch);
   }
 }

@@ -7,10 +7,20 @@ import { AuthModule } from '../auth/auth.module';
 import { User } from '../users/entities/user.entity';
 import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
 import { Submission } from 'src/submissions/entities/submission.entity';
+import { Assignment } from 'src/assignments/entities/assignment.entity';
+import { ChangeHistory } from 'src/changehistory/entities/changehistory.entity';
+import { ChangehistoryModule } from 'src/changehistory/changehistory.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Batch, User, AttendanceRecord, Submission]),
+    TypeOrmModule.forFeature([
+      Batch,
+      User,
+      AttendanceRecord,
+      Submission,
+      Assignment,
+    ]),
+    ChangehistoryModule,
     AuthModule,
   ],
   providers: [BatchResolver, BatchService],

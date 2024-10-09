@@ -10,8 +10,13 @@ import { User } from '../users/entities/user.entity';
 import { ChangehistoryModule } from '../changehistory/changehistory.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Candidate, Batch, User]),  forwardRef(() => AuthModule), forwardRef(() => ChangehistoryModule), MailModule],
+  imports: [
+    TypeOrmModule.forFeature([Candidate, Batch, User]),
+    forwardRef(() => AuthModule),
+    forwardRef(() => ChangehistoryModule),
+    MailModule,
+  ],
   providers: [CandidatesResolver, CandidatesService],
-  exports:[ CandidatesService]
+  exports: [CandidatesService],
 })
 export class CandidatesModule {}

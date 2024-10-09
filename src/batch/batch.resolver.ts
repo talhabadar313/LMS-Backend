@@ -10,6 +10,7 @@ import { Roles } from '../auth/role.decorator';
 import { ApplicationsResponse } from '../candidates/dto/applications-response';
 import { User } from 'src/users/entities/user.entity';
 import { StudentResponse } from './dto/students-response';
+import { UpdateExistingBatchInput } from './dto/update-existingbatch-input';
 
 @Resolver(() => Batch)
 export class BatchResolver {
@@ -93,5 +94,26 @@ export class BatchResolver {
     offset: number,
   ) {
     return this.batchService.findStudentsDetailsByBatchId(batchId);
+  }
+
+  @Mutation(() => Batch, { name: 'updateClassTimings' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  updateClassTimings(
+    @Args('batchId') batchId: string,
+    @Args('newTimings') newTimings: string,
+    @Args('changedBy') changedBy: string,
+  ) {
+    return this.batchService.updateClassTimings(batchId, newTimings, changedBy);
+  }
+
+  @Mutation(() => Batch, { name: 'updateExistingBatch' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  updateExistingBatch(
+    @Args('UpdateExistingBatchInput')
+    updateExistingBatchInput: UpdateExistingBatchInput,
+  ) {
+    return this.batchService.updateExistingBatch(updateExistingBatchInput);
   }
 }

@@ -2,16 +2,16 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class StudentAssignment {
-  @Field()
+  @Field({ nullable: true })
   title: string;
 
-  @Field()
+  @Field({ nullable: true })
   totalmarks: number;
 
-  @Field()
+  @Field({ nullable: true })
   dueDate: Date;
 
-  @Field()
+  @Field({ nullable: true })
   score: number | null;
 }
 
