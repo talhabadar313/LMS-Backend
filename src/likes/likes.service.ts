@@ -77,7 +77,7 @@ export class LikesService {
     });
 
     const likeCount = likes.length;
-    const userNames = likes.map((like) => like.user.name); // Adjust based on your User entity structure
+    const userNames = likes.map((like) => like.user.name);
 
     return { likeCount, userNames };
   }

@@ -130,98 +130,84 @@ export class PostService {
   }
 
   async updatePost(updatePostInput: UpdatePostInput): Promise<Post> {
-    const { post_id, title, category, content, files } = updatePostInput;
+    const { post_id, title, content, files } = updatePostInput;
 
     const post = await this.postRepository.findOne({
       where: { post_id },
-      relations: ['batch', 'user'],
+      relations: ['batch'],
     });
     if (!post) throw new NotFoundException('Post not found.');
+
+    const existingFileUrls = post.fileSrc || [];
+    const existingFileTypes = post.fileType || [];
 
     let newFileUrls: string[] = [];
     let newFileTypes: string[] = [];
 
-    const existingFileUrls = post.fileSrc || [];
-
-    const filesToDelete: string[] = existingFileUrls.filter(
-      (existingFileUrl) => {
-        const fileName = existingFileUrl.split('/').pop();
-        return (
-          !files ||
-          !files.some(async (filePromise) => {
-            const resolvedFile = await filePromise;
-            return resolvedFile.filename === fileName;
-          })
-        );
-      },
-    );
-
-    for (const fileUrl of filesToDelete) {
-      const fileName = fileUrl.split('/').pop();
-      console.log(
-        `Attempting to delete file: ${fileName} from Supabase storage`,
-      );
-
-      const { data, error } = await supabase.storage
-        .from('LMS Bucket')
-        .remove([`posts/${fileName}`]);
-
-      if (error) {
-        console.error(`Failed to delete file ${fileUrl}:`, error.message);
-        throw new Error(`File deletion error: ${error.message}`);
-      } else {
-        console.log(`Successfully deleted file: ${fileUrl}`);
-        console.log(`Supabase response data:`, data);
-      }
-    }
-
     if (files && files.length > 0) {
       for (const filePromise of files) {
         const resolvedFile = await filePromise;
-        const { createReadStream, mimetype, filename } = resolvedFile;
-
-        const allowedMimeTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-        if (!allowedMimeTypes.includes(mimetype)) {
-          throw new BadRequestException('Invalid file type.');
-        }
-
-        const stream = createReadStream();
-        const chunks: Buffer[] = [];
-        for await (const chunk of stream) {
-          chunks.push(chunk);
-        }
-        const buffer = Buffer.concat(chunks);
+        const { filename, mimetype } = resolvedFile;
 
         const existingFileUrl = existingFileUrls.find((url) =>
           url.endsWith(filename),
         );
+
         if (!existingFileUrl) {
+          const { createReadStream } = resolvedFile;
+          const stream = createReadStream();
+          const chunks: Buffer[] = [];
+          for await (const chunk of stream) {
+            chunks.push(chunk);
+          }
+          const buffer = Buffer.concat(chunks);
+
           const { data, error } = await supabase.storage
             .from('LMS Bucket')
             .upload(`posts/${filename}`, buffer, { contentType: mimetype });
 
           if (error) {
-            throw new Error(`File upload error: ${error.message}`);
+            console.error(`File upload error: ${error.message}`);
+            continue;
           }
 
           const fileUrl = data?.path
-            ? `${supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data.publicUrl}`
+            ? supabase.storage.from('LMS Bucket').getPublicUrl(data.path).data
+                .publicUrl
             : null;
 
-          newFileUrls.push(fileUrl);
-          newFileTypes.push(mimetype);
+          if (fileUrl) {
+            newFileUrls.push(fileUrl);
+            newFileTypes.push(mimetype);
+          }
         } else {
           newFileUrls.push(existingFileUrl);
-          newFileTypes.push(mimetype);
+          const existingFileType =
+            existingFileTypes[existingFileUrls.indexOf(existingFileUrl)];
+          newFileTypes.push(existingFileType || mimetype);
+          console.log(`Retained existing file: ${existingFileUrl}`);
         }
       }
     }
+    const filesToRemove = existingFileUrls.filter(
+      (url) => !newFileUrls.includes(url),
+    );
+    for (const fileUrl of filesToRemove) {
+      const fileName = fileUrl.split('/').pop();
+      const { error: deleteError } = await supabase.storage
+        .from('LMS Bucket')
+        .remove([`posts/${fileName}`]);
 
+      if (deleteError) {
+        console.error(
+          `Error removing file from Supabase: ${deleteError.message}`,
+        );
+      }
+    }
     post.title = title || post.title;
-    post.category = category || post.category;
     post.content = content || post.content;
-    post.fileSrc = newFileUrls;
-    post.fileType = newFileTypes;
+    post.fileSrc = [...newFileUrls];
+    post.fileType = [...newFileTypes];
 
     return this.postRepository.save(post);
   }

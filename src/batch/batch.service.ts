@@ -15,6 +15,7 @@ import { StudentResponse } from './dto/students-response';
 import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { ChangeHistoryService } from 'src/changehistory/changehistory.service';
 import { UpdateExistingBatchInput } from './dto/update-existingbatch-input';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class BatchService {
@@ -29,6 +30,7 @@ export class BatchService {
     private assignmentRepository: Repository<Assignment>,
 
     private readonly changeHistoryService: ChangeHistoryService,
+    private readonly userService: UsersService,
   ) {}
 
   async create(createBatchInput: CreateBatchInput): Promise<Batch> {
@@ -443,10 +445,7 @@ export class BatchService {
       throw new BadRequestException('BatchId is required');
     }
 
-    const batch = await this.batchRepository.findOneBy({
-      batch_id: batch_id,
-    });
-
+    const batch = await this.batchRepository.findOneBy({ batch_id });
     if (!batch) {
       throw new BadRequestException('Batch not found');
     }
@@ -458,45 +457,50 @@ export class BatchService {
     const teachers = await this.userRepository.find({
       where: { user_id: In(teacherIds) },
     });
-
     if (!teachers || teachers.length === 0) {
       throw new BadRequestException('Teachers not found');
     }
 
     batch.name = name;
     batch.teachers = teachers;
+    batch.maxAbsents = maxAbsents;
 
     if (movePupils) {
       const pupils = await this.userRepository.find({
-        where: { batch: batch },
+        where: { batch },
         relations: ['attendanceRecords'],
       });
 
       let studentsMovedToWatchlist = 0;
+      let studentsRemovedFromWatchlist = 0;
 
       for (const pupil of pupils) {
         const absences = pupil.attendanceRecords.filter(
           (record) => record.status === 'absent',
         ).length;
 
-        if (absences > maxAbsents) {
+        console.log(`Processing pupil: ${pupil.user_id}`);
+        console.log(
+          `Current absences: ${absences}, Max absents: ${maxAbsents}`,
+        );
+
+        if (pupil.watchlisted && absences < maxAbsents) {
+          this.userService.removeFromWatchList(pupil.user_id);
+        } else if (!pupil.watchlisted && absences > maxAbsents) {
           pupil.watchlisted = true;
           pupil.warning = defaultMessage;
+          pupil.reason = 'Lack of attendance';
           studentsMovedToWatchlist++;
-          console.log(
-            `Pupil ${pupil.user_id} added to watchlist with absences: ${absences}`,
-          );
-        } else {
-          pupil.watchlisted = false;
-          pupil.warning = null;
+          console.log(`Pupil ${pupil.user_id} added to watchlist.`);
         }
-
         pupil.absences = absences;
       }
 
       await this.userRepository.save(pupils);
-
       console.log(`${studentsMovedToWatchlist} students moved to watchlist.`);
+      console.log(
+        `${studentsRemovedFromWatchlist} students removed from watchlist.`,
+      );
     }
 
     return this.batchRepository.save(batch);

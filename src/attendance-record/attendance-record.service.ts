@@ -6,6 +6,7 @@ import { AttendanceRecord } from './entities/attendance-record.entity';
 import { Repository } from 'typeorm';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Batch } from 'src/batch/entities/batch.entity';
 
 @Injectable()
 export class AttendanceRecordService {
@@ -18,6 +19,9 @@ export class AttendanceRecordService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(Batch)
+    private readonly batchRepository: Repository<Batch>,
   ) {}
   async create(
     createAttendanceRecordInput: CreateAttendanceRecordInput,
@@ -38,8 +42,9 @@ export class AttendanceRecordService {
       throw new BadRequestException('Status must match the number of students');
     }
 
-    const attendance = await this.attendanceRepository.findOneBy({
-      attendance_id: attendanceId,
+    const attendance = await this.attendanceRepository.findOne({
+      where: { attendance_id: attendanceId },
+      relations: ['batch'],
     });
     if (!attendance) {
       throw new BadRequestException('Attendance not found');
@@ -50,7 +55,19 @@ export class AttendanceRecordService {
       throw new BadRequestException('User not found');
     }
 
-    const attendanceRecords = [];
+    if (!attendance.batch) {
+      throw new BadRequestException('Attendance batch not found');
+    }
+
+    const batch = await this.batchRepository.findOne({
+      where: { batch_id: attendance.batch.batch_id },
+    });
+
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+
+    const attendanceRecords: AttendanceRecord[] = [];
 
     for (let i = 0; i < studentIds.length; i++) {
       const studentId = studentIds[i];
@@ -65,7 +82,7 @@ export class AttendanceRecordService {
 
       const attendanceRecord = this.attendanceRecordRepository.create({
         attendance,
-        student,
+        student: student,
         status: studentStatus,
         markedBy: user,
       });
@@ -73,8 +90,35 @@ export class AttendanceRecordService {
       const savedRecord =
         await this.attendanceRecordRepository.save(attendanceRecord);
       attendanceRecords.push(savedRecord);
+
+      const studentAttendanceRecords =
+        await this.attendanceRecordRepository.find({
+          where: { student: { user_id: studentId } },
+        });
+
+      const absences =
+        studentAttendanceRecords.filter((record) => record.status === 'absent')
+          .length || 0;
+
+      if (absences > batch.maxAbsents) {
+        student.watchlisted = true;
+        student.warning =
+          'You are on watchlist! Please Be Regular! Your absences exceeds the max allowed absences';
+        student.reason = 'Lack of attendance';
+        console.log(
+          `Student ${student.user_id} added to the watchlist with ${absences} absences.`,
+        );
+      } else {
+        if (student.reason === 'Lack of attendance') {
+          student.watchlisted = false;
+          student.warning = null;
+          student.reason = null;
+          console.log(`Student ${student.user_id} unwatchlisted.`);
+        }
+      }
+
+      await this.userRepository.save(student);
     }
-    console.log('Saved attendance records:', attendanceRecords);
     return attendanceRecords;
   }
 
@@ -119,9 +163,28 @@ export class AttendanceRecordService {
         throw new BadRequestException(`Student not found: ${studentId}`);
       }
 
+      const attendance = await this.attendanceRepository.findOne({
+        where: { attendance_id: attendanceId },
+        relations: ['batch'],
+      });
+      if (!attendance) {
+        throw new BadRequestException('Attendance not found');
+      }
+
+      if (!attendance.batch) {
+        throw new BadRequestException('Attendance batch not found');
+      }
+
+      const batch = await this.batchRepository.findOne({
+        where: { batch_id: attendance.batch.batch_id },
+      });
+
+      if (!batch) {
+        throw new BadRequestException('Batch not found');
+      }
+
       const existingRecord = await this.attendanceRecordRepository.findOne({
         where: { attendance: { attendance_id: attendanceId }, student },
-        relations: ['student'],
       });
 
       if (existingRecord) {
@@ -139,8 +202,35 @@ export class AttendanceRecordService {
           await this.attendanceRecordRepository.save(newRecord);
         attendanceRecords.push(savedRecord);
       }
-    }
 
+      const studentAttendanceRecords =
+        await this.attendanceRecordRepository.find({
+          where: { student: { user_id: studentId } },
+        });
+
+      const absences =
+        studentAttendanceRecords.filter((record) => record.status === 'absent')
+          .length || 0;
+
+      if (absences > batch.maxAbsents) {
+        student.watchlisted = true;
+        student.warning =
+          'You are on watchlist! Please Be Regular! Your absences exceed the max allowed absences';
+        student.reason = 'Lack of attendance';
+        console.log(
+          `Student ${student.user_id} added to the watchlist with ${absences} absences.`,
+        );
+      } else {
+        if (student.reason === 'Lack of attendance') {
+          student.watchlisted = false;
+          student.warning = null;
+          student.reason = null;
+          console.log(`Student ${student.user_id} unwatchlisted.`);
+        }
+      }
+
+      await this.userRepository.save(student);
+    }
     return attendanceRecords;
   }
 }

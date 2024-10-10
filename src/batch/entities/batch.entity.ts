@@ -40,7 +40,11 @@ export class Batch {
   maxAbsents: number;
 
   @Field()
-  @Column({ default: 'Please Be Regular!', nullable: true })
+  @Column({
+    default:
+      'You are on watchlist! Please Be Regular! Your absences exceed the max allowed absences',
+    nullable: true,
+  })
   defaultMessage: string;
 
   @Field()

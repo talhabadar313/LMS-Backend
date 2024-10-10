@@ -14,18 +14,10 @@ export class UpdatePostInput {
 
   @Field()
   @IsString()
-  category: string;
-
-  @Field()
-  @IsString()
   content: string;
 
   @Field(() => [GraphQLUpload], { nullable: true })
   files?: Promise<FileUpload>[];
-
-  @Field(() => Int, { defaultValue: 0 })
-  @IsNumber()
-  likeCount: number;
 
   @Field({ nullable: true })
   @IsString()

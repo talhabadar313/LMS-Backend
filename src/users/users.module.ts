@@ -8,13 +8,14 @@ import { BatchModule } from '../batch/batch.module';
 import { CandidatesModule } from '../candidates/candidates.module';
 import { Candidate } from '../candidates/entities/candidate.entity';
 import { MailModule } from '../mail/mail.module';
+import { Batch } from 'src/batch/entities/batch.entity';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    BatchModule,
+
     CandidatesModule,
     MailModule,
-    TypeOrmModule.forFeature([User, Candidate]),
+    TypeOrmModule.forFeature([User, Candidate, Batch]),
   ],
   providers: [UsersService, UsersResolver],
   exports: [UsersService, TypeOrmModule],
