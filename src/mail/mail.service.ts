@@ -7,6 +7,7 @@ export class MailService {
   private readonly invitationTemplate: string;
   private readonly rejectionTemplate: string;
   private readonly resetPasswordTemplate: string;
+  private readonly assignmentTemplate : string;
 
   constructor(private readonly mailerService: MailerService) {
     this.invitationTemplate = `
@@ -27,7 +28,7 @@ export class MailService {
       <p>We appreciate the effort you put into applying, and we encourage you to apply again for future opportunities.</p>
       <p>If you have any questions, feel free to reach out.</p>
       <p>Best regards,</p>
-      <p>The Admissions Team</p>
+      <p>Inciter Tech</p>
     `;
 
     this.resetPasswordTemplate = `
@@ -35,6 +36,13 @@ export class MailService {
     <p>Your new password is <strong>{{tempPassword}}</strong></p>
     <p>If you did not request a password reset, please ignore this email.</p>
     <p>Thank you!</p>
+  `;
+  this.assignmentTemplate=`
+   <h1>Hello {{name}},</h1>
+      <p>A new assignment has been created by your teacher.</p>
+      <p>Please check your portal for more details.</p>
+      <p>Best regards,</p>
+      <p>Inciter Tech</p>
   `;
   }
 
@@ -88,4 +96,22 @@ export class MailService {
       html,
     });
   }
+
+  async sendAssignmentNotificationEmail(
+    email: string,
+    name: string,
+    title: string,
+  ): Promise<void> {
+    const html = this.compileTemplate(this.assignmentTemplate, {
+      name,
+      title,
+    });
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'New Assignment Created',
+      html,
+    });
+  }
+
 }

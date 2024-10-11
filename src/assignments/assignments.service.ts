@@ -14,6 +14,9 @@ import { Topic } from '../topics/entities/topic.entity';
 import { supabase } from '../supabase.config';
 import { Submission } from 'src/submissions/entities/submission.entity';
 import { User } from 'src/users/entities/user.entity';
+import { MailService } from 'src/mail/mail.service';
+import { BatchService } from 'src/batch/batch.service';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 
 @Injectable()
 export class AssignmentsService {
@@ -32,6 +35,11 @@ export class AssignmentsService {
 
     @InjectRepository(Submission)
     private readonly submissionRepository: Repository<Submission>,
+
+    private readonly notificationGateway: NotificationsGateway,
+
+    private mailService: MailService,
+    private readonly batchService: BatchService,
   ) {}
   async create(
     createAssignmentInput: CreateAssignmentInput,
@@ -138,6 +146,19 @@ export class AssignmentsService {
     assignment.topics = topics;
 
     await this.assignmentRepository.save(assignment);
+
+    // const users = await this.batchService.GetStudentsByBatchId(batchId);
+    // const studentEmails = users?.map(user => user.email);
+    // const studentNames = users?.map(user => user.name);
+
+    // for (let i = 0; i < studentEmails.length; i++) {
+    //   await this.mailService.sendAssignmentNotificationEmail(studentEmails[i], studentNames[i], title);
+    // }
+
+    await this.notificationGateway.handleNewAssignment({
+      title: 'New Assignment Posted',
+      description: 'Check Your Classroom',
+    });
 
     return assignment;
   }
@@ -285,10 +306,10 @@ export class AssignmentsService {
       (url) => !newFileUrls.includes(url),
     );
     for (const fileUrl of filesToRemove) {
-      const fileName = fileUrl.split('/').pop(); 
+      const fileName = fileUrl.split('/').pop();
       const { error: deleteError } = await supabase.storage
         .from('LMS Bucket')
-        .remove([`posts/${fileName}`]); 
+        .remove([`posts/${fileName}`]);
 
       if (deleteError) {
         console.error(

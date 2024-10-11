@@ -7,6 +7,10 @@ import { BatchModule } from '../batch/batch.module';
 import { TopicsModule } from '../topics/topics.module';
 import { AuthModule } from '../auth/auth.module';
 import { SubmissionsModule } from '../submissions/submissions.module';
+import { MailModule } from 'src/mail/mail.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
+
+
 
 @Module({
   imports: [
@@ -14,9 +18,11 @@ import { SubmissionsModule } from '../submissions/submissions.module';
     BatchModule,
     TopicsModule,
     AuthModule,
+    MailModule,
     forwardRef(() => SubmissionsModule),
+    NotificationsModule
   ],
-  providers: [AssignmentsResolver, AssignmentsService],
+  providers: [AssignmentsResolver, AssignmentsService ],
   exports: [TypeOrmModule],
 })
 export class AssignmentsModule {}

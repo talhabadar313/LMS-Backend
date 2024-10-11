@@ -51,6 +51,15 @@ export class BatchResolver {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
+  @Roles('student')
+  @Query(() => [Batch], { name: 'Studentbatch' })
+  findStudentBatch(@Args('studentId' , {type:()=>String}) studentId:string) {
+    return this.batchService.findStudentBatch(studentId);
+  }
+
+  
+
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')
   @Query(() => Batch, { name: 'batch' })
   findOne(@Args('id', { type: () => String }) id: string) {
@@ -81,11 +90,18 @@ export class BatchResolver {
     return this.batchService.getApplicationsPerDay(batchId);
   }
 
-  @Query(() => Batch, { name: 'getStudentsByBatch' })
+  @Query(() => Batch, { name: 'findStudentsByBatch' })
   findStudentsByBatchId(
     @Args('batchId', { type: () => String }) batchId: string,
   ) {
     return this.batchService.findStudentsByBatchId(batchId);
+  }
+
+  @Query(() => Batch, { name: 'getStudentsByBatch' })
+  GetStudentsByBatchId(
+    @Args('batchId', { type: () => String }) batchId: string,
+  ) {
+    return this.batchService.GetStudentsByBatchId(batchId);
   }
 
   @Query(() => [StudentResponse], { name: 'getStudentsDetailsByBatch' })

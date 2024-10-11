@@ -18,6 +18,8 @@ import { SubmissionsModule } from './submissions/submissions.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AttendanceRecordModule } from './attendance-record/attendance-record.module';
 import { NotesModule } from './notes/notes.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationsGateway } from './notifications/notifications.gateway';
 
 dotenv.config({ path: '.env' });
 
@@ -61,8 +63,10 @@ dotenv.config({ path: '.env' });
     AttendanceModule,
     AttendanceRecordModule,
     NotesModule,
+    NotificationsModule,
+
   ],
   controllers: [],
-  providers: [],
+  providers: [NotificationsGateway],
 })
 export class AppModule {}

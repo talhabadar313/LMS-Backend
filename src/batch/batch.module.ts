@@ -25,6 +25,6 @@ import { UsersModule } from 'src/users/users.module';
     UsersModule,
   ],
   providers: [BatchResolver, BatchService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule , BatchService],
 })
 export class BatchModule {}
