@@ -21,6 +21,7 @@ export class CommentsResolver {
     return this.commentsService.findAll(postId);
   }
 
+
   @Mutation(() => Boolean)
   async removeComment(@Args('id', { type: () => String }) id: string) {
     await this.commentsService.remove(id);
