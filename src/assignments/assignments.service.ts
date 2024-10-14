@@ -17,6 +17,7 @@ import { User } from 'src/users/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
 import { BatchService } from 'src/batch/batch.service';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
+import { NotificationType } from 'src/util/enum';
 
 @Injectable()
 export class AssignmentsService {
@@ -158,6 +159,8 @@ export class AssignmentsService {
     await this.notificationGateway.handleNewAssignment({
       title: 'New Assignment Posted',
       description: 'Check Your Classroom',
+      type: NotificationType.ASSIGNMENT,
+      batchId,
     });
 
     return assignment;

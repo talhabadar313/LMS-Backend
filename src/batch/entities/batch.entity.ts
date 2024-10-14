@@ -19,6 +19,7 @@ import { Assignment } from 'src/assignments/entities/assignment.entity';
 import { Quiz } from 'src/quizs/entities/quiz.entity';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
 import { ChangeHistory } from 'src/changehistory/entities/changehistory.entity';
+import { Notification } from 'src/notifications/entities/notification.entity';
 
 @ObjectType()
 @Entity('batch')
@@ -132,4 +133,8 @@ export class Batch {
   @OneToMany(() => ChangeHistory, (changeHistory) => changeHistory.batch)
   @Field(() => [ChangeHistory])
   classTimingsHistories?: ChangeHistory[];
+
+  @OneToMany(() => Notification, (notification) => notification.batch)
+  @Field(() => [Notification])
+  notifications?: Notification[];
 }

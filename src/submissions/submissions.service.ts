@@ -8,9 +8,17 @@ import { Assignment } from '../assignments/entities/assignment.entity';
 import { Quiz } from '../quizs/entities/quiz.entity';
 import { User } from '../users/entities/user.entity';
 import { AssignMarsksToAssignmentInput } from './dto/assign-assignmentmarks-input';
-import { SubmissionStatus, SubmissionType } from 'src/util/enum';
+import {
+  NotificationType,
+  SubmissionStatus,
+  SubmissionType,
+} from 'src/util/enum';
 import { v4 as uuidv4 } from 'uuid';
 import { AssignMarsksToQuizInput } from './dto/assign-quizmarks-input';
+import { MailService } from 'src/mail/mail.service';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
+import { Batch } from 'src/batch/entities/batch.entity';
+import { BatchService } from 'src/batch/batch.service';
 
 @Injectable()
 export class SubmissionsService {
@@ -26,6 +34,13 @@ export class SubmissionsService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(Batch)
+    private readonly batchRepository: Repository<Batch>,
+
+    private readonly notificationGateway: NotificationsGateway,
+    private readonly mailService: MailService,
+    private readonly batchService: BatchService,
   ) {}
   async create(createSubmissionInput: CreateSubmissionInput) {
     const {
@@ -192,27 +207,38 @@ export class SubmissionsService {
       throw new BadRequestException('CheckedBy user not found');
     }
 
+    const student = await this.userRepository.findOneBy({ user_id: studentId });
+    if (!student) {
+      throw new BadRequestException('Student not found');
+    }
+
+    const batches = await this.batchService.findStudentBatch(studentId);
+    if (!batches || batches.length === 0) {
+      throw new BadRequestException('Batch Not Found');
+    }
+
+    const batch = batches[0];
+    const batchId = batch.batch_id;
+
     let submission;
 
     if (submissionId) {
       submission = await this.submissionRepository.findOneBy({
         submissionid: submissionId,
       });
-
       if (!submission) {
         throw new BadRequestException('Submission not found');
       }
     } else {
       if (!assignmentId) {
         throw new BadRequestException(
-          'AssignmentId is required for missing students',
+          'AssignmentId is required for creating a new submission',
         );
       }
 
       const assignment = await this.assignmentRepository.findOneBy({
         assignment_id: assignmentId,
       });
-
       if (!assignment) {
         throw new BadRequestException('Assignment not found');
       }
@@ -236,7 +262,22 @@ export class SubmissionsService {
     submission.checkedBy = user;
     submission.score = score;
 
-    return await this.submissionRepository.save(submission);
+    await this.submissionRepository.save(submission);
+
+    // await this.mailService.sendAssignmentMarksNotificationEmail(
+    //   student.email,
+    //   student.name,
+    // );
+
+    await this.notificationGateway.handleNewAssignment({
+      title: 'Assignment Marks Assigned',
+      description: 'Check Your Classroom',
+      type: NotificationType.MARKS,
+      batchId,
+      studentId,
+    });
+
+    return submission;
   }
 
   async assignMarksToQuiz(assignMarksToQuiz: AssignMarsksToQuizInput) {

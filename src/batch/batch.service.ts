@@ -120,9 +120,9 @@ export class BatchService {
   }
   async findStudentBatch(studentId: string): Promise<Batch[]> {
     if (!studentId) {
-      throw new BadRequestException("Student Id is required");
+      throw new BadRequestException('Student Id is required');
     }
-  
+
     const batches = await this.batchRepository.find({
       where: {
         users: {
@@ -134,8 +134,6 @@ export class BatchService {
 
     return batches.map((batch) => this.calculateOtherFields(batch));
   }
-  
-
 
   private calculateOtherFields(batch: Batch): Batch {
     batch.totalCandidates = batch.candidates ? batch.candidates.length : 0;
@@ -458,94 +456,92 @@ export class BatchService {
       defaultMessage,
       movePupils,
     } = updateExistingBatchInput;
-  
-    console.log(maxAbsents,  movePupils , teacherIds , batch_id , defaultMessage)
-   
+
+    console.log(maxAbsents, movePupils, teacherIds, batch_id, defaultMessage);
+
     if (!batch_id) {
       throw new BadRequestException('BatchId is required');
     }
-  
+
     const batch = await this.batchRepository.findOneBy({ batch_id });
     if (!batch) {
       throw new BadRequestException('Batch not found');
     }
-  
+
     if (!teacherIds || teacherIds.length === 0) {
       throw new BadRequestException('TeacherIds are required');
     }
-  
+
     const teachers = await this.userRepository.find({
       where: { user_id: In(teacherIds) },
     });
     if (!teachers || teachers.length === 0) {
       throw new BadRequestException('Teachers not found');
     }
-  
-    
+
     batch.name = name;
     batch.teachers = teachers;
-  
-    
+
     if (movePupils) {
       const pupils = await this.userRepository.find({
         where: { batch },
         relations: ['attendanceRecords'],
       });
-  
+
       let studentsMovedToWatchlist = 0;
       let studentsRemovedFromWatchlist = 0;
-  
-      
+
       for (const pupil of pupils) {
         const absences = pupil.attendanceRecords.filter(
           (record) => record.status === 'absent',
         ).length;
-  
-        console.log(`Pupil: ${pupil.name}, Absences: ${absences}, Max Absents: ${maxAbsents}`);
-  
-        
+
+        console.log(
+          `Pupil: ${pupil.name}, Absences: ${absences}, Max Absents: ${maxAbsents}`,
+        );
+
         if (pupil.watchlisted && absences < maxAbsents) {
           await this.userService.removeFromWatchList(pupil.user_id);
           pupil.watchlisted = false;
           studentsRemovedFromWatchlist++;
-          await this.userRepository.save(pupil); 
+          await this.userRepository.save(pupil);
           console.log(`${pupil.name} removed from watchlist.`);
-        } 
-        
-        else if (!pupil.watchlisted && absences >= maxAbsents) {
+        } else if (!pupil.watchlisted && absences >= maxAbsents) {
           pupil.watchlisted = true;
           pupil.warning = defaultMessage;
           pupil.reason = 'Lack of attendance';
           studentsMovedToWatchlist++;
-          await this.userRepository.save(pupil); 
+          await this.userRepository.save(pupil);
           console.log(`${pupil.name} added to watchlist.`);
         }
-  
+
         pupil.absences = absences;
       }
-  
+
       console.log(`${studentsMovedToWatchlist} students moved to watchlist.`);
-      console.log(`${studentsRemovedFromWatchlist} students removed from watchlist.`);
+      console.log(
+        `${studentsRemovedFromWatchlist} students removed from watchlist.`,
+      );
     }
-  
+
     batch.maxAbsents = maxAbsents;
-   
+
     return await this.batchRepository.save(batch);
   }
-  
+
   async GetStudentsByBatchId(batchId: string): Promise<User[]> {
     if (!batchId) {
       throw new BadRequestException('BatchId is required');
     }
 
-    const batch= await this.batchRepository.findOne({
+    const batch = await this.batchRepository.findOne({
       where: { batch_id: batchId },
       relations: ['users'],
     });
 
-    if(!batch){
-      throw new BadRequestException("Batch Not Found")
+    if (!batch) {
+      throw new BadRequestException('Batch Not Found');
     }
-    return batch.users
+    return batch.users;
   }
 }

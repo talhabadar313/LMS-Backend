@@ -27,3 +27,14 @@ registerEnumType(AttendanceStatus, {
   name: 'AttendanceStatus',
   description: 'The type of status (present or absent)',
 });
+
+export enum NotificationType {
+  ASSIGNMENT = 'Assignment',
+  QUIZ = 'Quiz',
+  MARKS = 'Marks',
+}
+
+registerEnumType(NotificationType, {
+  name: 'NotificationType',
+  description: 'The type of notification (assignment , quiz or marks)',
+});

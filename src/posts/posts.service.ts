@@ -116,15 +116,29 @@ export class PostService {
 
     const posts = await this.postRepository.find({
       where: { batch: batch },
-      relations: ['batch', 'likes', 'likes.user', 'createdBy'],
+      relations: [
+        'batch',
+        'likes',
+        'likes.user',
+        'createdBy',
+        'comments',
+        'comments.replies',
+      ],
     });
 
     return posts.map((post) => {
       const userNames = post.likes.map((like) => like.user.name);
+
+      const comments = post.comments.map((comment) => ({
+        ...comment,
+        replies: comment.replies ? comment.replies : [],
+      }));
+
       return {
         ...post,
         likeCount: post.likes.length,
         userNames,
+        comments,
       };
     });
   }

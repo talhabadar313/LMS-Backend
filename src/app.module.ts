@@ -20,6 +20,7 @@ import { AttendanceRecordModule } from './attendance-record/attendance-record.mo
 import { NotesModule } from './notes/notes.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { NotificationsGateway } from './notifications/notifications.gateway';
+import { CommentsModule } from './comments/comments.module';
 
 dotenv.config({ path: '.env' });
 
@@ -64,7 +65,7 @@ dotenv.config({ path: '.env' });
     AttendanceRecordModule,
     NotesModule,
     NotificationsModule,
-
+    CommentsModule,
   ],
   controllers: [],
   providers: [NotificationsGateway],

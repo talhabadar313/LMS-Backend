@@ -7,11 +7,14 @@ export class MailService {
   private readonly invitationTemplate: string;
   private readonly rejectionTemplate: string;
   private readonly resetPasswordTemplate: string;
-  private readonly assignmentTemplate : string;
+  private readonly assignmentTemplate: string;
+  private readonly quizTemplate: string;
+  private readonly assignmentMarksTemplate: string;
 
   constructor(private readonly mailerService: MailerService) {
     this.invitationTemplate = `
-      <h1>Hello {{name}},</h1>
+      <h4>Dear {{name}},</h4>
+       <p>We hope this message finds you well.</p>
       <p>You have been invited to join our course. Below are your login details:</p>
       <ul>
         <li><strong>Email:</strong> {{email}}</li>
@@ -19,31 +22,55 @@ export class MailService {
       </ul>
       <p>Please login and reset your password by clicking the link below:</p>
       <a href="{{loginUrl}}">Login and Reset Password</a>
-      <p>Thank you!</p>
+      <p>Best regards,</p>
+      <p><strong>Inciter Tech</strong></p>
     `;
 
     this.rejectionTemplate = `
-      <h1>Hello {{name}},</h1>
+      <h4>Dear {{name}},</h4>
+      <p>We hope this message finds you well.</p>
       <p>Thank you for your interest in our course. After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.</p>
       <p>We appreciate the effort you put into applying, and we encourage you to apply again for future opportunities.</p>
       <p>If you have any questions, feel free to reach out.</p>
       <p>Best regards,</p>
-      <p>Inciter Tech</p>
+      <p><strong>Inciter Tech</strong></p>
     `;
 
     this.resetPasswordTemplate = `
-    <h4>Hello,</h4>
+    <h4>Dear {{name}},</h4>
     <p>Your new password is <strong>{{tempPassword}}</strong></p>
     <p>If you did not request a password reset, please ignore this email.</p>
     <p>Thank you!</p>
+    <p>Best regards,</p>
+    <p><strong>Inciter Tech</strong></p>
   `;
-  this.assignmentTemplate=`
-   <h1>Hello {{name}},</h1>
-      <p>A new assignment has been created by your teacher.</p>
-      <p>Please check your portal for more details.</p>
-      <p>Best regards,</p>
-      <p>Inciter Tech</p>
+    this.assignmentTemplate = `
+    <h4>Dear {{name}},</h4>
+    <p>A new assignment has been created by your teacher.</p>
+    <p>Please log in to your portal to view the assignment details and any deadlines.</p>
+    <p>If you have any questions regarding the assignment, please feel free to reach out to your teacher.</p>
+    <p>Best regards,</p>
+    <p><strong>Inciter Tech</strong></p>
   `;
+
+    this.quizTemplate = `
+    <h4>Dear {{name}},</h4>
+    <p>A new quiz has been assigned by your teacher.</p>
+    <p>Please log in to your portal to review the quiz details and deadlines.</p>
+    <p>If you have any questions or need assistance, please do not hesitate to contact your teacher.</p>
+    <p>Best regards,</p>
+    <p><strong>Inciter Tech</strong></p>
+    `;
+
+    this.assignmentMarksTemplate = `
+    <h4>Dear {{name}},</h4>
+    <p>We hope this message finds you well.</p>
+    <p>We are pleased to inform you that your teacher has assigned marks to your recent assignment. Please log in to your portal to review the details of your grades.</p>
+    <p>If you have any questions or need further clarification regarding your marks, feel free to reach out to your teacher or our support team.</p>
+    <p>Best regards,</p>
+    <p><strong>Inciter Tech</strong></p>
+
+`;
   }
 
   private compileTemplate(template: string, context: any): string {
@@ -114,4 +141,35 @@ export class MailService {
     });
   }
 
+  async sendQuizNotificationEmail(
+    email: string,
+    name: string,
+    title: string,
+  ): Promise<void> {
+    const html = this.compileTemplate(this.quizTemplate, {
+      name,
+      title,
+    });
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'New Quiz Created',
+      html,
+    });
+  }
+
+  async sendAssignmentMarksNotificationEmail(
+    email: string,
+    name: string,
+  ): Promise<void> {
+    const html = this.compileTemplate(this.assignmentMarksTemplate, {
+      name,
+    });
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Marks Assigned',
+      html,
+    });
+  }
 }

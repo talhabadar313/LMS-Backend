@@ -8,6 +8,10 @@ import { Batch } from '../batch/entities/batch.entity';
 import { Topic } from '../topics/entities/topic.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Submission } from 'src/submissions/entities/submission.entity';
+import { MailService } from 'src/mail/mail.service';
+import { BatchService } from 'src/batch/batch.service';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
+import { NotificationType } from 'src/util/enum';
 
 @Injectable()
 export class QuizsService {
@@ -26,6 +30,10 @@ export class QuizsService {
 
     @InjectRepository(Submission)
     private readonly submissionRepository: Repository<Submission>,
+
+    private mailService: MailService,
+    private readonly batchService: BatchService,
+    private readonly notificationGateway: NotificationsGateway,
   ) {}
   async create(createQuizInput: CreateQuizInput): Promise<Quiz> {
     const {
@@ -72,7 +80,28 @@ export class QuizsService {
       marksBreakDown,
     });
 
-    return await this.quizRepository.save(newQuiz);
+    await this.quizRepository.save(newQuiz);
+
+    // const users = await this.batchService.GetStudentsByBatchId(batchId);
+    // const studentEmails = users?.map((user) => user.email);
+    // const studentNames = users?.map((user) => user.name);
+
+    // for (let i = 0; i < studentEmails.length; i++) {
+    //   await this.mailService.sendQuizNotificationEmail(
+    //     studentEmails[i],
+    //     studentNames[i],
+    //     title,
+    //   );
+    // }
+
+    await this.notificationGateway.handleNewAssignment({
+      title: 'New Quiz Posted',
+      description: 'Check Your Classroom',
+      type: NotificationType.QUIZ,
+      batchId,
+    });
+
+    return newQuiz;
   }
 
   async findAll(batchId: string): Promise<Quiz[]> {

@@ -10,6 +10,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Comment } from 'src/comments/entities/comment.entity';
 
 @ObjectType()
 @Entity('posts')
@@ -58,6 +59,10 @@ export class Post {
   @OneToMany(() => Like, (like) => like.post)
   @Field(() => [Like], { nullable: true })
   likes: Like[];
+
+  @OneToMany(() => Comment, (comment) => comment.post)
+  @Field(() => [Comment], { nullable: true })
+  comments: Comment[];
 
   @ManyToOne(() => Batch, (batch) => batch.posts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'batchId' })

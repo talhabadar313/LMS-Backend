@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { NotificationsService } from './notification.service';
+import { NotificationType } from 'src/util/enum';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -28,7 +29,6 @@ export class NotificationsGateway
   handleConnection(client: Socket) {
     console.log('New User Connected:', client.id);
     this.clients.add(client);
-    this.fetchMissedNotifications(client);
   }
 
   handleDisconnect(client: Socket) {
@@ -36,26 +36,84 @@ export class NotificationsGateway
     this.clients.delete(client);
   }
 
-  private async fetchMissedNotifications(client: Socket) {
-    const notifications = await this.notificationsService.findAll();
-    client.emit('missedNotifications', notifications);
+  @SubscribeMessage('joinBatch')
+  async handleJoinBatch(
+    client: Socket,
+    { batchId, studentId }: { batchId: string; studentId: string },
+  ) {
+    console.log(
+      `Client ${client.id} joined batch ${batchId} having studentId ${studentId}`,
+    );
+    client.data.batchId = batchId;
+    client.data.studentId = studentId;
+
+    await this.fetchMissedNotifications(client, batchId);
   }
 
-  @SubscribeMessage('newAssignment')
+  private async fetchMissedNotifications(client: Socket, batchId: string) {
+    const studentId = client.data.studentId;
+
+    const notifications =
+      await this.notificationsService.findByBatchAndStudentId(
+        batchId,
+        studentId,
+      );
+    const filteredNotifications = notifications.filter(
+      (notification) =>
+        notification.student?.user_id === studentId ||
+        notification.student === null,
+    );
+    client.emit('missedNotifications', filteredNotifications);
+  }
+
+  @SubscribeMessage('newNotification')
   async handleNewAssignment(
     @MessageBody()
-    { title, description }: { title: string; description: string },
+    {
+      title,
+      description,
+      type,
+      batchId,
+      studentId,
+    }: {
+      title: string;
+      description: string;
+      type: NotificationType;
+      batchId?: string;
+      studentId?: string;
+    },
   ) {
     const notification = await this.notificationsService.create(
       title,
       description,
+      type,
+      batchId,
+      studentId,
     );
 
-    this.clients.forEach((client) => {
-      client.emit('assignmentNotification', {
-        message: `${title}`,
-        id: notification.id,
+    if (studentId) {
+      const studentSocket = [...this.clients].find(
+        (client) => client.data.studentId === studentId,
+      );
+      if (studentSocket) {
+        studentSocket.emit('Notification', {
+          message: title,
+          id: notification.id,
+          type,
+        });
+        console.log(`Notification sent to student client ${studentSocket.id}`);
+      }
+    } else {
+      this.clients.forEach((client) => {
+        if (client.data.batchId === batchId) {
+          client.emit('Notification', {
+            message: title,
+            id: notification.id,
+            type,
+          });
+          console.log(`Notification sent to client ${client.id}`);
+        }
       });
-    });
+    }
   }
 }
