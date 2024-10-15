@@ -14,6 +14,7 @@ import { Batch } from 'src/batch/entities/batch.entity';
 import { Topic } from 'src/topics/entities/topic.entity';
 import { Submission } from 'src/submissions/entities/submission.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 @ObjectType()
 @Entity()
 export class Assignment {
@@ -70,4 +71,8 @@ export class Assignment {
   @OneToMany(() => Submission, (submission) => submission)
   @Field(() => [Submission])
   submissions: Submission[];
+
+  @OneToMany(() => Comment, (comment) => comment.assignment)
+  @Field(() => [Comment])
+  comments: Comment[];
 }

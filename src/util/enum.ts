@@ -38,3 +38,13 @@ registerEnumType(NotificationType, {
   name: 'NotificationType',
   description: 'The type of notification (assignment , quiz or marks)',
 });
+
+export enum CommentType {
+  POST = 'Post',
+  ASSIGNMENT = 'Assignment',
+}
+
+registerEnumType(CommentType, {
+  name: 'CommentType',
+  description: 'The type of comment (post or assignment)',
+});

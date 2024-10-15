@@ -21,6 +21,16 @@ export class CommentsResolver {
     return this.commentsService.findAll(postId);
   }
 
+  @Query(() => [Comment], { name: 'getCommentsByAssignment' })
+  findAllCommentsByAssignment(
+    @Args('assignmentId', { type: () => String }) assignmentId: string,
+    @Args('userId', { type: () => String }) userId: string,
+  ) {
+    return this.commentsService.findAllCommentsByAssignment(
+      assignmentId,
+      userId,
+    );
+  }
 
   @Mutation(() => Boolean)
   async removeComment(@Args('id', { type: () => String }) id: string) {

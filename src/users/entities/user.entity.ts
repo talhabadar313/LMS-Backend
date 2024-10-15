@@ -22,6 +22,7 @@ import { AttendanceRecord } from 'src/attendance-record/entities/attendance-reco
 import { Note } from 'src/notes/entities/note.entity';
 import { ChangeHistory } from 'src/changehistory/entities/changehistory.entity';
 import { Notification } from 'src/notifications/entities/notification.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 @ObjectType()
 @Entity('user')
 export class User {
@@ -146,4 +147,8 @@ export class User {
   @OneToMany(() => Notification, (notification) => notification.student)
   @Field(() => [Notification], { nullable: true })
   notifications?: Notification[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  @Field(() => [Comment], { nullable: true })
+  comments?: Comment[];
 }
