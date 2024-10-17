@@ -13,7 +13,7 @@ export class PostResolver {
 
   @Mutation(() => Post)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
+  @Roles('admin', 'teacher', 'student')
   async createPost(
     @Args('createPostInput') createPostInput: CreatePostInput,
   ): Promise<Post> {
@@ -31,6 +31,14 @@ export class PostResolver {
   async postsByBatchId(@Args('batchId') batchId: string): Promise<Post[]> {
     console.log('Received batchId:', batchId);
     return this.postService.getPostsByBatchId(batchId);
+  }
+
+  @Query(() => [Post], { name: 'getPostsByBatchIdForStudentSide' })
+  async postsByBatchIdOnStudentSide(
+    @Args('batchId') batchId: string,
+  ): Promise<Post[]> {
+    console.log('Received batchId:', batchId);
+    return this.postService.getPostsByBatchIdForStudentSide(batchId);
   }
 
   @Mutation(() => Post)

@@ -143,6 +143,44 @@ export class PostService {
     });
   }
 
+  async getPostsByBatchIdForStudentSide(batchId: string): Promise<any[]> {
+    const batch = await this.batchRepository.findOne({
+      where: { batch_id: batchId },
+    });
+    if (!batch) {
+      throw new NotFoundException('Batch not found.');
+    }
+
+    const posts = await this.postRepository.find({
+      where: { batch: batch, deleted: false },
+
+      relations: [
+        'batch',
+        'likes',
+        'likes.user',
+        'createdBy',
+        'comments',
+        'comments.replies',
+      ],
+    });
+
+    return posts.map((post) => {
+      const userNames = post.likes.map((like) => like.user.name);
+
+      const comments = post.comments.map((comment) => ({
+        ...comment,
+        replies: comment.replies ? comment.replies : [],
+      }));
+
+      return {
+        ...post,
+        likeCount: post.likes.length,
+        userNames,
+        comments,
+      };
+    });
+  }
+
   async updatePost(updatePostInput: UpdatePostInput): Promise<Post> {
     const { post_id, title, content, files } = updatePostInput;
 
@@ -168,13 +206,16 @@ export class PostService {
         );
 
         if (!existingFileUrl) {
+          // Get the names of users who liked the post
           const { createReadStream } = resolvedFile;
           const stream = createReadStream();
+          // Get the comments and their replies
           const chunks: Buffer[] = [];
           for await (const chunk of stream) {
             chunks.push(chunk);
           }
           const buffer = Buffer.concat(chunks);
+          // Return the post with the like count, userNames and comments
 
           const { data, error } = await supabase.storage
             .from('LMS Bucket')
