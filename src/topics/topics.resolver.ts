@@ -21,7 +21,7 @@ export class TopicsResolver {
 
   @Query(() => [Topic], { name: 'getAllTopicsByBatch' })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
+  @Roles('admin', 'teacher', 'student')
   findAll(@Args('batchId', { type: () => String }) batchId: string) {
     return this.topicsService.findAll(batchId);
   }

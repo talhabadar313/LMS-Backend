@@ -55,7 +55,7 @@ export class Quiz {
   @Field(() => [Topic])
   topics: Topic[];
 
-  @OneToMany(() => Submission, (submission) => submission)
+  @OneToMany(() => Submission, (submission) => submission.quiz)
   @Field(() => [Submission])
   submissions: Submission[];
 

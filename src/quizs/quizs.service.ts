@@ -3,7 +3,7 @@ import { CreateQuizInput } from './dto/create-quiz.input';
 import { UpdateQuizInput } from './dto/update-quiz.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Quiz } from './entities/quiz.entity';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { Batch } from '../batch/entities/batch.entity';
 import { Topic } from '../topics/entities/topic.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -141,6 +141,80 @@ export class QuizsService {
     });
     return quizsWithSubmissions;
   }
+
+  async findUpcomingQuizes(batchId: string): Promise<Quiz[]> {
+    if (!batchId) {
+      throw new BadRequestException('BatchId is required');
+    }
+
+    const batch = await this.batchRepository.findOneBy({ batch_id: batchId });
+
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+
+    const quizs = await this.quizRepository.find({
+      where: { batch: batch },
+      relations: ['batch', 'topics', 'createdBy', 'submissions'],
+    });
+
+    const upcomingQuizzes = quizs?.filter((quiz) => {
+      const hasNoSubmissions = quiz?.submissions?.length === 0;
+      const quizDate = new Date(quiz.Date as string);
+      const isTodayOrFutureDate =
+        quizDate >= new Date(new Date().setHours(0, 0, 0, 0));
+
+      return hasNoSubmissions && isTodayOrFutureDate;
+    });
+
+    return upcomingQuizzes;
+  }
+
+  async findQuizsData(batchId: string, studentId: string): Promise<Quiz[]> {
+    if (!batchId || !studentId) {
+      throw new BadRequestException('BatchId or StudentId is required');
+    }
+
+    const batch = await this.batchRepository.findOneBy({ batch_id: batchId });
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+
+    const student = await this.userRepository.findOneBy({ user_id: studentId });
+    if (!student) {
+      throw new BadRequestException('Student not found');
+    }
+
+    const quizzes = await this.quizRepository.find({
+      where: { batch: batch },
+      relations: [
+        'batch',
+        'topics',
+        'createdBy',
+        'submissions',
+        'submissions.student',
+      ],
+    });
+
+    const quizzesWithStudentSubmission = quizzes
+      .map((quiz) => {
+        const submission = quiz.submissions.find(
+          (sub) => sub.student?.user_id === studentId,
+        );
+
+        if (submission) {
+          return {
+            ...quiz,
+            submissions: [submission],
+          };
+        }
+        return null;
+      })
+      .filter((quiz) => quiz !== null);
+
+    return quizzesWithStudentSubmission as Quiz[];
+  }
+
   async findOne(quizId: string): Promise<Quiz> {
     if (!quizId) {
       throw new BadRequestException('AssignmentId is required');

@@ -194,7 +194,9 @@ export class AssignmentsService {
       const totalSubmissions = submissions.filter(
         (sub) =>
           sub.assignment &&
-          sub.assignment.assignment_id === assignment.assignment_id,
+          sub.assignment.assignment_id === assignment.assignment_id &&
+          sub.SubmittedData &&
+          Object.keys(sub.SubmittedData).length > 0,
       ).length;
 
       return {
@@ -204,6 +206,106 @@ export class AssignmentsService {
     });
 
     return assignmentsWithSubmissions;
+  }
+
+  async findUpcomingAssignments(
+    batchId: string,
+    studentId: string,
+  ): Promise<Assignment[]> {
+    if (!batchId) {
+      throw new BadRequestException('BatchId is required');
+    }
+
+    const batch = await this.batchrepository.findOneBy({ batch_id: batchId });
+
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+
+    const assignments = await this.assignmentRepository.find({
+      where: { batch: batch },
+      relations: [
+        'batch',
+        'topics',
+        'createdBy',
+        'submissions',
+        'submissions.student',
+      ],
+    });
+
+    const upcomingAssignments = assignments.filter((assignment) => {
+      const assignmentDate = new Date(assignment?.dueDate);
+      const isTodayOrFutureDate =
+        assignmentDate >= new Date(new Date().setHours(0, 0, 0, 0));
+
+      const hasSubmitted = assignment.submissions?.some(
+        (submission) => submission.student?.user_id === studentId,
+      );
+
+      return !hasSubmitted && isTodayOrFutureDate;
+    });
+
+    return upcomingAssignments;
+  }
+
+  async findAssignmentsData(
+    batchId: string,
+    studentId: string,
+  ): Promise<Assignment[]> {
+    if (!batchId) {
+      throw new BadRequestException('BatchId is required');
+    }
+
+    const batch = await this.batchrepository.findOneBy({ batch_id: batchId });
+
+    if (!batch) {
+      throw new BadRequestException('Batch not found');
+    }
+
+    if (!studentId) {
+      throw new BadRequestException('StudentId is required');
+    }
+
+    const student = await this.userRepository.findOneBy({
+      user_id: studentId,
+    });
+
+    if (!student) {
+      throw new BadRequestException('Student not found');
+    }
+
+    const assignments = await this.assignmentRepository.find({
+      where: { batch: batch },
+      relations: [
+        'batch',
+        'topics',
+        'createdBy',
+        'submissions',
+        'submissions.student',
+      ],
+    });
+
+    const filteredAssignments = assignments.map((assignment) => {
+      const submission = assignment.submissions.find(
+        (sub) => sub.student?.user_id === studentId,
+      );
+
+      if (submission) {
+        return {
+          ...assignment,
+          submissions: [submission],
+        };
+      } else {
+        return {
+          ...assignment,
+          submissions: [],
+        };
+      }
+    });
+
+    return filteredAssignments.filter(
+      (assignment) => new Date(assignment.dueDate) < new Date(),
+    );
   }
 
   async findOne(assignmentId: string): Promise<Assignment> {

@@ -68,7 +68,7 @@ export class Assignment {
   @Field(() => [Topic])
   topics: Topic[];
 
-  @OneToMany(() => Submission, (submission) => submission)
+  @OneToMany(() => Submission, (submission) => submission.assignment)
   @Field(() => [Submission])
   submissions: Submission[];
 

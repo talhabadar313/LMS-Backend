@@ -18,6 +18,19 @@ export class QuizsResolver {
     return this.quizsService.findAll(batchId);
   }
 
+  @Query(() => [Quiz], { name: 'findUpcomingQuizes' })
+  findUpcomingQuizes(@Args('batchId', { type: () => String }) batchId: string) {
+    return this.quizsService.findUpcomingQuizes(batchId);
+  }
+
+  @Query(() => [Quiz], { name: 'findQuizsData' })
+  findQuizsData(
+    @Args('batchId', { type: () => String }) batchId: string,
+    @Args('studentId', { type: () => String }) studentId: string,
+  ) {
+    return this.quizsService.findQuizsData(batchId, studentId);
+  }
+
   @Query(() => Quiz, { name: 'getOneQuiz' })
   findOne(@Args('quizId', { type: () => String }) quizId: string) {
     return this.quizsService.findOne(quizId);

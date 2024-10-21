@@ -25,6 +25,26 @@ export class AssignmentsResolver {
     return this.assignmentsService.findOne(assignmentId);
   }
 
+  @Query(() => [Assignment], { name: 'getUpcomingAssignmentsForStudent' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher', 'student')
+  findUpcomingAssignments(
+    @Args('batchId', { type: () => String }) batchId: string,
+    @Args('studentId', { type: () => String }) studentId: string,
+  ) {
+    return this.assignmentsService.findUpcomingAssignments(batchId, studentId);
+  }
+
+  @Query(() => [Assignment], { name: 'getAssignmentsDataForStudent' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher', 'student')
+  findAssignmentsData(
+    @Args('batchId', { type: () => String }) batchId: string,
+    @Args('studentId', { type: () => String }) studentId: string,
+  ) {
+    return this.assignmentsService.findAssignmentsData(batchId, studentId);
+  }
+
   @Mutation(() => Assignment, { name: 'createAssignment' })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')
