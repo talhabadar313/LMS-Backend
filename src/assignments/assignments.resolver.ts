@@ -45,6 +45,19 @@ export class AssignmentsResolver {
     return this.assignmentsService.findAssignmentsData(batchId, studentId);
   }
 
+  @Query(() => Assignment, { name: 'getOneAssignmentDataForStudent' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher', 'student')
+  findOneAssignmentData(
+    @Args('assignmentId', { type: () => String }) assignmentId: string,
+    @Args('studentId', { type: () => String }) studentId: string,
+  ) {
+    return this.assignmentsService.findOneAssignmentData(
+      assignmentId,
+      studentId,
+    );
+  }
+
   @Mutation(() => Assignment, { name: 'createAssignment' })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher')

@@ -17,7 +17,10 @@ import { User } from 'src/users/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
 import { BatchService } from 'src/batch/batch.service';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
-import { NotificationType } from 'src/util/enum';
+import {
+  AssignmentSubmissionStatusType,
+  NotificationType,
+} from 'src/util/enum';
 
 @Injectable()
 export class AssignmentsService {
@@ -285,27 +288,111 @@ export class AssignmentsService {
       ],
     });
 
+    const normalizeDate = (date: Date) => {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    };
+
+    const currentDate = normalizeDate(new Date());
+
     const filteredAssignments = assignments.map((assignment) => {
       const submission = assignment.submissions.find(
         (sub) => sub.student?.user_id === studentId,
       );
 
-      if (submission) {
-        return {
-          ...assignment,
-          submissions: [submission],
-        };
-      } else {
-        return {
-          ...assignment,
-          submissions: [],
-        };
-      }
+      return submission
+        ? { ...assignment, submissions: [submission] }
+        : { ...assignment, submissions: [] };
     });
 
-    return filteredAssignments.filter(
-      (assignment) => new Date(assignment.dueDate) < new Date(),
+    return filteredAssignments.filter((assignment) => {
+      const dueDate = normalizeDate(new Date(assignment.dueDate));
+      const submission = assignment.submissions.find(
+        (sub) => sub.student?.user_id === studentId,
+      );
+
+      const hasSubmitted = submission && submission.SubmittedData?.length > 0;
+      return (
+        dueDate < currentDate ||
+        (dueDate.getTime() === currentDate.getTime() && hasSubmitted) ||
+        (dueDate > currentDate && hasSubmitted)
+      );
+    });
+  }
+
+  async findOneAssignmentData(
+    assignmentId: string,
+    studentId: string,
+  ): Promise<Assignment> {
+    if (!assignmentId || !studentId) {
+      throw new BadRequestException('AssignmentId and StudentId are required');
+    }
+
+    const assignment = await this.assignmentRepository.findOne({
+      where: { assignment_id: assignmentId },
+      relations: [
+        'createdBy',
+        'batch',
+        'submissions',
+        'submissions.student',
+        'comments',
+        'comments.user',
+      ],
+    });
+
+    if (!assignment) {
+      throw new BadRequestException('Assignment not found');
+    }
+
+    const student = await this.userRepository.findOneBy({
+      user_id: studentId,
+    });
+
+    if (!student) {
+      throw new BadRequestException('Student not found');
+    }
+
+    const studentSubmission = assignment.submissions.find(
+      (submission) => submission.student?.user_id === studentId,
     );
+
+    const currentDate = new Date();
+    const dueDate = new Date(assignment.dueDate);
+
+    let status: AssignmentSubmissionStatusType;
+
+    if (studentSubmission) {
+      const submissionDate = new Date(studentSubmission.submissionDate);
+      const dueDateEnd = new Date(dueDate);
+      dueDateEnd.setHours(23, 59, 59, 999);
+      if (studentSubmission.score !== null) {
+        status = AssignmentSubmissionStatusType.MARKS_ASSIGNED;
+      } else if (submissionDate > dueDateEnd) {
+        status = AssignmentSubmissionStatusType.LATE_SUBMISSION;
+      } else {
+        status = AssignmentSubmissionStatusType.SUBMITTED;
+      }
+    } else {
+      const dueDateEnd = new Date(dueDate);
+      dueDateEnd.setHours(23, 59, 59, 999);
+      if (currentDate.getTime() > dueDateEnd.getTime()) {
+        status = AssignmentSubmissionStatusType.MISSING;
+      } else {
+        status = AssignmentSubmissionStatusType.NOT_SUBMITTED;
+      }
+    }
+
+    const studentComments = assignment.comments.filter(
+      (comment) => comment.user?.user_id === studentId,
+    );
+
+    return {
+      ...assignment,
+      submissions: studentSubmission ? [studentSubmission] : [],
+      comments: studentComments || [],
+      submissionStatus: status,
+    };
   }
 
   async findOne(assignmentId: string): Promise<Assignment> {

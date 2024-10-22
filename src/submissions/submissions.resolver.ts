@@ -45,9 +45,11 @@ export class SubmissionsResolver {
     );
   }
 
-  @Mutation(() => Submission)
-  removeSubmission(@Args('id', { type: () => String }) id: string) {
-    return this.submissionsService.remove(id);
+  @Mutation(() => Submission, { name: 'unsubmitSubmission' })
+  unsubmitSubmission(
+    @Args('submissionId', { type: () => String }) submissionId: string,
+  ) {
+    return this.submissionsService.unsubmitSubmission(submissionId);
   }
 
   @Mutation(() => Submission, { name: 'assignMarksToAssignment' })

@@ -137,7 +137,6 @@ export class SubmissionsService {
     });
     return await this.submissionRepository.save(newSubmission);
   }
-
   async findAllAssignmentSubmissions(
     assignmentId: string,
   ): Promise<Submission[]> {
@@ -158,7 +157,6 @@ export class SubmissionsService {
       relations: ['assignment', 'quiz', 'student', 'checkedBy'],
     });
   }
-
   async findAllQuizSubmissions(quizId: string): Promise<Submission[]> {
     if (!quizId) {
       throw new BadRequestException('QuizId is required');
@@ -177,20 +175,35 @@ export class SubmissionsService {
       relations: ['assignment', 'quiz', 'student', 'checkedBy'],
     });
   }
-
-
   findOne(id: string) {
     return `This action returns a #${id} submission`;
+  }
+  async unsubmitSubmission(
+    submissionId: string,
+  ): Promise<{ submissionid: string }> {
+    if (!submissionId) {
+      throw new BadRequestException('SubmissionId is required');
+    }
+
+    const submission = await this.submissionRepository.findOneBy({
+      submissionid: submissionId,
+    });
+
+    if (!submission) {
+      throw new BadRequestException('Submission not found');
+    }
+
+    if (submission.status === 'Not Assigned' && submission.score === null) {
+      await this.submissionRepository.remove(submission);
+      return { submissionid: submissionId };
+    }
+
+    throw new BadRequestException('Submission cannot be removed');
   }
 
   update(id: string, updateSubmissionInput: UpdateSubmissionInput) {
     return `This action updates a #${id} submission`;
   }
-
-  remove(id: string) {
-    return `This action removes a #${id} submission`;
-  }
-
   async assignMarksToAssignment(
     assignMarksToAssignmentInput: AssignMarsksToAssignmentInput,
   ) {

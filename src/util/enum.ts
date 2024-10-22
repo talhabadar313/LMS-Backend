@@ -48,3 +48,16 @@ registerEnumType(CommentType, {
   name: 'CommentType',
   description: 'The type of comment (post or assignment)',
 });
+
+export enum AssignmentSubmissionStatusType {
+  MISSING = 'Missing',
+  SUBMITTED = 'Submitted',
+  NOT_SUBMITTED = 'Not Submitted',
+  LATE_SUBMISSION = 'Late Submission',
+  MARKS_ASSIGNED = 'Marks Assigned',
+}
+
+registerEnumType(AssignmentSubmissionStatusType, {
+  name: 'AssignmentSubmissionStatusType',
+  description: 'The type of assignment submission status',
+});

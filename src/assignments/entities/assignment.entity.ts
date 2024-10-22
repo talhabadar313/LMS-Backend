@@ -58,6 +58,9 @@ export class Assignment {
   @Column('text', { array: true, nullable: true })
   attachmentSrc?: string[];
 
+  @Field(() => String, { nullable: true })
+  submissionStatus?: String;
+
   @ManyToOne(() => Batch, (batch) => batch.assignments)
   @JoinColumn({ name: 'batchId' })
   @Field(() => Batch)
