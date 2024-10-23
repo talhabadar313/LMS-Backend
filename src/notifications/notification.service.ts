@@ -68,7 +68,6 @@ export class NotificationsService {
       relations: ['student'],
     });
 
-    console.log('Fetched Notifications:', notifications);
     return notifications;
   }
 

@@ -16,24 +16,10 @@ export class UpdateUserInput {
 
   @Field()
   @IsString()
-  password: string;
-
-  @Field()
-  @IsString()
-  role: string;
+  address: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
   phoneNumber?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  status?: string;
-
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  watchlisted?: boolean;
 }

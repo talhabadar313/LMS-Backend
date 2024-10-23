@@ -7,7 +7,6 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
-  AfterLoad,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -73,6 +72,10 @@ export class Batch {
   @Column({ nullable: true })
   classTimings?: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  totalClasses?: number;
+
   @OneToMany(() => User, (user) => user.batch)
   @Field(() => [User], { nullable: true })
   users: User[];
@@ -123,7 +126,7 @@ export class Batch {
   assignments?: Assignment[];
 
   @OneToMany(() => Quiz, (quiz) => quiz.batch)
-  @Field(() => Quiz)
+  @Field(() => [Quiz], { nullable: true })
   quizzes?: Quiz[];
 
   @OneToMany(() => Attendance, (attendance) => attendance.batch)

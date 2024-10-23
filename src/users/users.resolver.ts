@@ -56,9 +56,29 @@ export class UsersResolver {
 
   @Query(() => User, { name: 'user' })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
+  @Roles('admin', 'teacher', 'student')
   findOne(@Args('id', { type: () => String }) user_id: string) {
     return this.usersService.findOne(user_id);
+  }
+
+  @Query(() => User, { name: 'studentCompleteData' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher', 'student')
+  async findStudentCompleteData(
+    @Args('userId', { type: () => String }) userId: string,
+  ): Promise<User> {
+    const completeData =
+      await this.usersService.findStudentCompleteData(userId);
+
+    return {
+      ...completeData.user,
+      totalClasses: completeData.totalClasses,
+      attendedClasses: completeData.attendedClasses,
+      totalAssignments: completeData.totalAssignments,
+      submittedAssignments: completeData.submittedAssignments,
+      totalQuizzes: completeData.totalQuizzes,
+      attendedQuizzes: completeData.attendedQuizzes,
+    };
   }
 
   @Query(() => [User], { name: 'teachers' })
@@ -67,9 +87,9 @@ export class UsersResolver {
   findTeachers() {
     return this.usersService.findTeachers();
   }
-  @Mutation(() => User)
+  @Mutation(() => User, { name: 'updateUser' })
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin', 'teacher')
+  @Roles('admin', 'teacher', 'student')
   updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
     return this.usersService.update(updateUserInput.user_id, updateUserInput);
   }
@@ -101,13 +121,14 @@ export class UsersResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { name: 'resetStudentPassword' })
   async resetPassword(
     @Args('input') resetPasswordInput: ResetPasswordInput,
   ): Promise<boolean> {
     try {
       await this.usersService.resetPassword(
-        resetPasswordInput.email,
+        resetPasswordInput.user_id,
+        resetPasswordInput.oldPassword,
         resetPasswordInput.newPassword,
       );
       return true;

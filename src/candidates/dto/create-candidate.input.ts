@@ -12,6 +12,9 @@ export class CreateCandidateInput {
   phoneNo: string;
 
   @Field()
+  address: string;
+
+  @Field()
   gender: string;
 
   @Field()

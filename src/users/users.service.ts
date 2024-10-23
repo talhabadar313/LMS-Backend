@@ -13,6 +13,7 @@ import { Batch } from '../batch/entities/batch.entity';
 import { Candidate } from '../candidates/entities/candidate.entity';
 import { MailService } from '../mail/mail.service';
 import { WatchlistUserInput } from './dto/watchlist-user-input';
+import { AttendanceStatus } from 'src/util/enum';
 
 @Injectable()
 export class UsersService {
@@ -86,6 +87,62 @@ export class UsersService {
     });
   }
 
+  async findStudentCompleteData(userId: string): Promise<any> {
+    if (!userId) {
+      throw new BadRequestException('UserId is required');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+      relations: [
+        'batch',
+        'batch.assignments',
+        'batch.assignments.topics',
+        'batch.quizzes',
+        'candidate',
+        'submissions',
+        'submissions.assignment',
+        'submissions.quiz',
+        'notes',
+        'notes.createdBy',
+        'attendanceRecords',
+        'attendanceRecords.attendance',
+      ],
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    console.log('Batch Quizzes:', user.batch?.quizzes);
+
+    const totalClasses = user.batch?.totalClasses ?? 0;
+    const totalAssignments = user.batch?.assignments?.length ?? 0;
+    const totalQuizzes = user.batch?.quizzes?.length ?? 0;
+
+    const attendedClasses = user.attendanceRecords.filter(
+      (record) => record.status === AttendanceStatus.PRESENT,
+    ).length;
+
+    const submittedAssignments = user.submissions.filter(
+      (submission) => submission.assignment,
+    ).length;
+
+    const attendedQuizzes = user.submissions.filter(
+      (submission) => submission.quiz,
+    ).length;
+
+    return {
+      user,
+      totalClasses,
+      attendedClasses,
+      totalAssignments,
+      submittedAssignments,
+      totalQuizzes,
+      attendedQuizzes,
+    };
+  }
+
   findOneByEmail(email: string): Promise<User> {
     return this.userRepository.findOne({
       where: { email },
@@ -119,18 +176,25 @@ export class UsersService {
     await this.mailService.sendResetPasswordEmail(user.email, tempPassword);
   }
 
-  async resetPassword(email: string, newPassword: string): Promise<User> {
+  async resetPassword(
+    user_id: string,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<User> {
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
     const user = await this.userRepository.findOne({
-      where: { email: email },
+      where: { user_id: user_id },
     });
 
     if (!user) {
-      throw new NotFoundException(`User with email ${email} not found`);
+      throw new NotFoundException(`User with id ${user_id} not found`);
+    }
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      throw new BadRequestException('Old password is incorrect');
     }
 
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
     user.password = hashedPassword;
     await this.userRepository.save(user);
 
@@ -145,16 +209,35 @@ export class UsersService {
     user_id: string,
     updateUserInput: UpdateUserInput,
   ): Promise<User> {
-    const saltRounds = 10;
+    if (!user_id) {
+      throw new BadRequestException('UserId is required');
+    }
+    const user = await this.userRepository.findOne({
+      where: { user_id },
+      relations: ['candidate'],
+    });
 
-    if (updateUserInput.password) {
-      updateUserInput.password = await bcrypt.hash(
-        updateUserInput.password,
-        saltRounds,
-      );
+    if (!user) {
+      throw new BadRequestException('User not found');
     }
 
-    await this.userRepository.update(user_id, updateUserInput);
+    const candidate = user.candidate;
+    if (!candidate) {
+      throw new BadRequestException('Candidate not found for this user');
+    }
+
+    candidate.name = updateUserInput.name;
+    candidate.email = updateUserInput.email;
+    candidate.phoneNo = updateUserInput.phoneNumber;
+    candidate.address = updateUserInput.address;
+
+    await this.candidateRepository.save(candidate);
+
+    user.name = updateUserInput.name;
+    user.email = updateUserInput.email;
+    user.phoneNumber = updateUserInput.phoneNumber;
+    await this.userRepository.save(user);
+
     return this.userRepository.findOne({
       where: { user_id },
       relations: ['batch', 'candidate'],

@@ -151,4 +151,22 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.user)
   @Field(() => [Comment], { nullable: true })
   comments?: Comment[];
+
+  @Field(() => Int, { nullable: true })
+  attendedClasses: number;
+
+  @Field(() => Int, { nullable: true })
+  submittedAssignments: number;
+
+  @Field(() => Int, { nullable: true })
+  attendedQuizzes: number;
+
+  @Field(() => Int, { nullable: true })
+  totalClasses: number;
+
+  @Field(() => Int, { nullable: true })
+  totalAssignments: number;
+
+  @Field(() => Int, { nullable: true })
+  totalQuizzes: number;
 }

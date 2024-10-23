@@ -35,6 +35,10 @@ export class Candidate {
   @Column({ unique: true })
   phoneNo: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  address: string;
+
   @Field()
   @Column()
   gender: string;
