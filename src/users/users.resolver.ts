@@ -72,12 +72,7 @@ export class UsersResolver {
 
     return {
       ...completeData.user,
-      totalClasses: completeData.totalClasses,
-      attendedClasses: completeData.attendedClasses,
-      totalAssignments: completeData.totalAssignments,
-      submittedAssignments: completeData.submittedAssignments,
-      totalQuizzes: completeData.totalQuizzes,
-      attendedQuizzes: completeData.attendedQuizzes,
+      
     };
   }
 
