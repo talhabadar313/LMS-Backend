@@ -50,12 +50,12 @@ export class Submission {
     nullable: true,
   })
   @JoinColumn({ name: 'assignmentId' })
-  @Field(() => Assignment)
+  @Field(() => Assignment, { nullable: true })
   assignment: Assignment;
 
   @ManyToOne(() => Quiz, (quiz) => quiz.submissions, { nullable: true })
   @JoinColumn({ name: 'quizId' })
-  @Field(() => Quiz)
+  @Field(() => Quiz, { nullable: true })
   quiz: Quiz;
 
   @ManyToOne(() => User, (user) => user.submissions)

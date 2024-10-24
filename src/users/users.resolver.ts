@@ -66,14 +66,17 @@ export class UsersResolver {
   @Roles('admin', 'teacher', 'student')
   async findStudentCompleteData(
     @Args('userId', { type: () => String }) userId: string,
-  ): Promise<User> {
-    const completeData =
-      await this.usersService.findStudentCompleteData(userId);
+  ) {
+    return this.usersService.findStudentCompleteData(userId);
+  }
 
-    return {
-      ...completeData.user,
-      
-    };
+  @Query(() => User, { name: 'studentProgressData' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher', 'student')
+  async findStudentProgressData(
+    @Args('userId', { type: () => String }) userId: string,
+  ) {
+    return this.usersService.findStudentProgressData(userId);
   }
 
   @Query(() => [User], { name: 'teachers' })

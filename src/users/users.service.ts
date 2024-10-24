@@ -99,6 +99,7 @@ export class UsersService {
         'batch.assignments',
         'batch.assignments.topics',
         'batch.quizzes',
+        'batch.quizzes.topics',
         'candidate',
         'submissions',
         'submissions.assignment',
@@ -114,33 +115,121 @@ export class UsersService {
       throw new BadRequestException('User not found');
     }
 
-    console.log('Batch Quizzes:', user.batch?.quizzes);
+    const completedClassesSet = new Set(
+      user.attendanceRecords.map((record) => record.attendance.attendance_id),
+    );
 
-    const totalClasses = user.batch?.totalClasses ?? 0;
+    user.totalClasses = completedClassesSet.size;
     const totalAssignments = user.batch?.assignments?.length ?? 0;
+    user.totalAssignments = totalAssignments;
     const totalQuizzes = user.batch?.quizzes?.length ?? 0;
+    user.totalQuizzes = totalQuizzes;
 
     const attendedClasses = user.attendanceRecords.filter(
       (record) => record.status === AttendanceStatus.PRESENT,
     ).length;
+    user.attendedClasses = attendedClasses;
 
     const submittedAssignments = user.submissions.filter(
       (submission) => submission.assignment,
     ).length;
+    user.submittedAssignments = submittedAssignments;
 
     const attendedQuizzes = user.submissions.filter(
       (submission) => submission.quiz,
     ).length;
+    user.attendedQuizzes = attendedQuizzes;
 
-    return {
-      user,
-      totalClasses,
-      attendedClasses,
-      totalAssignments,
-      submittedAssignments,
-      totalQuizzes,
-      attendedQuizzes,
-    };
+    return user;
+  }
+
+  async findStudentProgressData(userId: string): Promise<any> {
+    if (!userId) {
+      throw new BadRequestException('UserId is required');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+      relations: [
+        'batch',
+        'batch.assignments',
+        'batch.assignments.topics',
+        'batch.quizzes',
+        'batch.quizzes.topics',
+        'submissions',
+        'submissions.assignment',
+        'submissions.assignment.topics',
+        'submissions.quiz',
+        'submissions.quiz.topics',
+        'attendanceRecords',
+        'attendanceRecords.attendance',
+      ],
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const totalClasses = user.attendanceRecords.length;
+    const attendedClasses = user.attendanceRecords.filter(
+      (record) => record.attendance,
+    ).length;
+    const attendanceScore =
+      totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 0;
+
+    const assignmentScores = user.submissions
+      .filter((submission) => submission.assignment)
+      .map((submission) => ({
+        obtainedMarks: submission.score || 0,
+        totalMarks: submission.assignment.totalmarks || 100,
+      }));
+
+    const avgAssignmentScore =
+      assignmentScores.length > 0
+        ? assignmentScores.reduce(
+            (sum, { obtainedMarks, totalMarks }) =>
+              sum + (obtainedMarks / totalMarks) * 100,
+            0,
+          ) / assignmentScores.length
+        : 0;
+
+    console.log(assignmentScores);
+    console.log(avgAssignmentScore);
+
+    const quizScores = user.submissions
+      .filter((submission) => submission.quiz)
+      .map((submission) => ({
+        obtainedMarks: submission.score || 0,
+        totalMarks: submission.quiz.totalmarks || 100,
+      }));
+
+    const avgQuizScore =
+      quizScores.length > 0
+        ? quizScores.reduce(
+            (sum, { obtainedMarks, totalMarks }) =>
+              sum + (obtainedMarks / totalMarks) * 100,
+            0,
+          ) / quizScores.length
+        : 0;
+
+    console.log(quizScores);
+    console.log(avgQuizScore);
+
+    const attendanceWeight = 0.2;
+    const assignmentWeight = 0.4;
+    const quizWeight = 0.4;
+
+    const overallScore =
+      attendanceScore * attendanceWeight +
+      avgAssignmentScore * assignmentWeight +
+      avgQuizScore * quizWeight;
+
+    user.overallScore = Math.round(overallScore);
+    console.log('Attendance Score:', attendanceScore);
+    console.log('Avg Assignment Score:', avgAssignmentScore);
+    console.log('Avg Quiz Score:', avgQuizScore);
+
+    return user;
   }
 
   findOneByEmail(email: string): Promise<User> {

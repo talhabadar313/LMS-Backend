@@ -169,4 +169,7 @@ export class User {
 
   @Field(() => Int, { nullable: true })
   totalQuizzes: number;
+
+  @Field(() => Int, { nullable: true })
+  overallScore: number;
 }
