@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { LikesService } from './likes.service';
 import { Like } from './entities/like.entity';
 import { CreateLikeInput } from './dto/create-like.input';
-import { CreateLikeResponse } from './dto/create-like-response'; // Ensure this path is correct
+import { CreateLikeResponse } from './dto/create-like-response'; 
 import { FindLikesResponse } from './dto/like-response';
 
 @Resolver(() => Like)
