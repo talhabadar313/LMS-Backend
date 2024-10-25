@@ -6,9 +6,9 @@ import { Submission } from './entities/submission.entity';
 import { UsersModule } from '../users/users.module';
 import { AssignmentsModule } from '../assignments/assignments.module';
 import { QuizsModule } from '../quizs/quizs.module';
-import { MailModule } from 'src/mail/mail.module';
-import { NotificationsModule } from 'src/notifications/notifications.module';
-import { BatchModule } from 'src/batch/batch.module';
+import { MailModule } from '../mail/mail.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { BatchModule } from '../batch/batch.module';
 
 @Module({
   imports: [

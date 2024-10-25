@@ -10,7 +10,7 @@ import { supabase } from '../supabase.config';
 import { Batch } from '../batch/entities/batch.entity';
 import { User } from '../users/entities/user.entity';
 import { CreatePostInput } from './dto/create-post.input';
-import { LikesService } from 'src/likes/likes.service';
+import { LikesService } from '../likes/likes.service';
 import { UpdatePostInput } from './dto/update-post.input';
 
 @Injectable()

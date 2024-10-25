@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChangeHistory } from './entities/changehistory.entity';
 import { Repository } from 'typeorm';
 import { Candidate } from '../candidates/entities/candidate.entity';
-import { Batch } from 'src/batch/entities/batch.entity';
-import { User } from 'src/users/entities/user.entity';
+import { Batch } from '../batch/entities/batch.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ChangeHistoryService {

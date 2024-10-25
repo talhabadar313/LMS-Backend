@@ -12,13 +12,13 @@ import {
   NotificationType,
   SubmissionStatus,
   SubmissionType,
-} from 'src/util/enum';
+} from '../util/enum';
 import { v4 as uuidv4 } from 'uuid';
 import { AssignMarsksToQuizInput } from './dto/assign-quizmarks-input';
-import { MailService } from 'src/mail/mail.service';
-import { NotificationsGateway } from 'src/notifications/notifications.gateway';
-import { Batch } from 'src/batch/entities/batch.entity';
-import { BatchService } from 'src/batch/batch.service';
+import { MailService } from '../mail/mail.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
+import { Batch } from '../batch/entities/batch.entity';
+import { BatchService } from '../batch/batch.service';
 
 @Injectable()
 export class SubmissionsService {

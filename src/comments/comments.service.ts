@@ -4,10 +4,10 @@ import { Repository } from 'typeorm';
 import { CreateCommentInput } from './dto/create-comment.input';
 import { UpdateCommentInput } from './dto/update-comment.input';
 import { Comment } from './entities/comment.entity';
-import { Post } from 'src/posts/entities/post.entity';
-import { Assignment } from 'src/assignments/entities/assignment.entity';
-import { CommentType } from 'src/util/enum';
-import { User } from 'src/users/entities/user.entity';
+import { Post } from '../posts/entities/post.entity';
+import { Assignment } from '../assignments/entities/assignment.entity';
+import { CommentType } from '../util/enum';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class CommentsService {

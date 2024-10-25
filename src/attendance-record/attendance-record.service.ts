@@ -4,9 +4,9 @@ import { UpdateAttendanceRecordInput } from './dto/update-attendance-record.inpu
 import { InjectRepository } from '@nestjs/typeorm';
 import { AttendanceRecord } from './entities/attendance-record.entity';
 import { Repository } from 'typeorm';
-import { Attendance } from 'src/attendance/entities/attendance.entity';
-import { User } from 'src/users/entities/user.entity';
-import { Batch } from 'src/batch/entities/batch.entity';
+import { Attendance } from '../attendance/entities/attendance.entity';
+import { User } from '../users/entities/user.entity';
+import { Batch } from '../batch/entities/batch.entity';
 
 @Injectable()
 export class AttendanceRecordService {

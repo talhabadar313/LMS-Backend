@@ -5,9 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Quiz } from './entities/quiz.entity';
 import { BatchModule } from '../batch/batch.module';
 import { TopicsModule } from '../topics/topics.module';
-import { SubmissionsModule } from 'src/submissions/submissions.module';
-import { MailModule } from 'src/mail/mail.module';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+import { SubmissionsModule } from '../submissions/submissions.module';
+import { MailModule } from '../mail/mail.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [

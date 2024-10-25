@@ -8,7 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { NotificationsService } from './notification.service';
-import { NotificationType } from 'src/util/enum';
+import { NotificationType } from '../util/enum';
 
 @WebSocketGateway(3002, {
   cors: {

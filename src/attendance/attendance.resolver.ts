@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { AttendanceService } from './attendance.service';
 import { Attendance } from './entities/attendance.entity';
 import { CreateAttendanceInput } from './dto/create-attendance.input';

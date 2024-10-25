@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
-import { NotificationType } from 'src/util/enum';
-import { Batch } from 'src/batch/entities/batch.entity';
-import { User } from 'src/users/entities/user.entity';
+import { NotificationType } from '../util/enum';
+import { Batch } from '../batch/entities/batch.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class NotificationsService {

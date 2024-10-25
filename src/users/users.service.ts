@@ -13,7 +13,7 @@ import { Batch } from '../batch/entities/batch.entity';
 import { Candidate } from '../candidates/entities/candidate.entity';
 import { MailService } from '../mail/mail.service';
 import { WatchlistUserInput } from './dto/watchlist-user-input';
-import { AttendanceStatus } from 'src/util/enum';
+import { AttendanceStatus } from '../util/enum';
 
 @Injectable()
 export class UsersService {
@@ -131,7 +131,8 @@ export class UsersService {
     user.attendedClasses = attendedClasses;
 
     const submittedAssignments = user.submissions.filter(
-      (submission) => submission.assignment,
+      (submission) =>
+        submission.assignment && submission.SubmittedData !== null,
     ).length;
     user.submittedAssignments = submittedAssignments;
 

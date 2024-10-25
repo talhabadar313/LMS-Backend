@@ -12,10 +12,10 @@ import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
 import { ApplicationsResponse } from '../candidates/dto/applications-response';
 import { StudentResponse } from './dto/students-response';
-import { Assignment } from 'src/assignments/entities/assignment.entity';
-import { ChangeHistoryService } from 'src/changehistory/changehistory.service';
+import { Assignment } from '../assignments/entities/assignment.entity';
+import { ChangeHistoryService } from '../changehistory/changehistory.service';
 import { UpdateExistingBatchInput } from './dto/update-existingbatch-input';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class BatchService {

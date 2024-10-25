@@ -3,9 +3,9 @@ import { NotesService } from './notes.service';
 import { Note } from './entities/note.entity';
 import { CreateNoteInput } from './dto/create-note.input';
 import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/auth/role.guard';
-import { Roles } from 'src/auth/role.decorator';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
 import { AddNoteInput } from './dto/add-note-input';
 
 @Resolver(() => Note)

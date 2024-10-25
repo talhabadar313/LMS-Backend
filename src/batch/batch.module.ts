@@ -5,11 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Batch } from './entities/batch.entity';
 import { AuthModule } from '../auth/auth.module';
 import { User } from '../users/entities/user.entity';
-import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
-import { Submission } from 'src/submissions/entities/submission.entity';
-import { Assignment } from 'src/assignments/entities/assignment.entity';
-import { ChangehistoryModule } from 'src/changehistory/changehistory.module';
-import { UsersModule } from 'src/users/users.module';
+import { AttendanceRecord } from '../attendance-record/entities/attendance-record.entity';
+import { Submission } from '../submissions/entities/submission.entity';
+import { Assignment } from '../assignments/entities/assignment.entity';
+import { ChangehistoryModule } from '../changehistory/changehistory.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +25,6 @@ import { UsersModule } from 'src/users/users.module';
     UsersModule,
   ],
   providers: [BatchResolver, BatchService],
-  exports: [TypeOrmModule , BatchService],
+  exports: [TypeOrmModule, BatchService],
 })
 export class BatchModule {}

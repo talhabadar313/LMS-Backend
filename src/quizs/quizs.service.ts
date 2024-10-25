@@ -6,12 +6,12 @@ import { Quiz } from './entities/quiz.entity';
 import { In, IsNull, Repository } from 'typeorm';
 import { Batch } from '../batch/entities/batch.entity';
 import { Topic } from '../topics/entities/topic.entity';
-import { User } from 'src/users/entities/user.entity';
-import { Submission } from 'src/submissions/entities/submission.entity';
-import { MailService } from 'src/mail/mail.service';
-import { BatchService } from 'src/batch/batch.service';
-import { NotificationsGateway } from 'src/notifications/notifications.gateway';
-import { NotificationType } from 'src/util/enum';
+import { User } from '../users/entities/user.entity';
+import { Submission } from '../submissions/entities/submission.entity';
+import { MailService } from '../mail/mail.service';
+import { BatchService } from '../batch/batch.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
+import { NotificationType } from '../util/enum';
 
 @Injectable()
 export class QuizsService {

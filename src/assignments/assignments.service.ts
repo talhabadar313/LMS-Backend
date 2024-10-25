@@ -12,15 +12,12 @@ import { Batch } from '../batch/entities/batch.entity';
 import { In, Repository } from 'typeorm';
 import { Topic } from '../topics/entities/topic.entity';
 import { supabase } from '../supabase.config';
-import { Submission } from 'src/submissions/entities/submission.entity';
-import { User } from 'src/users/entities/user.entity';
-import { MailService } from 'src/mail/mail.service';
-import { BatchService } from 'src/batch/batch.service';
-import { NotificationsGateway } from 'src/notifications/notifications.gateway';
-import {
-  AssignmentSubmissionStatusType,
-  NotificationType,
-} from 'src/util/enum';
+import { Submission } from '../submissions/entities/submission.entity';
+import { User } from '../users/entities/user.entity';
+import { MailService } from '../mail/mail.service';
+import { BatchService } from '../batch/batch.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
+import { AssignmentSubmissionStatusType, NotificationType } from '../util/enum';
 
 @Injectable()
 export class AssignmentsService {

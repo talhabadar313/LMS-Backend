@@ -3,9 +3,9 @@ import { AttendanceService } from './attendance.service';
 import { AttendanceResolver } from './attendance.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Attendance } from './entities/attendance.entity';
-import { BatchModule } from 'src/batch/batch.module';
-import { UsersModule } from 'src/users/users.module';
-import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
+import { BatchModule } from '../batch/batch.module';
+import { UsersModule } from '../users/users.module';
+import { AttendanceRecord } from '../attendance-record/entities/attendance-record.entity';
 
 @Module({
   imports: [
