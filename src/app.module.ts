@@ -21,7 +21,6 @@ import { NotesModule } from './notes/notes.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { NotificationsGateway } from './notifications/notifications.gateway';
 import { CommentsModule } from './comments/comments.module';
-import { TestModule } from './test/test.module';
 
 dotenv.config({ path: '.env' });
 
@@ -67,7 +66,6 @@ dotenv.config({ path: '.env' });
     NotesModule,
     NotificationsModule,
     CommentsModule,
-    TestModule,
   ],
   controllers: [],
   providers: [NotificationsGateway],

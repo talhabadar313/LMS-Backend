@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-const express = require('express'); // Use require syntax for express
+const express = require('express');
 // @ts-ignore
 import { graphqlUploadExpress } from 'graphql-upload';
 
-const server = express(); // Create an express server
+const server = express();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
