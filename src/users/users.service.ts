@@ -213,8 +213,8 @@ export class UsersService {
           ) / quizScores.length
         : 0;
 
-    console.log(quizScores);
-    console.log(avgQuizScore);
+    // console.log(quizScores);
+    // console.log(avgQuizScore);
 
     const attendanceWeight = 0.2;
     const assignmentWeight = 0.4;
@@ -226,9 +226,9 @@ export class UsersService {
       avgQuizScore * quizWeight;
 
     user.overallScore = Math.round(overallScore);
-    console.log('Attendance Score:', attendanceScore);
-    console.log('Avg Assignment Score:', avgAssignmentScore);
-    console.log('Avg Quiz Score:', avgQuizScore);
+    // console.log('Attendance Score:', attendanceScore);
+    // console.log('Avg Assignment Score:', avgAssignmentScore);
+    // console.log('Avg Quiz Score:', avgQuizScore);
 
     return user;
   }
