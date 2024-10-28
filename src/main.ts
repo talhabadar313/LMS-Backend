@@ -2,9 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 const express = require('express');
+import * as dotenv from 'dotenv';
 // @ts-ignore
 import { graphqlUploadExpress } from 'graphql-upload';
 
+dotenv.config({ path: '.env' });
 const server = express();
 
 async function bootstrap() {
@@ -24,8 +26,8 @@ async function bootstrap() {
 
   server.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
   await app.init();
-
-  server.listen(3000, '0.0.0.0', () => {
+  const port = process.env.PORT || 3000;
+  server.listen(port, '0.0.0.0', () => {
     console.log('Server is running on http://0.0.0.0:3000');
   });
 }
