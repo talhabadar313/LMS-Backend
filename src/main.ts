@@ -1,12 +1,13 @@
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 const express = require('express');
-import * as dotenv from 'dotenv';
+
 // @ts-ignore
 import { graphqlUploadExpress } from 'graphql-upload';
-
-dotenv.config({ path: '.env' });
 const server = express();
 
 async function bootstrap() {
