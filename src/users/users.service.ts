@@ -7,13 +7,18 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Batch } from '../batch/entities/batch.entity';
 import { Candidate } from '../candidates/entities/candidate.entity';
 import { MailService } from '../mail/mail.service';
 import { WatchlistUserInput } from './dto/watchlist-user-input';
 import { AttendanceStatus } from '../util/enum';
+import { Assignment } from 'src/assignments/entities/assignment.entity';
+import { Quiz } from 'src/quizs/entities/quiz.entity';
+import { Attendance } from 'src/attendance/entities/attendance.entity';
+import { Submission } from 'src/submissions/entities/submission.entity';
+import { AttendanceRecord } from 'src/attendance-record/entities/attendance-record.entity';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +31,21 @@ export class UsersService {
 
     @InjectRepository(Candidate)
     private readonly candidateRepository: Repository<Candidate>,
+
+    @InjectRepository(Assignment)
+    private readonly assignmentRepository: Repository<Assignment>,
+
+    @InjectRepository(Quiz)
+    private readonly quizRepository: Repository<Quiz>,
+
+    @InjectRepository(Attendance)
+    private readonly attendanceRepository: Repository<Attendance>,
+
+    @InjectRepository(AttendanceRecord)
+    private readonly attendanceRecordRepository: Repository<AttendanceRecord>,
+
+    @InjectRepository(Submission)
+    private readonly submissionRepository: Repository<Submission>,
 
     private readonly mailService: MailService,
   ) {}
@@ -93,51 +113,58 @@ export class UsersService {
     }
 
     const user = await this.userRepository.findOne({
-      where: {
-        user_id: userId,
-      },
-      relations: [
-        'batch',
-        'batch.assignments',
-        'batch.quizzes',
-        'submissions',
-        'submissions.assignment',
-        'submissions.quiz',
-        'attendanceRecords',
-        'attendanceRecords.attendance',
-      ],
+      where: { user_id: userId },
+      relations: ['batch'],
     });
-    if (!user) {
-      throw new BadRequestException('User not found');
+
+    if (!user || !user.batch) {
+      throw new BadRequestException('User or User Batch not found');
     }
 
-    const completedClassesSet = new Set(
-      user.attendanceRecords.map((record) => record.attendance.attendance_id),
-    );
+    const batch = user.batch;
 
-    user.totalClasses = completedClassesSet.size;
-    const totalAssignments = user.batch?.assignments?.length ?? 0;
-    user.totalAssignments = totalAssignments;
-    const totalQuizzes = user.batch?.quizzes?.length ?? 0;
-    user.totalQuizzes = totalQuizzes;
+    const [totalClasses, attendedClasses] = await Promise.all([
+      this.attendanceRepository.count({
+        where: { batch: { batch_id: batch.batch_id } },
+      }),
+      this.attendanceRecordRepository.count({
+        where: { student: user, status: AttendanceStatus.PRESENT },
+      }),
+    ]);
 
-    const attendedClasses = user.attendanceRecords.filter(
-      (record) => record.status === AttendanceStatus.PRESENT,
-    ).length;
-    user.attendedClasses = attendedClasses;
+    const [totalAssignments, submittedAssignments] = await Promise.all([
+      this.assignmentRepository.count({
+        where: { batch: { batch_id: batch.batch_id } },
+      }),
+      this.submissionRepository.count({
+        where: {
+          student: user,
+          assignment: Not(IsNull()),
+          SubmittedData: Not(IsNull()),
+        },
+      }),
+    ]);
 
-    const submittedAssignments = user.submissions.filter(
-      (submission) =>
-        submission.assignment && submission.SubmittedData !== null,
-    ).length;
-    user.submittedAssignments = submittedAssignments;
+    const [totalQuizzes, attendedQuizzes] = await Promise.all([
+      this.quizRepository.count({
+        where: { batch: { batch_id: batch.batch_id } },
+      }),
+      this.submissionRepository.count({
+        where: {
+          student: user,
+          quiz: Not(IsNull()),
+        },
+      }),
+    ]);
 
-    const attendedQuizzes = user.submissions.filter(
-      (submission) => submission.quiz,
-    ).length;
-    user.attendedQuizzes = attendedQuizzes;
-
-    return user;
+    return {
+      totalClasses,
+      attendedClasses,
+      totalAssignments,
+      submittedAssignments,
+      totalQuizzes,
+      attendedQuizzes,
+    };
   }
 
   async findRemindersandNotesData(userId: string): Promise<any> {
