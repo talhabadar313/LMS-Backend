@@ -100,7 +100,6 @@ export class UsersService {
         'batch.assignments.topics',
         'batch.quizzes',
         'batch.quizzes.topics',
-        'candidate',
         'submissions',
         'submissions.assignment',
         'submissions.quiz',
@@ -152,11 +151,6 @@ export class UsersService {
     const user = await this.userRepository.findOne({
       where: { user_id: userId },
       relations: [
-        'batch',
-        'batch.assignments',
-        'batch.assignments.topics',
-        'batch.quizzes',
-        'batch.quizzes.topics',
         'submissions',
         'submissions.assignment',
         'submissions.assignment.topics',
