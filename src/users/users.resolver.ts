@@ -61,13 +61,22 @@ export class UsersResolver {
     return this.usersService.findOne(user_id);
   }
 
-  @Query(() => User, { name: 'studentCompleteData' })
+  @Query(() => User, { name: 'findStudentCountsData' })
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'teacher', 'student')
-  async findStudentCompleteData(
+  async findStudentCountsData(
     @Args('userId', { type: () => String }) userId: string,
   ) {
-    return this.usersService.findStudentCompleteData(userId);
+    return this.usersService.findStudentCountsData(userId);
+  }
+
+  @Query(() => User, { name: 'findRemindersandNotesData' })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'teacher', 'student')
+  async findRemindersandNotesData(
+    @Args('userId', { type: () => String }) userId: string,
+  ) {
+    return this.usersService.findRemindersandNotesData(userId);
   }
 
   @Query(() => User, { name: 'studentProgressData' })

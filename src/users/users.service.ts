@@ -87,29 +87,26 @@ export class UsersService {
     });
   }
 
-  async findStudentCompleteData(userId: string): Promise<any> {
+  async findStudentCountsData(userId: string): Promise<any> {
     if (!userId) {
       throw new BadRequestException('UserId is required');
     }
 
     const user = await this.userRepository.findOne({
-      where: { user_id: userId },
+      where: {
+        user_id: userId,
+      },
       relations: [
         'batch',
         'batch.assignments',
-        'batch.assignments.topics',
         'batch.quizzes',
-        'batch.quizzes.topics',
         'submissions',
         'submissions.assignment',
         'submissions.quiz',
-        'notes',
-        'notes.createdBy',
         'attendanceRecords',
         'attendanceRecords.attendance',
       ],
     });
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
@@ -139,6 +136,31 @@ export class UsersService {
       (submission) => submission.quiz,
     ).length;
     user.attendedQuizzes = attendedQuizzes;
+
+    return user;
+  }
+
+  async findRemindersandNotesData(userId: string): Promise<any> {
+    if (!userId) {
+      throw new BadRequestException('UserId is required');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+      relations: [
+        'batch',
+        'batch.assignments',
+        'batch.assignments.topics',
+        'batch.quizzes',
+        'batch.quizzes.topics',
+        'notes',
+        'notes.createdBy',
+      ],
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
 
     return user;
   }
