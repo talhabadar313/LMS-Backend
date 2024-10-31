@@ -12,7 +12,7 @@ import { NotificationType } from '../util/enum';
 
 @WebSocketGateway(3002, {
   cors: {
-    origin: 'http://localhost:3000 , https://lms-alpha-five.vercel.app',
+    origin: ['http://localhost:3001', 'https://lms-alpha-five.vercel.app'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
